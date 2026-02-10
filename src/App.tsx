@@ -6,7 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ProgressProvider } from "@/contexts/ProgressContext";
 import { GamificationProvider } from "@/contexts/GamificationContext";
+import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import AppLayout from "@/components/layout/AppLayout";
+import OfflineBanner from "@/components/layout/OfflineBanner";
 import Landing from "@/pages/Landing";
 import SelectLanguage from "@/pages/SelectLanguage";
 import Dashboard from "@/pages/Dashboard";
@@ -27,9 +29,11 @@ const App = () => (
     <LanguageProvider>
       <ProgressProvider>
         <GamificationProvider>
+        <AccessibilityProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <OfflineBanner />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Landing />} />
@@ -49,6 +53,7 @@ const App = () => (
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
+        </AccessibilityProvider>
         </GamificationProvider>
       </ProgressProvider>
     </LanguageProvider>

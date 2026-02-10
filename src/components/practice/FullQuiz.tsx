@@ -210,7 +210,7 @@ const FullQuiz = ({ questions, onComplete }: FullQuizProps) => {
           transition={{ duration: 0.2 }}
           className="space-y-4"
         >
-          <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">
+          <p className="text-xl sm:text-[22px] font-bold text-foreground leading-snug">
             {q.question}
           </p>
 
@@ -219,7 +219,7 @@ const FullQuiz = ({ questions, onComplete }: FullQuizProps) => {
               <button
                 key={i}
                 onClick={() => handleSelect(i)}
-                className={`w-full text-left px-4 py-3.5 rounded-xl text-[15px] sm:text-base font-medium border-2 transition-all min-h-[52px] ${
+                className={`w-full text-left px-5 py-4 rounded-xl text-base sm:text-lg font-medium border-2 transition-all min-h-[60px] active:scale-[0.98] ${
                   selected === i
                     ? "border-primary bg-primary/10 text-foreground"
                     : "border-border bg-card text-foreground hover:border-primary/40"
@@ -227,7 +227,7 @@ const FullQuiz = ({ questions, onComplete }: FullQuizProps) => {
               >
                 <span className="flex items-center gap-3">
                   <span
-                    className={`h-6 w-6 rounded-full border-2 flex items-center justify-center text-xs font-bold shrink-0 ${
+                    className={`h-8 w-8 rounded-full border-2 flex items-center justify-center text-sm font-bold shrink-0 ${
                       selected === i
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-muted-foreground/30"
@@ -246,7 +246,7 @@ const FullQuiz = ({ questions, onComplete }: FullQuizProps) => {
       <Button
         onClick={handleNext}
         disabled={selected === null}
-        className="w-full h-12 text-base font-semibold"
+        className="w-full h-14 text-lg font-semibold"
       >
         {current + 1 < questions.length ? (
           <>

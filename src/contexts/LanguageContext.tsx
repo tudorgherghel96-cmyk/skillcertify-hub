@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { getFontFamily } from "@/i18n/translations";
 
 export interface Language {
   code: string;
@@ -41,6 +42,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
 
   useEffect(() => {
     document.documentElement.dir = language.rtl ? "rtl" : "ltr";
+    document.body.style.fontFamily = getFontFamily(language.code);
   }, [language]);
 
   return (

@@ -30,6 +30,8 @@ import {
   hoursUntilResit,
 } from "@/contexts/ProgressContext";
 import { useGamification } from "@/contexts/GamificationContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { ui } from "@/i18n/translations";
 import StreakBanner from "@/components/gamification/StreakBanner";
 import BadgesGrid from "@/components/gamification/BadgesGrid";
 import SmartNudges from "@/components/gamification/SmartNudges";
@@ -38,6 +40,8 @@ import MotivationalBanner from "@/components/gamification/MotivationalBanner";
 const Dashboard = () => {
   const { progress } = useProgress();
   const { gamification, badges, nudges, motivationalMessage } = useGamification();
+  const { language } = useLanguage();
+  const lang = language.code;
   const overall = getOverallProgress(progress);
   const nextAction = getNextAction(progress);
   const showCscs = allGqaPassed(progress);
@@ -48,7 +52,7 @@ const Dashboard = () => {
       {/* Welcome */}
       <div>
         <h1 className="text-xl sm:text-2xl font-bold">
-          Welcome back. <span className="text-primary">Your fastest route to the CSCS card.</span>
+          {ui("welcome_back", lang)} <span className="text-primary">{ui("fastest_route", lang)}</span>
         </h1>
       </div>
 
@@ -66,7 +70,7 @@ const Dashboard = () => {
         <CardContent className="pt-5 pb-4 space-y-3">
           <div className="flex justify-between items-baseline">
             <span className="font-semibold text-sm">
-              Module {overall.modulesComplete} of 5 — {gqaPassed} GQA test{gqaPassed !== 1 ? "s" : ""} passed
+              {ui("module_of", lang, overall.modulesComplete)} — {ui("gqa_passed", lang, gqaPassed, gqaPassed !== 1 ? "s" : "")}
             </span>
             <span className="text-xs text-muted-foreground">{overall.percentage}%</span>
           </div>
@@ -95,19 +99,19 @@ const Dashboard = () => {
           <div className="grid grid-cols-3 gap-2 pt-1">
             <div className="text-center p-2 rounded-lg bg-muted/50">
               <p className="text-lg font-bold text-foreground">{gamification.streak}</p>
-              <p className="text-[10px] text-muted-foreground">Day Streak</p>
+              <p className="text-[10px] text-muted-foreground">{ui("day_streak", lang)}</p>
             </div>
             <div className="text-center p-2 rounded-lg bg-muted/50">
               <p className="text-lg font-bold text-foreground">
                 {badges.filter((b) => b.earned).length}
               </p>
-              <p className="text-[10px] text-muted-foreground">Badges</p>
+              <p className="text-[10px] text-muted-foreground">{ui("badges", lang)}</p>
             </div>
             <div className="text-center p-2 rounded-lg bg-muted/50">
               <p className="text-lg font-bold text-foreground">
                 {Math.round(gamification.totalStudyMinutes)}
               </p>
-              <p className="text-[10px] text-muted-foreground">Minutes</p>
+              <p className="text-[10px] text-muted-foreground">{ui("minutes", lang)}</p>
             </div>
           </div>
         </CardContent>
@@ -117,8 +121,7 @@ const Dashboard = () => {
       <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4">
         <Brain className="h-5 w-5 text-primary shrink-0 mt-0.5" />
         <p className="text-sm leading-snug">
-          <span className="font-semibold">Both tests are CLOSED BOOK</span> — no notes allowed.
-          This course will get it all into your head.
+          <span className="font-semibold">{ui("closed_book_title", lang)}</span> — {ui("closed_book_desc", lang)}
         </p>
       </div>
 
@@ -167,10 +170,10 @@ const Dashboard = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-sm leading-tight">
-                        Module {mod.id}: {mod.title}
+                        {ui("module", lang)} {mod.id}: {mod.title}
                       </h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {mod.lessons.length} lessons • {mod.topics.length} topics
+                        {mod.lessons.length} {ui("lessons", lang).toLowerCase()} • {mod.topics.length} {ui("topics", lang)}
                       </p>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -190,7 +193,7 @@ const Dashboard = () => {
                     <div className="grid grid-cols-3 gap-2 pt-1">
                       <div className="flex flex-col items-center text-center gap-1 p-2 rounded-lg bg-muted/50">
                         <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-[10px] font-medium">LEARN</span>
+                        <span className="text-[10px] font-medium">{ui("learn", lang)}</span>
                         <span
                           className={`text-[10px] ${
                             lessonsComplete === mod.lessons.length
@@ -203,7 +206,7 @@ const Dashboard = () => {
                       </div>
                       <div className="flex flex-col items-center text-center gap-1 p-2 rounded-lg bg-muted/50">
                         <Target className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-[10px] font-medium">PRACTICE</span>
+                        <span className="text-[10px] font-medium">{ui("practice", lang)}</span>
                         <span
                           className={`text-[10px] ${
                             mp.practice.bestScore >= 80
@@ -213,8 +216,8 @@ const Dashboard = () => {
                         >
                           {practiceReady
                             ? mp.practice.attempts > 0
-                              ? `Best ${mp.practice.bestScore}%`
-                              : "Ready"
+                              ? ui("best_score", lang, mp.practice.bestScore)
+                              : ui("ready", lang)
                             : "🔒"}
                         </span>
                       </div>
@@ -234,10 +237,10 @@ const Dashboard = () => {
                             ? `✅ ${mp.gqa.score}%`
                             : failed
                             ? canResitGqa(mp)
-                              ? "Resit ready"
+                              ? ui("resit_ready", lang)
                               : `⏳ ${hoursUntilResit(mp)}h`
                             : gqaReady
-                            ? "Ready"
+                            ? ui("ready", lang)
                             : "🔒"}
                         </span>
                       </div>
@@ -270,21 +273,21 @@ const Dashboard = () => {
                 <Trophy className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
-                <h3 className="font-bold text-sm">All 5 GQA Modules Complete! 🎉</h3>
+              <h3 className="font-bold text-sm">{ui("all_gqa_complete", lang)}</h3>
                 <p className="text-xs text-muted-foreground">
-                  Now prepare for your CSCS Health &amp; Safety Test
+                  {ui("prepare_cscs", lang)}
                 </p>
               </div>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               <Button asChild variant="outline" className="h-11">
                 <Link to="/cscs-prep">
-                  <Brain className="mr-2 h-4 w-4" /> CSCS Mock Test
+                  <Brain className="mr-2 h-4 w-4" /> {ui("cscs_mock_test", lang)}
                 </Link>
               </Button>
               <Button asChild className="h-11">
                 <Link to="/cscs-test">
-                  Take CSCS Test <ArrowRight className="ml-2 h-4 w-4" />
+                  {ui("take_cscs_test", lang)} <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </div>
@@ -295,9 +298,9 @@ const Dashboard = () => {
           <CardContent className="py-4 flex items-center gap-3">
             <Lock className="h-5 w-5 text-muted-foreground" />
             <div>
-              <h3 className="font-semibold text-sm">CSCS Health &amp; Safety Test</h3>
+              <h3 className="font-semibold text-sm">{ui("cscs_test", lang)}</h3>
               <p className="text-xs text-muted-foreground">
-                Available after all 5 GQA modules passed
+                {ui("cscs_available_after", lang)}
               </p>
             </div>
           </CardContent>
@@ -307,7 +310,7 @@ const Dashboard = () => {
       {/* CSCS Route link */}
       <div className="text-center pb-4">
         <Link to="/cscs-route" className="text-xs text-primary hover:underline font-medium">
-          View full CSCS Green Card roadmap →
+          {ui("view_roadmap", lang)}
         </Link>
       </div>
     </div>

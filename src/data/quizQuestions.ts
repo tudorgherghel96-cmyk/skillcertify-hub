@@ -263,7 +263,7 @@ const m2Questions: QuizQuestion[] = [
   {
     id: "m2q3",
     moduleId: 2,
-    lessonId: 1,
+    lessonId: 2,
     question: "When lifting, you should bend at the:",
     options: [
       "Back",
@@ -280,7 +280,7 @@ const m2Questions: QuizQuestion[] = [
   {
     id: "m2q4",
     moduleId: 2,
-    lessonId: 3,
+    lessonId: 1,
     question: "The most common manual handling injury is to the:",
     options: [
       "Hands and fingers",
@@ -293,6 +293,74 @@ const m2Questions: QuizQuestion[] = [
       "Lower back injuries are the most common manual handling injury in construction.",
     rememberText:
       "Lower back = most common manual handling injury. That's why correct lifting technique matters!",
+  },
+  {
+    id: "m2q5",
+    moduleId: 2,
+    lessonId: 1,
+    question: "Why is safe manual handling important on a construction site?",
+    options: [
+      "To make the work slower",
+      "To prevent injuries to yourself and others",
+      "To impress the site manager",
+      "It's not important if you're strong",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Safe manual handling prevents injuries. Over one third of all workplace injuries are from manual handling.",
+    rememberText:
+      "Over ONE THIRD of workplace injuries are from manual handling. It affects EVERYONE, regardless of strength.",
+  },
+  {
+    id: "m2q6",
+    moduleId: 2,
+    lessonId: 2,
+    question: "A load is too heavy for you. What should you do?",
+    options: [
+      "Try your best and lift it quickly",
+      "Drag it along the ground",
+      "Inform your supervisor and request help or equipment",
+      "Leave it and walk away",
+    ],
+    correctIndex: 2,
+    explanation:
+      "Never attempt to lift a load that is too heavy. Inform your supervisor and get help or mechanical equipment.",
+    rememberText:
+      "Too heavy? NEVER try alone. Inform supervisor → get help → use equipment. This is the SAFE and LEGAL answer.",
+  },
+  {
+    id: "m2q7",
+    moduleId: 2,
+    lessonId: 3,
+    question: "Which of the following is a manual handling lifting aid?",
+    options: [
+      "Hard hat",
+      "Sack truck",
+      "Safety goggles",
+      "High-vis vest",
+    ],
+    correctIndex: 1,
+    explanation:
+      "A sack truck is a mechanical lifting aid. Others include wheelbarrows, pallet trucks, trolleys, and forklifts.",
+    rememberText:
+      "Lifting aids: sack truck, wheelbarrow, pallet truck, trolley, forklift, crane, conveyor belt.",
+  },
+  {
+    id: "m2q8",
+    moduleId: 2,
+    lessonId: 1,
+    question: "What is a long-term effect of repeated poor manual handling?",
+    options: [
+      "Improved fitness",
+      "Better posture",
+      "Musculoskeletal disorders and osteoarthritis",
+      "Increased strength",
+    ],
+    correctIndex: 2,
+    explanation:
+      "Repeated poor manual handling causes long-term damage: musculoskeletal disorders, osteoarthritis, chronic back pain, and disc problems.",
+    rememberText:
+      "Long-term effects: musculoskeletal disorders (MSDs), osteoarthritis, chronic back pain, slipped discs. PERMANENT damage.",
   },
 ];
 

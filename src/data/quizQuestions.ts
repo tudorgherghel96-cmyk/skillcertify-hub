@@ -687,36 +687,137 @@ const m5Questions: QuizQuestion[] = [
     id: "m5q1",
     moduleId: 5,
     lessonId: 1,
+    question: "What are the THREE biggest killers on construction sites?",
+    options: [
+      "Sunburn, dehydration, cold",
+      "Falls from height, struck by vehicles, struck by falling objects",
+      "Electric shocks, chemical burns, noise",
+      "Manual handling, dust, vibration",
+    ],
+    correctIndex: 1,
+    explanation:
+      "The three biggest killers: falls from height, struck by moving vehicles, struck by falling objects.",
+    rememberText:
+      "Top 3 killers: Falls from height, struck by vehicles, struck by falling objects. Falls is always #1.",
+  },
+  {
+    id: "m5q2",
+    moduleId: 5,
+    lessonId: 1,
     question: "What is an exclusion zone?",
     options: [
       "A rest area for workers",
-      "An area where no unauthorised people are allowed due to plant/equipment danger",
+      "An area around operating plant you MUST NOT enter",
       "A storage area for materials",
       "An area for smoking breaks",
     ],
     correctIndex: 1,
     explanation:
-      "Exclusion zones keep people away from dangerous moving plant and equipment. They must be clearly marked.",
+      "An exclusion zone is the area around operating plant where NO unauthorised person may enter — even walking through.",
     rememberText:
-      "Exclusion zone = NO ENTRY area around moving plant/equipment. Clearly marked with barriers and signs.",
+      "Exclusion zone = NO ENTRY around operating plant. Even walking through is FORBIDDEN.",
   },
   {
-    id: "m5q2",
+    id: "m5q3",
     moduleId: 5,
-    lessonId: 2,
-    question:
-      "What should you do if you hear the emergency stop alarm on site?",
+    lessonId: 1,
+    question: "Who guides reversing vehicles on a construction site?",
     options: [
-      "Carry on working",
-      "Move to the assembly point immediately",
-      "Go and investigate the cause",
-      "Call the police",
+      "Any available worker",
+      "A trained signaller/banksman",
+      "The site manager",
+      "Nobody — drivers manage alone",
     ],
     correctIndex: 1,
     explanation:
-      "When you hear the emergency alarm, stop work and go directly to the assembly point.",
+      "Only a TRAINED banksman/signaller guides reversing vehicles using standard hand signals.",
     rememberText:
-      "Emergency alarm = STOP work → go to ASSEMBLY POINT immediately. Don't investigate, don't collect belongings.",
+      "Banksman/signaller = TRAINED person who guides reversing vehicles. NEVER reverse without one.",
+  },
+  {
+    id: "m5q4",
+    moduleId: 5,
+    lessonId: 2,
+    question: "The emergency stop button on machinery is always what colour?",
+    options: [
+      "Green",
+      "Blue",
+      "Red",
+      "Yellow",
+    ],
+    correctIndex: 2,
+    explanation:
+      "The emergency stop button is ALWAYS RED. Know where it is before operating any machine.",
+    rememberText:
+      "Emergency stop = ALWAYS RED. Know its location BEFORE starting any machine.",
+  },
+  {
+    id: "m5q5",
+    moduleId: 5,
+    lessonId: 1,
+    question: "Before operating plant on site, you must be:",
+    options: [
+      "Over 21 years old",
+      "Trained, competent, and authorised",
+      "A site manager",
+      "Wearing a hard hat only",
+    ],
+    correctIndex: 1,
+    explanation:
+      "You must be TRAINED, COMPETENT, and AUTHORISED before operating any plant or equipment.",
+    rememberText:
+      "Must be: 1) TRAINED. 2) COMPETENT. 3) AUTHORISED. Never operate plant without all three.",
+  },
+  {
+    id: "m5q6",
+    moduleId: 5,
+    lessonId: 1,
+    question: "What is the main risk when using a crane near overhead power lines?",
+    options: [
+      "The crane might tip over",
+      "Electrocution",
+      "Noise pollution",
+      "Traffic congestion",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Overhead power lines + cranes = electrocution risk. Maintain safe distances and use goal posts to mark safe heights.",
+    rememberText:
+      "Crane + overhead power lines = ELECTROCUTION. If contact occurs: STAY IN THE CAB, warn others.",
+  },
+  {
+    id: "m5q7",
+    moduleId: 5,
+    lessonId: 1,
+    question: "You're asked to operate a machine you haven't been trained on. You should:",
+    options: [
+      "Try carefully — it looks simple",
+      "Refuse and request proper training",
+      "Ask a friend to show you quickly",
+      "Just move it a short distance",
+    ],
+    correctIndex: 1,
+    explanation:
+      "REFUSE and request training. Even 'just moving it' is illegal and dangerous without proper training.",
+    rememberText:
+      "NEVER operate plant you're not trained on. Not even 'just moving it'. REFUSE and request training.",
+  },
+  {
+    id: "m5q8",
+    moduleId: 5,
+    lessonId: 2,
+    question: "Pre-start checks on plant include:",
+    options: [
+      "Only checking the fuel level",
+      "Fluid levels, tyre condition, controls, safety devices, lights and alarms",
+      "Just looking for visible damage",
+      "Only checking the brakes",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Pre-start checks: fluids, tyres, controls, safety devices, lights, alarms, and visible damage — before EVERY shift.",
+    rememberText:
+      "Pre-start checks BEFORE EVERY SHIFT: fluids, tyres, controls, safety devices, lights, alarms, no damage.",
   },
 ];
 

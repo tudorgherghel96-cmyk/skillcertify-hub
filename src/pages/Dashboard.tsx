@@ -1,7 +1,7 @@
+import { useState, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
   Brain,
@@ -13,7 +13,10 @@ import {
   Target,
   ClipboardCheck,
   Trophy,
+  Zap,
+  Timer,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { MODULES } from "@/data/courseData";
 import {
   useProgress,
@@ -36,8 +39,31 @@ import StreakBanner from "@/components/gamification/StreakBanner";
 import BadgesGrid from "@/components/gamification/BadgesGrid";
 import SmartNudges from "@/components/gamification/SmartNudges";
 import MotivationalBanner from "@/components/gamification/MotivationalBanner";
+import QuickSession from "@/components/practice/QuickSession";
 
 const Dashboard = () => {
+  const [quickMode, setQuickMode] = useState<"drill" | "blitz" | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const startY = useRef(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Pull-to-refresh
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    startY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const el = scrollRef.current;
+    if (!el || el.scrollTop > 10) return;
+    const diff = e.changedTouches[0].clientY - startY.current;
+    if (diff > 80) {
+      setRefreshing(true);
+      setTimeout(() => {
+        setRefreshing(false);
+        window.location.reload();
+      }, 800);
+    }
+  }, []);
   const { progress } = useProgress();
   const { gamification, badges, nudges, motivationalMessage } = useGamification();
   const { language } = useLanguage();
@@ -48,7 +74,18 @@ const Dashboard = () => {
   const gqaPassed = MODULES.filter((m) => isModuleComplete(getModuleProgress(progress, m.id))).length;
 
   return (
-    <div className="px-4 py-6 max-w-2xl mx-auto space-y-5">
+    <div ref={scrollRef} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} className="px-4 py-6 max-w-2xl mx-auto space-y-5 pb-24">
+      {/* Pull to refresh indicator */}
+      {refreshing && (
+        <div className="flex justify-center py-2">
+          <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+
+      {/* Quick Session Overlay */}
+      {quickMode && (
+        <QuickSession mode={quickMode} onClose={() => setQuickMode(null)} />
+      )}
       {/* Welcome */}
       <div>
         <h1 className="text-xl sm:text-2xl font-bold">
@@ -64,6 +101,28 @@ const Dashboard = () => {
 
       {/* Smart Nudges */}
       <SmartNudges nudges={nudges} />
+
+      {/* Quick Session Buttons */}
+      {!quickMode && (
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            onClick={() => setQuickMode("drill")}
+            variant="outline"
+            className="h-14 flex flex-col items-center gap-0.5 border-primary/30 hover:bg-primary/5"
+          >
+            <Zap className="h-5 w-5 text-primary" />
+            <span className="text-xs font-semibold">Quick Drill</span>
+          </Button>
+          <Button
+            onClick={() => setQuickMode("blitz")}
+            variant="outline"
+            className="h-14 flex flex-col items-center gap-0.5 border-primary/30 hover:bg-primary/5"
+          >
+            <Timer className="h-5 w-5 text-primary" />
+            <span className="text-xs font-semibold">2-Min Blitz</span>
+          </Button>
+        </div>
+      )}
 
       {/* Overall progress */}
       <Card>

@@ -55,6 +55,8 @@ const LessonPlayer = () => {
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const [timeSpent, setTimeSpent] = useState(0);
   const [showMarkComplete, setShowMarkComplete] = useState(false);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
 
   useEffect(() => {
     recordStudySession();
@@ -91,6 +93,29 @@ const LessonPlayer = () => {
   const goNext = () => hasNext ? navigate(`/lesson/${moduleId}/${lessonId + 1}`) : navigate(`/module/${moduleId}`);
   const goPrev = () => hasPrev && navigate(`/lesson/${moduleId}/${lessonId - 1}`);
 
+  // Swipe gestures
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    // Only horizontal swipes (not vertical scrolling)
+    if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0 && hasNext) goNext(); // swipe left = next
+      if (dx > 0 && hasPrev) goPrev(); // swipe right = prev
+    }
+    // Swipe up at bottom = next lesson (TikTok-style)
+    if (dy < -120 && isCompleted && hasNext) {
+      const el = contentRef.current;
+      if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 100) {
+        goNext();
+      }
+    }
+  }, [hasNext, hasPrev, isCompleted, goNext, goPrev]);
+
   if (!mod || !lesson) {
     return (
       <div className="px-4 py-12 text-center">
@@ -123,9 +148,9 @@ const LessonPlayer = () => {
   const renderI18nBlock = (block: I18nContentBlock, i: number) => {
     switch (block.type) {
       case "paragraph":
-        return <p key={i} className="text-[16px] sm:text-[17px] leading-relaxed text-foreground">{t(block.text, lang)}</p>;
+        return <p key={i} className="text-[18px] sm:text-[19px] leading-relaxed text-foreground">{t(block.text, lang)}</p>;
       case "bold":
-        return <p key={i} className="text-[16px] sm:text-[17px] font-bold text-foreground">{t(block.text, lang)}</p>;
+        return <p key={i} className="text-[18px] sm:text-[19px] font-bold text-foreground">{t(block.text, lang)}</p>;
       case "rememberThis":
         return <RememberThis key={i} text={t(block.text, lang)} />;
       case "testTip":
@@ -152,8 +177,14 @@ const LessonPlayer = () => {
   };
 
   return (
-    <div ref={contentRef} onScroll={handleScroll} className="max-w-2xl mx-auto h-[calc(100vh-8rem)] overflow-y-auto">
-      <div className="px-4 py-5 space-y-5">
+    <div
+      ref={contentRef}
+      onScroll={handleScroll}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="max-w-2xl mx-auto h-[calc(100vh-8rem)] overflow-y-auto"
+    >
+      <div className="px-3 sm:px-4 py-5 space-y-5">
         {/* Header */}
         <div>
           <Link to={`/module/${moduleId}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -205,7 +236,7 @@ const LessonPlayer = () => {
             {legacyContent.content.map((block, i) => {
               switch (block.type) {
                 case "paragraph":
-                  return <p key={i} className="text-[16px] sm:text-[17px] leading-relaxed text-foreground">{block.text}</p>;
+                  return <p key={i} className="text-[18px] sm:text-[19px] leading-relaxed text-foreground">{block.text}</p>;
                 case "remember":
                   return <RememberThis key={i} text={block.text} />;
                 case "testTip":

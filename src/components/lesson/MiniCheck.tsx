@@ -6,10 +6,11 @@ interface MiniCheckProps {
   question: string;
   options: string[];
   correctIndex: number;
+  feedback?: string;
   onAnswer?: (correct: boolean) => void;
 }
 
-const MiniCheck = ({ question, options, correctIndex, onAnswer }: MiniCheckProps) => {
+const MiniCheck = ({ question, options, correctIndex, feedback, onAnswer }: MiniCheckProps) => {
   const [selected, setSelected] = useState<number | null>(null);
   const isAnswered = selected !== null;
   const isCorrect = selected === correctIndex;
@@ -72,7 +73,11 @@ const MiniCheck = ({ question, options, correctIndex, onAnswer }: MiniCheckProps
                 : "bg-destructive/10 text-destructive"
             }`}
           >
-            {isCorrect ? "✓ Correct! Keep going." : `✗ The correct answer is: ${options[correctIndex]}`}
+            {feedback
+              ? (isCorrect ? "✓ " : "✗ ") + feedback
+              : isCorrect
+              ? "✓ Correct! Keep going."
+              : `✗ The correct answer is: ${options[correctIndex]}`}
           </motion.div>
         )}
       </AnimatePresence>

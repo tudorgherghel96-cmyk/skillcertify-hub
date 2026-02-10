@@ -14,7 +14,9 @@ import { useProgress } from "@/contexts/ProgressContext";
 import { getModuleProgress } from "@/contexts/ProgressContext";
 import { useGamification } from "@/contexts/GamificationContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import KeyTermsBar from "@/components/lesson/KeyTermsBar";
+import KeyTermsPanel from "@/components/lesson/KeyTermsPanel";
+import type { KeyTermEntry } from "@/components/lesson/KeyTermsPanel";
+import { ui } from "@/i18n/translations";
 import RememberThis from "@/components/lesson/RememberThis";
 import TestTip from "@/components/lesson/TestTip";
 import MiniCheck from "@/components/lesson/MiniCheck";
@@ -102,8 +104,8 @@ const LessonPlayer = () => {
   const lessonTitle = i18nContent ? t(i18nContent.title, lang) : lesson.title;
   const videoDesc = i18nContent?.videoPlaceholder ?? lesson.title;
 
-  // Build key terms for bar (convert I18n terms to legacy format)
-  const keyTermsForBar = i18nContent
+  // Build key terms for panel
+  const keyTermsForPanel: KeyTermEntry[] = i18nContent
     ? i18nContent.keyTerms.map((kt) => ({
         english: kt.en,
         translations: {
@@ -112,7 +114,10 @@ const LessonPlayer = () => {
           ig: kt.ig ?? "", so: kt.so ?? "", am: kt.am ?? "",
         },
       }))
-    : legacyContent?.keyTerms ?? [];
+    : (legacyContent?.keyTerms ?? []).map((kt) => ({
+        english: kt.english,
+        translations: kt.translations,
+      }));
 
   // Render i18n content blocks
   const renderI18nBlock = (block: I18nContentBlock, i: number) => {
@@ -152,14 +157,14 @@ const LessonPlayer = () => {
         {/* Header */}
         <div>
           <Link to={`/module/${moduleId}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Module {moduleId}
+            <ArrowLeft className="h-4 w-4" /> {ui("module", lang)} {moduleId}
           </Link>
           <h1 className="text-lg font-bold mt-1 text-foreground">
-            Lesson {moduleId}.{lessonId}: {lessonTitle}
+            {ui("lesson", lang)} {moduleId}.{lessonId}: {lessonTitle}
           </h1>
           {isCompleted && (
             <span className="inline-flex items-center gap-1 text-xs text-primary font-medium mt-1">
-              <CheckCircle2 className="h-3.5 w-3.5" /> Completed
+              <CheckCircle2 className="h-3.5 w-3.5" /> {ui("completed", lang)}
             </span>
           )}
         </div>
@@ -168,7 +173,7 @@ const LessonPlayer = () => {
         <div className="flex items-center gap-2 bg-secondary/10 border border-secondary/20 rounded-lg px-3 py-2">
           <Brain className="h-4 w-4 text-secondary shrink-0" />
           <p className="text-xs text-muted-foreground">
-            <span className="font-semibold text-foreground">Closed book test</span> — memorise everything. No notes allowed.
+            <span className="font-semibold text-foreground">{ui("closed_book_title", lang)}</span> — {ui("memorise_everything", lang)}
           </p>
         </div>
 
@@ -183,7 +188,7 @@ const LessonPlayer = () => {
         </AspectRatio>
 
         {/* Key Terms Bar */}
-        {keyTermsForBar.length > 0 && <KeyTermsBar terms={keyTermsForBar} />}
+        {keyTermsForPanel.length > 0 && <KeyTermsPanel terms={keyTermsForPanel} />}
 
         {/* Lesson Content */}
         {i18nContent ? (
@@ -224,11 +229,11 @@ const LessonPlayer = () => {
         {/* Navigation */}
         <div className="flex justify-between items-center pt-2 pb-4">
           <Button variant="outline" size="sm" onClick={goPrev} disabled={!hasPrev}>
-            <ArrowLeft className="mr-1 h-4 w-4" /> Previous
+            <ArrowLeft className="mr-1 h-4 w-4" /> {ui("previous", lang)}
           </Button>
           <span className="text-xs text-muted-foreground">{lessonId} / {totalLessons}</span>
           <Button size="sm" onClick={goNext}>
-            {hasNext ? <>Next <ArrowRight className="ml-1 h-4 w-4" /></> : "Back to Module"}
+            {hasNext ? <>{ui("next", lang)} <ArrowRight className="ml-1 h-4 w-4" /></> : ui("back_to_module", lang)}
           </Button>
         </div>
       </div>
@@ -243,7 +248,7 @@ const LessonPlayer = () => {
             className="fixed bottom-20 sm:bottom-6 left-0 right-0 px-4 z-40 max-w-2xl mx-auto"
           >
             <Button onClick={handleMarkComplete} className="w-full h-12 text-base font-semibold shadow-lg">
-              <CheckCircle2 className="mr-2 h-5 w-5" /> Mark Lesson Complete
+              <CheckCircle2 className="mr-2 h-5 w-5" /> {ui("mark_complete", lang)}
             </Button>
           </motion.div>
         )}

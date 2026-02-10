@@ -88,9 +88,9 @@ export const MODULES: Module[] = [
     title: "Health Risks",
     icon: AlertTriangle,
     lessons: [
-      { id: 1, title: "COSHH & Hazardous Substances" },
-      { id: 2, title: "Asbestos Awareness" },
-      { id: 3, title: "Noise, Vibration, Dust & PPE Matching" },
+      { id: 1, title: "COSHH: Substances Hazardous to Health" },
+      { id: 2, title: "Asbestos: The Silent Killer" },
+      { id: 3, title: "Drugs, Alcohol, Noise, and Vibration" },
     ],
     topics: [
       "COSHH",

@@ -521,9 +521,9 @@ const m4Questions: QuizQuestion[] = [
     ],
     correctIndex: 0,
     explanation:
-      "COSHH = Control of Substances Hazardous to Health. It covers chemicals, dust, fumes, and biological agents.",
+      "COSHH = Control of Substances Hazardous to Health. It covers chemicals, dust, fumes, vapours, gases, and biological agents.",
     rememberText:
-      "COSHH = Control of Substances Hazardous to Health. Covers chemicals, dust, fumes, gases, biological agents.",
+      "COSHH = Control of Substances Hazardous to Health. Know every word — this is on nearly every exam.",
   },
   {
     id: "m4q2",
@@ -531,34 +531,152 @@ const m4Questions: QuizQuestion[] = [
     lessonId: 2,
     question: "If you discover what you think might be asbestos, you should:",
     options: [
-      "Remove it yourself carefully",
+      "Put on a dust mask and remove it carefully",
       "Cover it with plastic sheeting",
-      "Stop work, leave the area, and report it immediately",
-      "Continue working but wear a dust mask",
+      "STOP, don't touch it, leave and report immediately",
+      "Continue working but avoid that area",
     ],
     correctIndex: 2,
     explanation:
-      "STOP, leave the area, report it. Only licensed specialists can remove asbestos. NEVER disturb it.",
+      "STOP, don't touch, leave the area, report immediately. Only LICENSED contractors can remove asbestos.",
     rememberText:
-      "Asbestos: STOP work → LEAVE the area → REPORT immediately. Never touch, disturb, or try to remove it yourself.",
+      "Asbestos: STOP → DON'T TOUCH → LEAVE → REPORT → WARN others. NEVER try to remove it yourself.",
   },
   {
     id: "m4q3",
     moduleId: 4,
-    lessonId: 3,
-    question:
-      "Prolonged exposure to excessive noise on site can cause:",
+    lessonId: 2,
+    question: "What are the three types of asbestos?",
     options: [
-      "Skin irritation",
-      "Permanent hearing loss",
-      "Back pain",
-      "Vision problems",
+      "Red, yellow, green",
+      "Blue (crocidolite), brown (amosite), white (chrysotile)",
+      "Type A, Type B, Type C",
+      "Hard, soft, fibrous",
     ],
     correctIndex: 1,
     explanation:
-      "Noise-induced hearing loss is permanent and irreversible. Ear protection is mandatory above 85dB.",
+      "Three types: Blue (crocidolite) — MOST dangerous, Brown (amosite), White (chrysotile). ALL are deadly.",
     rememberText:
-      "Noise above 85dB = mandatory ear protection. Hearing loss is PERMANENT — it cannot be reversed.",
+      "Blue = most dangerous. Brown = second. White = most common. ALL three types are deadly.",
+  },
+  {
+    id: "m4q4",
+    moduleId: 4,
+    lessonId: 1,
+    question: "What are the three routes hazardous substances can enter the body?",
+    options: [
+      "Eyes, ears, mouth",
+      "Inhalation, skin absorption, ingestion",
+      "Injection, radiation, contact",
+      "Breathing, sweating, bleeding",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Three routes: Inhalation (breathing in), Absorption (through skin), Ingestion (swallowing). Remember I-A-I.",
+    rememberText:
+      "3 routes: Inhalation, Absorption, Ingestion (I-A-I). Inhalation is the MOST common route.",
+  },
+  {
+    id: "m4q5",
+    moduleId: 4,
+    lessonId: 1,
+    question: "Why must you wash your hands before eating on a construction site?",
+    options: [
+      "To keep your hands warm",
+      "To prevent ingestion of hazardous substances",
+      "It's not necessary if you wear gloves",
+      "Only if they look dirty",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Washing hands prevents ingestion of hazardous substances. Contaminated hands transfer chemicals to food.",
+    rememberText:
+      "ALWAYS wash hands before eating/drinking. Contaminated hands = ingestion of hazardous substances.",
+  },
+  {
+    id: "m4q6",
+    moduleId: 4,
+    lessonId: 1,
+    question: "What PPE should you wear when handling corrosive materials?",
+    options: [
+      "Standard cotton gloves",
+      "Neoprene gloves",
+      "No gloves needed if you're careful",
+      "Leather gloves",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Neoprene gloves are required for handling corrosive materials. Standard latex or rubber gloves are not sufficient.",
+    rememberText:
+      "Corrosive materials = NEOPRENE gloves. Not latex, not rubber, not cotton — NEOPRENE.",
+  },
+  {
+    id: "m4q7",
+    moduleId: 4,
+    lessonId: 3,
+    question: "Why does a dust mask not work properly with facial hair?",
+    options: [
+      "It looks unprofessional",
+      "Facial hair prevents a proper seal, making filtration ineffective",
+      "It's still partly effective with stubble",
+      "Only long beards cause problems",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Facial hair prevents a proper seal around the mask. Even stubble creates gaps that let dust and fumes in.",
+    rememberText:
+      "Dust mask + facial hair = POOR SEAL = DOESN'T WORK. Must be clean-shaven where the mask meets your face.",
+  },
+  {
+    id: "m4q8",
+    moduleId: 4,
+    lessonId: 3,
+    question: "When is hearing protection mandatory on site?",
+    options: [
+      "Only when using power tools",
+      "If you must shout to be heard 2 metres away (85dB+)",
+      "Only if noise lasts more than 8 hours",
+      "Hearing protection is optional",
+    ],
+    correctIndex: 1,
+    explanation:
+      "If you must SHOUT to be heard at 2 metres, noise is likely above 85dB and hearing protection is mandatory.",
+    rememberText:
+      "Shout at 2m = too loud (85dB+) = MANDATORY hearing protection. Hearing loss is PERMANENT.",
+  },
+  {
+    id: "m4q9",
+    moduleId: 4,
+    lessonId: 3,
+    question: "What percentage of construction accidents are linked to drugs or alcohol?",
+    options: [
+      "5-10%",
+      "20-30%",
+      "50-60%",
+      "Less than 1%",
+    ],
+    correctIndex: 1,
+    explanation:
+      "20-30% of construction accidents are linked to drugs or alcohol use.",
+    rememberText:
+      "20-30% of construction accidents linked to drugs/alcohol. Report concerns to your supervisor.",
+  },
+  {
+    id: "m4q10",
+    moduleId: 4,
+    lessonId: 3,
+    question: "What are the symptoms of hand-arm vibration syndrome (HAVS)?",
+    options: [
+      "Improved grip strength and warm hands",
+      "White or numb fingers, tingling, and loss of grip",
+      "Better blood circulation in hands",
+      "Temporary redness that fades overnight",
+    ],
+    correctIndex: 1,
+    explanation:
+      "HAVS symptoms: white/numb fingers (vibration white finger), tingling, loss of grip strength. The damage is PERMANENT.",
+    rememberText:
+      "HAVS: white/numb fingers, tingling, loss of grip. PERMANENT damage from vibrating tools. No cure.",
   },
 ];
 

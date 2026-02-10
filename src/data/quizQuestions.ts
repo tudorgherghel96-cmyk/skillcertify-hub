@@ -371,36 +371,35 @@ const m3Questions: QuizQuestion[] = [
     id: "m3q1",
     moduleId: 3,
     lessonId: 1,
-    question:
-      "What is the FIRST thing you should do to control risk when working at height?",
+    question: "What caused ALL 35 construction deaths in 2024/25?",
     options: [
-      "Use a safety harness",
-      "Avoid working at height if possible",
-      "Put up guard rails",
-      "Wear a hard hat",
+      "Electrocution",
+      "Falls from height",
+      "Being struck by vehicles",
+      "Manual handling injuries",
     ],
     correctIndex: 1,
     explanation:
-      "The hierarchy: 1) Avoid working at height, 2) Prevent falls (guard rails), 3) Minimise consequences (nets, harnesses).",
+      "ALL 35 construction worker deaths in 2024/25 were caused by falls from height — the number one killer.",
     rememberText:
-      "Working at height hierarchy: AVOID → PREVENT falls → MINIMISE consequences. Avoid is always first!",
+      "Falls from height = NUMBER ONE killer. ALL 35 deaths in 2024/25 were from falls.",
   },
   {
     id: "m3q2",
     moduleId: 3,
     lessonId: 2,
-    question: "A ladder should be placed at an angle of:",
+    question: "The correct ladder angle ratio is:",
     options: [
-      "45 degrees (1:1 ratio)",
-      "75 degrees (4:1 ratio — 1 out for every 4 up)",
-      "90 degrees (vertical)",
-      "60 degrees (2:1 ratio)",
+      "1 in 2",
+      "1 in 3",
+      "1 in 4",
+      "1 in 5",
     ],
-    correctIndex: 1,
+    correctIndex: 2,
     explanation:
-      "Ladders: 75° angle = 4:1 ratio. For every 4 metres up, the base should be 1 metre out.",
+      "The ladder angle is 1 in 4 — for every 4 metres up, the base is 1 metre out. This gives a safe 75° angle.",
     rememberText:
-      "Ladder angle: 75° = 4:1 ratio. 4 up, 1 out. The ladder must extend 1m above the landing point.",
+      "Ladder angle: 1 in 4 = 75°. 4 up, 1 out. Ladder must extend 1m above the landing point.",
   },
   {
     id: "m3q3",
@@ -408,16 +407,101 @@ const m3Questions: QuizQuestion[] = [
     lessonId: 3,
     question: "Who can erect scaffolding on a construction site?",
     options: [
-      "Any worker on site",
-      "Only CISRS-trained scaffolders",
-      "The site manager",
       "Any experienced worker",
+      "The site manager",
+      "Trained, competent CISRS scaffolders only",
+      "Any worker with a CSCS card",
+    ],
+    correctIndex: 2,
+    explanation:
+      "Only CISRS-trained and competent scaffolders can erect, alter, or dismantle scaffolding.",
+    rememberText:
+      "Only CISRS-trained scaffolders can erect scaffolding. NEVER modify it yourself!",
+  },
+  {
+    id: "m3q4",
+    moduleId: 3,
+    lessonId: 4,
+    question: "What PPE is used as a LAST RESORT when working at height?",
+    options: [
+      "Hard hat",
+      "Safety harness and lanyard",
+      "High-visibility vest",
+      "Steel-toe boots",
     ],
     correctIndex: 1,
     explanation:
-      "Only CISRS (Construction Industry Scaffolders Record Scheme) trained and competent scaffolders can erect scaffolding.",
+      "A harness is the LAST RESORT for fall protection — only after avoiding and preventing falls.",
     rememberText:
-      "Only CISRS-trained scaffolders can erect scaffolding. Never modify scaffolding yourself!",
+      "Hierarchy: AVOID height → PREVENT falls (guardrails) → MINIMISE consequences (harness = LAST RESORT).",
+  },
+  {
+    id: "m3q5",
+    moduleId: 3,
+    lessonId: 1,
+    question: "What is the MOST effective control for working at height?",
+    options: [
+      "Wear a safety harness",
+      "Install guardrails",
+      "Eliminate the need for height work altogether",
+      "Use safety nets",
+    ],
+    correctIndex: 2,
+    explanation:
+      "The FIRST and most effective step is to AVOID working at height altogether. Only then prevent and minimise.",
+    rememberText:
+      "AVOID is always FIRST. Don't jump to harnesses — eliminate the height work if possible.",
+  },
+  {
+    id: "m3q6",
+    moduleId: 3,
+    lessonId: 4,
+    question: "When working on a fragile roof, you should:",
+    options: [
+      "Walk along the strongest-looking areas",
+      "Never step on it unless certain it is load-bearing — use crawling boards",
+      "Only avoid the skylights",
+      "Wear extra-grippy boots",
+    ],
+    correctIndex: 1,
+    explanation:
+      "NEVER assume a fragile roof is safe. Always use crawling boards to spread your weight.",
+    rememberText:
+      "Fragile roofs: NEVER assume safe. Use crawling boards. Asbestos cement looks solid but shatters.",
+  },
+  {
+    id: "m3q7",
+    moduleId: 3,
+    lessonId: 2,
+    question: "Three points of contact on a ladder means:",
+    options: [
+      "Three hands on the ladder",
+      "Two hands and one foot, or two feet and one hand",
+      "Both feet and both hands",
+      "One hand and one foot",
+    ],
+    correctIndex: 1,
+    explanation:
+      "3 points of contact = 2 hands + 1 foot, or 2 feet + 1 hand on the ladder at all times.",
+    rememberText:
+      "3 points of contact ALWAYS. Never carry tools while climbing — use a tool belt.",
+  },
+  {
+    id: "m3q8",
+    moduleId: 3,
+    lessonId: 3,
+    question: "When must scaffolding be inspected?",
+    options: [
+      "Once a month",
+      "Before each shift and after bad weather",
+      "Only when it looks damaged",
+      "Every Friday",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Scaffolding must be inspected before EVERY shift and after bad weather (wind, rain, snow, frost).",
+    rememberText:
+      "Scaffold inspection: before EVERY shift + after bad weather + after any modification. Results must be RECORDED.",
   },
 ];
 

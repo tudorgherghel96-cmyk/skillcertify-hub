@@ -68,10 +68,10 @@ export const MODULES: Module[] = [
     title: "Working at Height",
     icon: Construction,
     lessons: [
-      { id: 1, title: "Working at Height Regulations" },
-      { id: 2, title: "Ladders & Step Ladders" },
-      { id: 3, title: "Scaffolding Safety" },
-      { id: 4, title: "Fragile Roofs, Voids & MEWPs" },
+      { id: 1, title: "What Counts as Working at Height?" },
+      { id: 2, title: "Ladder Safety" },
+      { id: 3, title: "Scaffold Safety" },
+      { id: 4, title: "Fragile Roofs, Internal Voids, and Fall Protection" },
     ],
     topics: [
       "Regulations",

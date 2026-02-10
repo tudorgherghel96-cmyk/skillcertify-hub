@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ProgressProvider } from "@/contexts/ProgressContext";
+import { GamificationProvider } from "@/contexts/GamificationContext";
 import AppLayout from "@/components/layout/AppLayout";
 import Landing from "@/pages/Landing";
 import SelectLanguage from "@/pages/SelectLanguage";
@@ -25,6 +26,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <ProgressProvider>
+        <GamificationProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -47,6 +49,7 @@ const App = () => (
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
+        </GamificationProvider>
       </ProgressProvider>
     </LanguageProvider>
   </QueryClientProvider>

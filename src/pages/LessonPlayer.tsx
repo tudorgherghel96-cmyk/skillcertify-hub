@@ -12,6 +12,7 @@ import { getModule5Lesson } from "@/data/module5Content";
 import type { I18nLessonContent, I18nContentBlock } from "@/data/module1Content";
 import { useProgress } from "@/contexts/ProgressContext";
 import { getModuleProgress } from "@/contexts/ProgressContext";
+import { useGamification } from "@/contexts/GamificationContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import KeyTermsBar from "@/components/lesson/KeyTermsBar";
 import RememberThis from "@/components/lesson/RememberThis";
@@ -29,6 +30,7 @@ const LessonPlayer = () => {
   const lessonId = Number(lIdStr);
   const navigate = useNavigate();
   const { progress, completeLesson } = useProgress();
+  const { addStudyMinutes, recordStudySession } = useGamification();
   const { language } = useLanguage();
   const lang = language.code;
   const mp = getModuleProgress(progress, moduleId);
@@ -53,8 +55,13 @@ const LessonPlayer = () => {
   const [showMarkComplete, setShowMarkComplete] = useState(false);
 
   useEffect(() => {
+    recordStudySession();
     const id = setInterval(() => setTimeSpent((prev) => prev + 1), 1000);
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+      // Record minutes on unmount
+      addStudyMinutes(timeSpent / 60);
+    };
   }, []);
 
   const handleScroll = useCallback(() => {

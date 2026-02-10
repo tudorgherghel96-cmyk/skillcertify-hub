@@ -141,6 +141,7 @@ interface ProgressContextValue {
   completeLesson: (moduleId: number, lessonId: number) => void;
   recordPractice: (moduleId: number, score: number) => void;
   recordGqa: (moduleId: number, passed: boolean, score: number) => void;
+  recordCscs: (passed: boolean, score: number) => void;
 }
 
 const ProgressContext = createContext<ProgressContextValue | undefined>(undefined);
@@ -222,8 +223,17 @@ export const ProgressProvider = ({ children }: { children: React.ReactNode }) =>
     [update]
   );
 
+  const recordCscs = useCallback(
+    (passed: boolean, score: number) =>
+      update((prev) => ({
+        ...prev,
+        cscs: { passed, score },
+      })),
+    [update]
+  );
+
   return (
-    <ProgressContext.Provider value={{ progress, completeLesson, recordPractice, recordGqa }}>
+    <ProgressContext.Provider value={{ progress, completeLesson, recordPractice, recordGqa, recordCscs }}>
       {children}
     </ProgressContext.Provider>
   );

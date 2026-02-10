@@ -8,6 +8,7 @@ import { getModule1Lesson, t } from "@/data/module1Content";
 import { getModule2Lesson } from "@/data/module2Content";
 import { getModule3Lesson } from "@/data/module3Content";
 import { getModule4Lesson } from "@/data/module4Content";
+import { getModule5Lesson } from "@/data/module5Content";
 import type { I18nLessonContent, I18nContentBlock } from "@/data/module1Content";
 import { useProgress } from "@/contexts/ProgressContext";
 import { getModuleProgress } from "@/contexts/ProgressContext";
@@ -40,7 +41,8 @@ const LessonPlayer = () => {
     moduleId === 1 ? getModule1Lesson(lessonId) :
     moduleId === 2 ? getModule2Lesson(lessonId) :
     moduleId === 3 ? getModule3Lesson(lessonId) :
-    moduleId === 4 ? getModule4Lesson(lessonId) : undefined;
+    moduleId === 4 ? getModule4Lesson(lessonId) :
+    moduleId === 5 ? getModule5Lesson(lessonId) : undefined;
   const legacyContent = !i18nContent ? getLessonContent(moduleId, lessonId) : undefined;
 
   const isCompleted = mp.lessons[lessonId]?.completed ?? false;

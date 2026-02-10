@@ -1,105 +1,252 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PlayCircle, Brain, ExternalLink, ChevronRight } from "lucide-react";
-
-const moduleData: Record<number, { title: string; lessons: { id: number; title: string }[] }> = {
-  1: {
-    title: "Health & Safety in Construction",
-    lessons: [
-      { id: 1, title: "Why Health & Safety Matters" },
-      { id: 2, title: "The Health & Safety at Work Act" },
-      { id: 3, title: "Risk Assessments" },
-      { id: 4, title: "Method Statements" },
-      { id: 5, title: "Site Inductions" },
-      { id: 6, title: "PPE Requirements" },
-    ],
-  },
-  2: {
-    title: "Accident Prevention & Reporting",
-    lessons: [
-      { id: 1, title: "Common Causes of Accidents" },
-      { id: 2, title: "RIDDOR Reporting" },
-      { id: 3, title: "Near Miss Reporting" },
-      { id: 4, title: "First Aid on Site" },
-      { id: 5, title: "Accident Investigation" },
-    ],
-  },
-  3: {
-    title: "Working at Height & Excavations",
-    lessons: [
-      { id: 1, title: "Working at Height Regulations" },
-      { id: 2, title: "Scaffolding Safety" },
-      { id: 3, title: "Ladder Safety" },
-      { id: 4, title: "Excavation Hazards" },
-      { id: 5, title: "Shoring & Support" },
-    ],
-  },
-  4: {
-    title: "Manual Handling & Equipment",
-    lessons: [
-      { id: 1, title: "Manual Handling Principles" },
-      { id: 2, title: "Lifting Techniques" },
-      { id: 3, title: "Hand & Power Tools" },
-      { id: 4, title: "Plant & Equipment" },
-      { id: 5, title: "COSHH Regulations" },
-      { id: 6, title: "Noise & Vibration" },
-    ],
-  },
-  5: {
-    title: "Fire Safety & Emergencies",
-    lessons: [
-      { id: 1, title: "Fire Triangle & Prevention" },
-      { id: 2, title: "Fire Extinguisher Types" },
-      { id: 3, title: "Emergency Procedures" },
-      { id: 4, title: "Electrical Safety" },
-    ],
-  },
-};
+import { Badge } from "@/components/ui/badge";
+import {
+  PlayCircle,
+  CheckCircle,
+  Lock,
+  Brain,
+  ExternalLink,
+  ArrowLeft,
+  ChevronRight,
+  AlertTriangle,
+  Clock,
+  Target,
+  RotateCcw,
+} from "lucide-react";
+import { MODULES } from "@/data/courseData";
+import {
+  useProgress,
+  getModuleProgress,
+  getLessonsCompleted,
+  isPracticeUnlocked,
+  isGqaUnlocked,
+  isModuleComplete,
+  canResitGqa,
+  hoursUntilResit,
+} from "@/contexts/ProgressContext";
 
 const ModuleOverview = () => {
   const { id } = useParams();
   const moduleId = Number(id) || 1;
-  const mod = moduleData[moduleId];
+  const mod = MODULES.find((m) => m.id === moduleId);
+  const { progress } = useProgress();
 
   if (!mod) {
     return <div className="p-4 text-center text-muted-foreground">Module not found</div>;
   }
 
+  const mp = getModuleProgress(progress, moduleId);
+  const lessonsComplete = getLessonsCompleted(mp, mod.lessons.length);
+  const practiceReady = isPracticeUnlocked(mp, mod.lessons.length);
+  const gqaReady = isGqaUnlocked(mp);
+  const complete = isModuleComplete(mp);
+  const failed = mp.gqa.passed === false;
+  const Icon = mod.icon;
+
   return (
-    <div className="px-4 py-6 max-w-2xl mx-auto space-y-6">
+    <div className="px-4 py-6 max-w-2xl mx-auto space-y-5">
+      <Link
+        to="/dashboard"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" /> Dashboard
+      </Link>
+
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div
+          className={`h-12 w-12 rounded-xl flex items-center justify-center ${
+            complete ? "bg-primary text-primary-foreground" : "bg-primary/10"
+          }`}
+        >
+          <Icon className={`h-6 w-6 ${complete ? "" : "text-primary"}`} />
+        </div>
+        <div>
+          <p className="text-xs text-primary font-medium">Module {moduleId}</p>
+          <h1 className="text-lg font-bold leading-tight">{mod.title}</h1>
+        </div>
+      </div>
+
+      {/* Closed-book reminder */}
+      <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
+        <Brain className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+        <p className="text-xs leading-snug">
+          <span className="font-semibold">Memorise everything.</span> The GQA test is closed-book — no notes.
+        </p>
+      </div>
+
+      {/* 📖 LESSONS */}
       <div>
-        <p className="text-sm text-primary font-medium">Module {moduleId}</p>
-        <h1 className="text-xl font-bold">{mod.title}</h1>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-base">📖</span>
+          <h2 className="font-semibold text-sm">
+            Lessons — {lessonsComplete}/{mod.lessons.length} complete
+          </h2>
+        </div>
+        <div className="space-y-1.5">
+          {mod.lessons.map((lesson, i) => {
+            const done = mp.lessons[lesson.id]?.completed;
+            // Unlock: first lesson always, or previous completed
+            const prevDone = i === 0 || mp.lessons[mod.lessons[i - 1].id]?.completed;
+            const isLocked = !prevDone && !done;
+
+            return (
+              <Link
+                key={lesson.id}
+                to={isLocked ? "#" : `/lesson/${moduleId}/${lesson.id}`}
+                className={isLocked ? "pointer-events-none" : ""}
+              >
+                <Card
+                  className={`transition-colors ${
+                    done
+                      ? "border-primary/20 bg-primary/5"
+                      : isLocked
+                      ? "opacity-40"
+                      : "hover:border-primary/30"
+                  }`}
+                >
+                  <CardContent className="flex items-center gap-3 py-3">
+                    {done ? (
+                      <CheckCircle className="h-5 w-5 text-primary shrink-0" />
+                    ) : isLocked ? (
+                      <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+                    ) : (
+                      <PlayCircle className="h-5 w-5 text-primary shrink-0" />
+                    )}
+                    <span className="text-sm flex-1">
+                      {moduleId}.{lesson.id} — {lesson.title}
+                    </span>
+                    {!isLocked && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Lessons */}
-      <div className="space-y-2">
-        {mod.lessons.map((lesson) => (
-          <Link key={lesson.id} to={`/lesson/${moduleId}/${lesson.id}`}>
-            <Card className="hover:border-primary/40 transition-colors">
-              <CardContent className="flex items-center gap-3 py-3">
-                <PlayCircle className="h-5 w-5 text-primary shrink-0" />
-                <span className="text-sm flex-1">{lesson.title}</span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+      {/* 🎯 PRACTICE QUIZ */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-base">🎯</span>
+          <h2 className="font-semibold text-sm">Practice Quiz</h2>
+        </div>
+        <Card className={!practiceReady ? "opacity-50" : ""}>
+          <CardContent className="py-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <Target className="h-5 w-5 text-primary shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">Drill until confident</p>
+                <p className="text-xs text-muted-foreground">
+                  {practiceReady
+                    ? mp.practice.attempts > 0
+                      ? `${mp.practice.attempts} attempt${mp.practice.attempts !== 1 ? "s" : ""} • Best score: ${mp.practice.bestScore}%`
+                      : "Unlimited retakes — no score minimum to start"
+                    : "Complete all lessons to unlock"}
+                </p>
+              </div>
+              {mp.practice.bestScore >= 80 && (
+                <Badge variant="secondary" className="bg-primary/10 text-primary text-[10px]">
+                  80%+ ✓
+                </Badge>
+              )}
+            </div>
+            {practiceReady && (
+              <Button asChild variant="outline" className="w-full h-11">
+                <Link to={`/practice/${moduleId}`}>
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  {mp.practice.attempts > 0 ? "Practice Again" : "Start Practice"}
+                </Link>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Actions */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Button asChild variant="outline" className="h-12">
-          <Link to={`/practice/${moduleId}`}>
-            <Brain className="mr-2 h-4 w-4" /> Practice Quiz
-          </Link>
-        </Button>
-        <Button asChild className="h-12">
-          <Link to={`/gqa-test/${moduleId}`}>
-            <ExternalLink className="mr-2 h-4 w-4" /> GQA Module Test
-          </Link>
-        </Button>
+      {/* ✅ GQA MODULE TEST */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-base">✅</span>
+          <h2 className="font-semibold text-sm">GQA Module {moduleId} Test</h2>
+        </div>
+        <Card
+          className={`${
+            complete
+              ? "border-primary/40 bg-primary/5"
+              : failed
+              ? "border-destructive/30"
+              : !gqaReady
+              ? "opacity-50"
+              : ""
+          }`}
+        >
+          <CardContent className="py-4 space-y-3">
+            {complete ? (
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-sm font-semibold text-primary">Passed — {mp.gqa.score}%</p>
+                  <p className="text-xs text-muted-foreground">Module {moduleId} complete</p>
+                </div>
+              </div>
+            ) : failed ? (
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-destructive">
+                      Not passed — {mp.gqa.score}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      You only need to resit this module. 80% required to pass.
+                    </p>
+                  </div>
+                </div>
+                {canResitGqa(mp) ? (
+                  <Button asChild className="w-full h-11">
+                    <Link to={`/gqa-test/${moduleId}`}>
+                      <RotateCcw className="mr-2 h-4 w-4" /> Resit Module {moduleId}
+                    </Link>
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 rounded-lg bg-muted">
+                    <Clock className="h-4 w-4" />
+                    <span>
+                      Resit available in {hoursUntilResit(mp)} hours. Review your lessons before then.
+                    </span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                {gqaReady ? (
+                  <ExternalLink className="h-5 w-5 text-primary shrink-0" />
+                ) : (
+                  <Lock className="h-5 w-5 text-muted-foreground shrink-0" />
+                )}
+                <div className="flex-1">
+                  <p className="text-sm font-medium">
+                    {gqaReady ? "Ready to take the test" : "Locked"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {gqaReady
+                      ? "Closed-book • 80% pass mark • 90 minutes"
+                      : "Score 80%+ on practice quiz to unlock"}
+                  </p>
+                </div>
+              </div>
+            )}
+            {gqaReady && !complete && !failed && (
+              <Button asChild className="w-full h-11">
+                <Link to={`/gqa-test/${moduleId}`}>
+                  <ExternalLink className="mr-2 h-4 w-4" /> Open GQA Test
+                </Link>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

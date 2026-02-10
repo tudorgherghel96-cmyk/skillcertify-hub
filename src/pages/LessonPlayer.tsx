@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Play, CheckCircle2, Brain } from "lucide-react";
 import { MODULES } from "@/data/courseData";
 import { getLessonContent } from "@/data/lessonContent";
 import { getModule1Lesson, t } from "@/data/module1Content";
+import { getModule2Lesson } from "@/data/module2Content";
 import type { I18nLessonContent, I18nContentBlock } from "@/data/module1Content";
 import { useProgress } from "@/contexts/ProgressContext";
 import { getModuleProgress } from "@/contexts/ProgressContext";
@@ -34,7 +35,8 @@ const LessonPlayer = () => {
 
   // Try multilingual content first (Module 1), fall back to legacy
   const i18nContent: I18nLessonContent | undefined =
-    moduleId === 1 ? getModule1Lesson(lessonId) : undefined;
+    moduleId === 1 ? getModule1Lesson(lessonId) :
+    moduleId === 2 ? getModule2Lesson(lessonId) : undefined;
   const legacyContent = !i18nContent ? getLessonContent(moduleId, lessonId) : undefined;
 
   const isCompleted = mp.lessons[lessonId]?.completed ?? false;

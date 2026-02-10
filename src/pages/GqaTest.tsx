@@ -1,44 +1,343 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ExternalLink, ArrowLeft, AlertTriangle } from "lucide-react";
+import {
+  ExternalLink,
+  ArrowLeft,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Lock,
+  Clock,
+  Brain,
+  Lightbulb,
+  ArrowRight,
+  Repeat,
+} from "lucide-react";
+import { MODULES } from "@/data/courseData";
+import { useProgress } from "@/contexts/ProgressContext";
+import {
+  getModuleProgress,
+  areAllLessonsComplete,
+  isGqaUnlocked,
+  isModuleComplete,
+  isModuleUnlocked,
+  canResitGqa,
+  hoursUntilResit,
+} from "@/contexts/ProgressContext";
 
 const GqaTest = () => {
-  const { moduleId } = useParams();
+  const { moduleId: mIdStr } = useParams();
+  const moduleId = Number(mIdStr);
+  const { progress } = useProgress();
+  const mp = getModuleProgress(progress, moduleId);
+  const mod = MODULES.find((m) => m.id === moduleId);
+
+  if (!mod) {
+    return (
+      <div className="px-4 py-12 text-center">
+        <p className="text-muted-foreground">Module not found.</p>
+        <Link to="/dashboard" className="text-primary underline text-sm">
+          Back to Dashboard
+        </Link>
+      </div>
+    );
+  }
+
+  const totalLessons = mod.lessons.length;
+  const lessonsComplete = areAllLessonsComplete(mp, totalLessons);
+  const practiceReady = isGqaUnlocked(mp);
+  const passed = mp.gqa.passed === true;
+  const failed = mp.gqa.passed === false;
+  const canResit = canResitGqa(mp);
+  const resitHours = hoursUntilResit(mp);
+
+  const isReady = lessonsComplete && practiceReady;
+  const nextModuleId = moduleId + 1;
+  const hasNextModule = MODULES.some((m) => m.id === nextModuleId);
 
   return (
-    <div className="px-4 py-6 max-w-2xl mx-auto space-y-6">
-      <Link to={`/module/${moduleId}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Back to Module {moduleId}
-      </Link>
-
-      <div className="text-center space-y-2">
-        <h1 className="text-xl font-bold">GQA Module {moduleId} Assessment</h1>
-        <p className="text-sm text-muted-foreground">Closed-book test — 80% pass mark — 90 minutes</p>
+    <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
+      {/* Header */}
+      <div>
+        <Link
+          to={`/module/${moduleId}`}
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" /> Module {moduleId}
+        </Link>
+        <h1 className="text-lg font-bold mt-1 text-foreground">
+          GQA Module {moduleId} Assessment
+        </h1>
+        <p className="text-sm text-muted-foreground">{mod.title}</p>
       </div>
 
-      <Card className="border-destructive/30 bg-destructive/5">
-        <CardContent className="py-4 flex gap-3">
-          <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <p className="font-medium text-foreground">Before you begin</p>
-            <p className="text-muted-foreground mt-1">
-              This is a closed-book assessment. No notes allowed. Make sure you've completed all lessons and feel confident with the practice quiz.
+      {/* Module Pass Tracker */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1">
+        {MODULES.map((m) => {
+          const mmp = getModuleProgress(progress, m.id);
+          const unlocked = isModuleUnlocked(progress, m.id);
+          const complete = isModuleComplete(mmp);
+          const isCurrent = m.id === moduleId;
+
+          return (
+            <div
+              key={m.id}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap border transition-colors ${
+                isCurrent
+                  ? "border-primary/40 bg-primary/5"
+                  : "border-border bg-card"
+              }`}
+            >
+              {complete ? (
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
+              ) : !unlocked ? (
+                <Lock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              ) : (
+                <Clock className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+              )}
+              <span className={complete ? "text-primary" : unlocked ? "text-foreground" : "text-muted-foreground"}>
+                M{m.id}
+                {complete && mmp.gqa.score !== null && ` ${mmp.gqa.score}%`}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* PASSED state */}
+      {passed && (
+        <div className="rounded-xl border-2 border-primary bg-primary/5 p-5 text-center space-y-3">
+          <CheckCircle2 className="h-12 w-12 text-primary mx-auto" />
+          <h2 className="text-xl font-bold text-foreground">
+            🎉 Module {moduleId} PASSED!
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Score: {mp.gqa.score}% — Well done!
+          </p>
+          {hasNextModule ? (
+            <Button asChild className="h-11">
+              <Link to={`/module/${nextModuleId}`}>
+                Next: Module {nextModuleId} <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Link>
+            </Button>
+          ) : (
+            <Button asChild className="h-11">
+              <Link to="/cscs-prep">
+                Prepare for CSCS Test <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Link>
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* FAILED state */}
+      {failed && (
+        <div className="rounded-xl border-2 border-destructive/40 bg-destructive/5 p-5 space-y-4">
+          <div className="text-center space-y-2">
+            <XCircle className="h-10 w-10 text-destructive mx-auto" />
+            <h2 className="text-lg font-bold text-foreground">
+              Module {moduleId} — Not passed this time
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Score: {mp.gqa.score}%. You need 80% to pass.
             </p>
           </div>
-        </CardContent>
-      </Card>
 
-      <Card>
-        <CardContent className="py-8 text-center space-y-4">
-          <p className="text-muted-foreground text-sm">
-            The GQA assessment link will be provided by your training provider.
-          </p>
-          <Button className="h-12 px-8" disabled>
-            <ExternalLink className="mr-2 h-4 w-4" /> Open GQA Test (Link Pending)
+          <div className="bg-card border rounded-lg p-3 space-y-2">
+            <p className="text-sm font-medium text-foreground">
+              ✓ Your other module passes are safe
+            </p>
+            <p className="text-sm text-muted-foreground">
+              You only need to resit Module {moduleId}. All previously passed
+              modules remain valid.
+            </p>
+          </div>
+
+          {canResit ? (
+            <div className="text-center space-y-3">
+              <p className="text-sm text-primary font-medium">
+                You can resit now.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <Button asChild variant="outline" size="sm">
+                  <Link to={`/practice/${moduleId}`}>
+                    <Repeat className="mr-1.5 h-4 w-4" /> Practice Drill
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center space-y-2">
+              <div className="inline-flex items-center gap-2 bg-muted px-4 py-2 rounded-xl">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-semibold text-foreground">
+                  Resit available in {resitHours} hour
+                  {resitHours !== 1 ? "s" : ""}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Use this time to review lessons and practice.
+              </p>
+              <Button asChild variant="outline" size="sm">
+                <Link to={`/practice/${moduleId}`}>
+                  <Repeat className="mr-1.5 h-4 w-4" /> Go to Practice Drill
+                </Link>
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Readiness Check (if not yet attempted or can resit) */}
+      {!passed && (
+        <div className="border rounded-xl p-4 bg-card space-y-3">
+          <h2 className="font-semibold text-sm text-foreground">
+            Readiness Check
+          </h2>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2.5">
+              {lessonsComplete ? (
+                <CheckCircle2 className="h-4.5 w-4.5 text-primary shrink-0" />
+              ) : (
+                <XCircle className="h-4.5 w-4.5 text-destructive shrink-0" />
+              )}
+              <span className={`text-sm ${lessonsComplete ? "text-foreground" : "text-muted-foreground"}`}>
+                All {totalLessons} lessons complete
+              </span>
+              {!lessonsComplete && (
+                <Link
+                  to={`/module/${moduleId}`}
+                  className="text-xs text-primary underline ml-auto"
+                >
+                  Go to lessons
+                </Link>
+              )}
+            </div>
+            <div className="flex items-center gap-2.5">
+              {practiceReady ? (
+                <CheckCircle2 className="h-4.5 w-4.5 text-primary shrink-0" />
+              ) : (
+                <XCircle className="h-4.5 w-4.5 text-destructive shrink-0" />
+              )}
+              <span className={`text-sm ${practiceReady ? "text-foreground" : "text-muted-foreground"}`}>
+                Practice quiz passed (80%+)
+              </span>
+              {!practiceReady && lessonsComplete && (
+                <Link
+                  to={`/practice/${moduleId}`}
+                  className="text-xs text-primary underline ml-auto"
+                >
+                  Practice now
+                </Link>
+              )}
+            </div>
+          </div>
+          {isReady && (
+            <p className="text-sm text-primary font-semibold">
+              ✓ Your best practice score: {mp.practice.bestScore}% — You are
+              ready!
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Pre-Test Briefing */}
+      {!passed && (
+        <div className="border-2 border-destructive/30 rounded-xl p-4 bg-destructive/5 space-y-3">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+            <h2 className="font-bold text-sm text-foreground">
+              Real GQA Module {moduleId} Assessment
+            </h2>
+          </div>
+          <ul className="space-y-2 text-sm text-foreground">
+            <li className="flex items-start gap-2">
+              <Brain className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+              <span>
+                <strong>CLOSED BOOK</strong> — No notes, no phone, no materials
+                allowed
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-destructive shrink-0 mt-0.5">📝</span>
+              <span>Multiple choice questions — read each carefully</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-destructive shrink-0 mt-0.5">🎯</span>
+              <span>
+                <strong>80% required</strong> to pass
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-destructive shrink-0 mt-0.5">⏱</span>
+              <span>
+                Time limit applies — answer at a steady pace, don't rush
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-destructive shrink-0 mt-0.5">🔁</span>
+              <span>
+                If you don't pass, you can resit <strong>this module only</strong>{" "}
+                after 24 hours
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-destructive shrink-0 mt-0.5">✅</span>
+              <span>
+                You do <strong>NOT</strong> need to resit modules you have
+                already passed
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-destructive shrink-0 mt-0.5">👁</span>
+              <span>
+                This test will be <strong>invigilated</strong> (watched) —
+                follow all instructions
+              </span>
+            </li>
+          </ul>
+        </div>
+      )}
+
+      {/* Tips Panel */}
+      {!passed && (
+        <div className="border rounded-xl p-4 bg-card space-y-3">
+          <div className="flex items-center gap-2">
+            <Lightbulb className="h-4 w-4 text-amber-500" />
+            <h2 className="font-semibold text-sm text-foreground">
+              Exam Tips
+            </h2>
+          </div>
+          <ul className="space-y-1.5 text-sm text-muted-foreground">
+            <li>• Read the WHOLE question before looking at answers</li>
+            <li>• Eliminate obviously wrong answers first</li>
+            <li>• If unsure, go with your first instinct</li>
+            <li>
+              • Don't spend too long on one question — move on and come back
+            </li>
+          </ul>
+        </div>
+      )}
+
+      {/* Start Button */}
+      {!passed && (
+        <div className="text-center space-y-3 pt-2 pb-4">
+          <Button
+            disabled={!isReady || (failed && !canResit)}
+            className="w-full h-14 text-base font-bold"
+          >
+            <ExternalLink className="mr-2 h-5 w-5" />
+            {failed
+              ? canResit
+                ? `Resit GQA Module ${moduleId} Test`
+                : `Resit available in ${resitHours}h`
+              : `Start GQA Module ${moduleId} Test`}
           </Button>
-        </CardContent>
-      </Card>
+          <p className="text-xs text-muted-foreground">
+            Coming soon — your trainer will provide access to this test
+          </p>
+        </div>
+      )}
     </div>
   );
 };

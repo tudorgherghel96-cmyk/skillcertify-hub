@@ -19,7 +19,7 @@ export const examMedia = {
 
 export const lessonMedia: Record<string, LessonMedia> = {
   "1.1": {
-    video: mediaUrl('module1/1.1_video'),
+    video: mediaUrl('module1/1.1_video.mp4'),
     images: [
       { src: mediaUrl('module1/1.1_photo_1.jpeg'), alt: 'Wet floor slip hazard on construction walkway' },
       { src: mediaUrl('module1/1.1_photo_2.png'), alt: 'Stack of bricks on uneven ground' },
@@ -85,7 +85,7 @@ export const lessonMedia: Record<string, LessonMedia> = {
     ]
   },
   "2.1": {
-    video: mediaUrl('module2/2.1_video'),
+    video: mediaUrl('module2/2.1_video.mp4'),
     images: [
       { src: mediaUrl('module2/2.1_photo_1.jpg'), alt: 'Spine anatomy during lifting' },
       { src: mediaUrl('module2/2.1_photo_2.jpeg'), alt: 'Worker with back pain on site' },
@@ -93,7 +93,7 @@ export const lessonMedia: Record<string, LessonMedia> = {
     ]
   },
   "2.2": {
-    video: mediaUrl('module2/2.2_video_'),
+    video: mediaUrl('module2/2.2_video.mp4'),
     images: [
       { src: mediaUrl('module2/2.2_photo_2.jpeg'), alt: 'Wrong vs right lifting technique comparison' },
       { src: mediaUrl('module2/2.2_photo_3.jpeg'), alt: 'Correct foot positioning for lifting' },
@@ -121,7 +121,7 @@ export const lessonMedia: Record<string, LessonMedia> = {
     ]
   },
   "3.2": {
-    video: mediaUrl('module3/3.2_video'),
+    video: mediaUrl('module3/3.2_video.mp4'),
     images: [
       { src: mediaUrl('module3/3.2_photo_1.png'), alt: '1-in-4 ladder angle rule diagram' },
       { src: mediaUrl('module3/3.2_photo_2.jpeg'), alt: 'Three points of contact on ladder' },
@@ -165,7 +165,7 @@ export const lessonMedia: Record<string, LessonMedia> = {
     ]
   },
   "5.1": {
-    video: mediaUrl('module5/5.1_video'),
+    video: mediaUrl('module5/5.1_video.mp4'),
     images: [
       { src: mediaUrl('module5/5.1_photo_1.jpeg'), alt: 'Blind spots around excavator diagram' },
       { src: mediaUrl('module5/5.1_photo_2.jpeg'), alt: 'Banksman guiding reversing vehicle' },

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Circle, BookOpen, ClipboardCheck, Award, Shield, CreditCard, Smartphone, ChevronRight, Mail, Phone, Zap, Star, Crown, Briefcase } from "lucide-react";
+import { examMedia } from "@/data/mediaMap";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,15 @@ const CscsRoute = () => {
         </p>
       </div>
 
+      {/* Pathway flowchart image */}
+      <img
+        src={examMedia.pathway}
+        alt="CSCS qualification pathway flowchart"
+        className="w-full rounded-xl shadow-sm"
+        loading="lazy"
+        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+      />
+
       {/* ─── Animated Flowchart ─── */}
       <section className="space-y-0">
         {STEPS.map((step, i) => {
@@ -197,6 +207,15 @@ const CscsRoute = () => {
         })}
       </section>
 
+      {/* CSCS Card image */}
+      <img
+        src={examMedia.cscsCard}
+        alt="CSCS Green Labourer Card"
+        className="w-full rounded-xl shadow-sm"
+        loading="lazy"
+        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+      />
+
       {/* ─── Key Info Boxes ─── */}
       <section className="space-y-3">
         <h2 className="text-lg font-bold">Key Information</h2>
@@ -263,6 +282,13 @@ const CscsRoute = () => {
       {/* ─── Career Progression ─── */}
       <section className="space-y-3">
         <h2 className="text-lg font-bold">Career Progression</h2>
+        <img
+          src={examMedia.careerProgression}
+          alt="Construction career progression pathway"
+          className="w-full rounded-xl shadow-sm"
+          loading="lazy"
+          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+        />
         <div className="grid gap-3">
           {CAREER_CARDS.map((card, i) => {
             const Icon = card.icon;

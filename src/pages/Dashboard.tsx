@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { MODULES } from "@/data/courseData";
+import { moduleThumbnails } from "@/data/mediaMap";
 import {
   useProgress,
   getModuleProgress,
@@ -203,7 +204,7 @@ const Dashboard = () => {
               className={!unlocked ? "pointer-events-none" : ""}
             >
               <Card
-                className={`transition-all ${
+                className={`transition-all overflow-hidden ${
                   complete
                     ? "border-primary/40 bg-primary/5"
                     : !unlocked
@@ -211,6 +212,18 @@ const Dashboard = () => {
                     : "hover:border-primary/30"
                 }`}
               >
+                {/* Module thumbnail */}
+                {moduleThumbnails[mod.id] && (
+                  <div className="h-28 w-full overflow-hidden bg-muted">
+                    <img
+                      src={moduleThumbnails[mod.id]}
+                      alt={`Module ${mod.id} thumbnail`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  </div>
+                )}
                 <CardContent className="py-4 space-y-3">
                   {/* Header row */}
                   <div className="flex items-center gap-3">

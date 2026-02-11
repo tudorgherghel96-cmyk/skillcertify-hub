@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Play, CheckCircle2, Brain } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Brain } from "lucide-react";
 import { MODULES } from "@/data/courseData";
 import { getLessonContent } from "@/data/lessonContent";
 import { getModule1Lesson, t } from "@/data/module1Content";
@@ -22,7 +22,7 @@ import TestTip from "@/components/lesson/TestTip";
 import MiniCheck from "@/components/lesson/MiniCheck";
 import KeyFactSummary from "@/components/lesson/KeyFactSummary";
 import { motion, AnimatePresence } from "framer-motion";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { LessonHeroMedia, getDistributedImages, MediaImage } from "@/components/lesson/LessonMedia";
 
 const MIN_TIME_SECONDS = 180;
 
@@ -144,36 +144,53 @@ const LessonPlayer = () => {
         translations: kt.translations,
       }));
 
-  // Render i18n content blocks
+  // Get distributed images for interleaving in content
+  const distributedImages = getDistributedImages(moduleId, lessonId);
+
+  // Render i18n content blocks with interleaved images
   const renderI18nBlock = (block: I18nContentBlock, i: number) => {
-    switch (block.type) {
-      case "paragraph":
-        return <p key={i} className="text-[18px] sm:text-[19px] leading-relaxed text-foreground">{t(block.text, lang)}</p>;
-      case "bold":
-        return <p key={i} className="text-[18px] sm:text-[19px] font-bold text-foreground">{t(block.text, lang)}</p>;
-      case "rememberThis":
-        return <RememberThis key={i} text={t(block.text, lang)} />;
-      case "testTip":
-        return <TestTip key={i} text={t(block.text, lang)} />;
-      case "image":
-        return (
-          <div key={i} className="aspect-video bg-muted rounded-xl flex items-center justify-center">
-            <p className="text-sm text-muted-foreground px-4 text-center">{t(block.description, lang)}</p>
-          </div>
-        );
-      case "miniCheck":
-        return (
-          <MiniCheck
-            key={i}
-            question={t(block.question, lang)}
-            options={block.options.map((o) => t(o, lang))}
-            correctIndex={block.correct}
-            feedback={t(block.feedback, lang)}
-          />
-        );
-      default:
-        return null;
-    }
+    // Insert an image after every 2-3 content blocks
+    const imageIndex = Math.floor(i / 3);
+    const showImage = i > 0 && i % 3 === 2 && imageIndex < distributedImages.length;
+    const img = showImage ? distributedImages[imageIndex] : null;
+
+    const blockEl = (() => {
+      switch (block.type) {
+        case "paragraph":
+          return <p key={`b-${i}`} className="text-[18px] sm:text-[19px] leading-relaxed text-foreground">{t(block.text, lang)}</p>;
+        case "bold":
+          return <p key={`b-${i}`} className="text-[18px] sm:text-[19px] font-bold text-foreground">{t(block.text, lang)}</p>;
+        case "rememberThis":
+          return <RememberThis key={`b-${i}`} text={t(block.text, lang)} />;
+        case "testTip":
+          return <TestTip key={`b-${i}`} text={t(block.text, lang)} />;
+        case "image":
+          return (
+            <div key={`b-${i}`} className="aspect-video bg-muted rounded-xl flex items-center justify-center">
+              <p className="text-sm text-muted-foreground px-4 text-center">{t(block.description, lang)}</p>
+            </div>
+          );
+        case "miniCheck":
+          return (
+            <MiniCheck
+              key={`b-${i}`}
+              question={t(block.question, lang)}
+              options={block.options.map((o) => t(o, lang))}
+              correctIndex={block.correct}
+              feedback={t(block.feedback, lang)}
+            />
+          );
+        default:
+          return null;
+      }
+    })();
+
+    return (
+      <div key={`wrap-${i}`}>
+        {blockEl}
+        {img && <MediaImage src={img.src} alt={img.alt} />}
+      </div>
+    );
   };
 
   return (
@@ -208,15 +225,8 @@ const LessonPlayer = () => {
           </p>
         </div>
 
-        {/* Video placeholder */}
-        <AspectRatio ratio={16 / 9} className="bg-secondary rounded-xl overflow-hidden relative">
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-            <div className="h-14 w-14 rounded-full bg-primary/90 flex items-center justify-center shadow-lg">
-              <Play className="h-6 w-6 text-primary-foreground ml-0.5" />
-            </div>
-            <p className="text-sm font-medium text-secondary-foreground/80 px-4 text-center">{videoDesc}</p>
-          </div>
-        </AspectRatio>
+        {/* Hero Media (video or first image) */}
+        <LessonHeroMedia moduleId={moduleId} lessonId={lessonId} videoDesc={videoDesc} />
 
         {/* Key Terms Bar */}
         {keyTermsForPanel.length > 0 && <KeyTermsPanel terms={keyTermsForPanel} />}

@@ -14,7 +14,195 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      badges: {
+        Row: {
+          badge_id: string
+          earned_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cscs_results: {
+        Row: {
+          attempted_at: string | null
+          id: string
+          passed: boolean | null
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string | null
+          id?: string
+          passed?: boolean | null
+          score?: number | null
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string | null
+          id?: string
+          passed?: boolean | null
+          score?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      gqa_results: {
+        Row: {
+          attempted_at: string | null
+          id: string
+          module_id: number
+          passed: boolean | null
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string | null
+          id?: string
+          module_id: number
+          passed?: boolean | null
+          score?: number | null
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string | null
+          id?: string
+          module_id?: number
+          passed?: boolean | null
+          score?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      practice_attempts: {
+        Row: {
+          answers_json: Json | null
+          attempted_at: string | null
+          id: string
+          mode: string
+          module_id: number
+          percentage: number | null
+          score: number | null
+          total: number | null
+          user_id: string
+        }
+        Insert: {
+          answers_json?: Json | null
+          attempted_at?: string | null
+          id?: string
+          mode: string
+          module_id: number
+          percentage?: number | null
+          score?: number | null
+          total?: number | null
+          user_id: string
+        }
+        Update: {
+          answers_json?: Json | null
+          attempted_at?: string | null
+          id?: string
+          mode?: string
+          module_id?: number
+          percentage?: number | null
+          score?: number | null
+          total?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string | null
+          selected_language: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id: string
+          name?: string | null
+          selected_language?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string | null
+          selected_language?: string | null
+        }
+        Relationships: []
+      }
+      progress: {
+        Row: {
+          completed: boolean | null
+          id: string
+          lesson_id: string
+          mini_check_score: Json | null
+          module_id: number
+          time_spent_seconds: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          id?: string
+          lesson_id: string
+          mini_check_score?: Json | null
+          module_id: number
+          time_spent_seconds?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          id?: string
+          lesson_id?: string
+          mini_check_score?: Json | null
+          module_id?: number
+          time_spent_seconds?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      streaks: {
+        Row: {
+          current_streak: number | null
+          id: string
+          last_active_date: string | null
+          longest_streak: number | null
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number | null
+          id?: string
+          last_active_date?: string | null
+          longest_streak?: number | null
+          user_id: string
+        }
+        Update: {
+          current_streak?: number | null
+          id?: string
+          last_active_date?: string | null
+          longest_streak?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

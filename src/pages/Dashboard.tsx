@@ -35,6 +35,7 @@ import {
 } from "@/contexts/ProgressContext";
 import { useGamification } from "@/contexts/GamificationContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSuperUser } from "@/contexts/SuperUserContext";
 import { ui } from "@/i18n/translations";
 import StreakBanner from "@/components/gamification/StreakBanner";
 import BadgesGrid from "@/components/gamification/BadgesGrid";
@@ -68,10 +69,11 @@ const Dashboard = () => {
   const { progress } = useProgress();
   const { gamification, badges, nudges, motivationalMessage } = useGamification();
   const { language } = useLanguage();
+  const { isSuperUser } = useSuperUser();
   const lang = language.code;
   const overall = getOverallProgress(progress);
   const nextAction = getNextAction(progress);
-  const showCscs = allGqaPassed(progress);
+  const showCscs = allGqaPassed(progress, isSuperUser);
   const gqaPassed = MODULES.filter((m) => isModuleComplete(getModuleProgress(progress, m.id))).length;
 
   return (
@@ -145,7 +147,7 @@ const Dashboard = () => {
                     ? "/cscs-prep"
                     : nextAction.lessonId
                     ? `/lesson/${nextAction.moduleId}/${nextAction.lessonId}`
-                    : isGqaUnlocked(getModuleProgress(progress, nextAction.moduleId))
+                    : isGqaUnlocked(getModuleProgress(progress, nextAction.moduleId), isSuperUser)
                     ? `/gqa-test/${nextAction.moduleId}`
                     : `/practice/${nextAction.moduleId}`
                 }
@@ -189,10 +191,10 @@ const Dashboard = () => {
       <div className="space-y-3">
         {MODULES.map((mod) => {
           const mp = getModuleProgress(progress, mod.id);
-          const unlocked = isModuleUnlocked(progress, mod.id);
+          const unlocked = isModuleUnlocked(progress, mod.id, isSuperUser);
           const lessonsComplete = getLessonsCompleted(mp, mod.lessons.length);
-          const practiceReady = isPracticeUnlocked(mp, mod.lessons.length);
-          const gqaReady = isGqaUnlocked(mp);
+          const practiceReady = isPracticeUnlocked(mp, mod.lessons.length, isSuperUser);
+          const gqaReady = isGqaUnlocked(mp, isSuperUser);
           const complete = isModuleComplete(mp);
           const Icon = mod.icon;
           const failed = mp.gqa.passed === false;
@@ -308,7 +310,7 @@ const Dashboard = () => {
                           {complete
                             ? `✅ ${mp.gqa.score}%`
                             : failed
-                            ? canResitGqa(mp)
+                            ? canResitGqa(mp, isSuperUser)
                               ? ui("resit_ready", lang)
                               : `⏳ ${hoursUntilResit(mp)}h`
                             : gqaReady

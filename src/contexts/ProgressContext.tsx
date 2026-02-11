@@ -67,20 +67,23 @@ export const getLessonsCompleted = (mp: ModuleProgress, totalLessons: number) =>
 export const areAllLessonsComplete = (mp: ModuleProgress, totalLessons: number) =>
   getLessonsCompleted(mp, totalLessons) === totalLessons;
 
-export const isPracticeUnlocked = (mp: ModuleProgress, totalLessons: number) =>
-  areAllLessonsComplete(mp, totalLessons);
+export const isPracticeUnlocked = (mp: ModuleProgress, totalLessons: number, superUser = false) =>
+  superUser || areAllLessonsComplete(mp, totalLessons);
 
-export const isGqaUnlocked = (mp: ModuleProgress) => mp.practice.bestScore >= 80;
+export const isGqaUnlocked = (mp: ModuleProgress, superUser = false) =>
+  superUser || mp.practice.bestScore >= 80;
 
 export const isModuleComplete = (mp: ModuleProgress) => mp.gqa.passed === true;
 
-export const isModuleUnlocked = (state: ProgressState, moduleId: number): boolean => {
+export const isModuleUnlocked = (state: ProgressState, moduleId: number, superUser = false): boolean => {
+  if (superUser) return true;
   if (moduleId === 1) return true;
   const prev = getModuleProgress(state, moduleId - 1);
   return isModuleComplete(prev);
 };
 
-export const canResitGqa = (mp: ModuleProgress): boolean => {
+export const canResitGqa = (mp: ModuleProgress, superUser = false): boolean => {
+  if (superUser) return true;
   if (!mp.gqa.failedAt) return true;
   const failDate = new Date(mp.gqa.failedAt);
   return Date.now() - failDate.getTime() >= 24 * 60 * 60 * 1000;
@@ -92,8 +95,8 @@ export const hoursUntilResit = (mp: ModuleProgress): number => {
   return Math.max(0, Math.ceil(diff / (60 * 60 * 1000)));
 };
 
-export const allGqaPassed = (state: ProgressState): boolean =>
-  MODULES.every((m) => getModuleProgress(state, m.id).gqa.passed === true);
+export const allGqaPassed = (state: ProgressState, superUser = false): boolean =>
+  superUser || MODULES.every((m) => getModuleProgress(state, m.id).gqa.passed === true);
 
 export const getOverallProgress = (state: ProgressState): { modulesComplete: number; percentage: number } => {
   let done = 0;

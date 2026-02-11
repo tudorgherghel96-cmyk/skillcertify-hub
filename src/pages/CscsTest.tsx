@@ -17,10 +17,12 @@ import {
   allGqaPassed,
   isModuleComplete,
 } from "@/contexts/ProgressContext";
+import { useSuperUser } from "@/contexts/SuperUserContext";
 
 const CscsTest = () => {
   const { progress } = useProgress();
-  const allPassed = allGqaPassed(progress);
+  const { isSuperUser } = useSuperUser();
+  const allPassed = allGqaPassed(progress, isSuperUser);
   const cscsResult = progress.cscs;
 
   // Gate: must pass all 5 GQA modules

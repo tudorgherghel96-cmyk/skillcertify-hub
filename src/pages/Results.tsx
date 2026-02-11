@@ -12,6 +12,7 @@ import {
   Download,
   Trophy,
   Repeat,
+  Unlock,
 } from "lucide-react";
 import { MODULES } from "@/data/courseData";
 import { useProgress } from "@/contexts/ProgressContext";
@@ -20,6 +21,8 @@ import {
   isModuleComplete,
   allGqaPassed,
 } from "@/contexts/ProgressContext";
+import { useSuperUser } from "@/contexts/SuperUserContext";
+import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 
 /* ─── Simple confetti effect ─── */
@@ -74,8 +77,9 @@ const Confetti = () => {
 
 const Results = () => {
   const { progress } = useProgress();
+  const { isSuperUser, isAdmin, toggleSuperUser } = useSuperUser();
   const cscsResult = progress.cscs;
-  const allGqa = allGqaPassed(progress);
+  const allGqa = allGqaPassed(progress, isSuperUser);
   const cscsPassed = cscsResult.passed === true;
   const cscsFailed = cscsResult.passed === false;
 
@@ -431,6 +435,35 @@ const Results = () => {
           </Button>
         </>
       )}
+
+      {/* Super User Mode Toggle - visible to all for now (restrict to admins when auth is wired) */}
+      <Card className={`border ${isSuperUser ? "border-amber-500 bg-amber-500/10" : "border-border"}`}>
+        <CardContent className="py-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${isSuperUser ? "bg-amber-500 text-amber-950" : "bg-muted"}`}>
+                <Unlock className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm">Super User Mode</h3>
+                <p className="text-xs text-muted-foreground">
+                  Bypass all module locks for QA testing
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={isSuperUser}
+              onCheckedChange={toggleSuperUser}
+              className="data-[state=checked]:bg-amber-500"
+            />
+          </div>
+          {isSuperUser && (
+            <p className="text-xs text-amber-600 font-medium">
+              🔓 All modules, lessons, quizzes, and GQA tests are now unlocked
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

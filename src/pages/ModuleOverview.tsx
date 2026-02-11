@@ -26,12 +26,14 @@ import {
   canResitGqa,
   hoursUntilResit,
 } from "@/contexts/ProgressContext";
+import { useSuperUser } from "@/contexts/SuperUserContext";
 
 const ModuleOverview = () => {
   const { id } = useParams();
   const moduleId = Number(id) || 1;
   const mod = MODULES.find((m) => m.id === moduleId);
   const { progress } = useProgress();
+  const { isSuperUser } = useSuperUser();
 
   if (!mod) {
     return <div className="p-4 text-center text-muted-foreground">Module not found</div>;
@@ -39,8 +41,8 @@ const ModuleOverview = () => {
 
   const mp = getModuleProgress(progress, moduleId);
   const lessonsComplete = getLessonsCompleted(mp, mod.lessons.length);
-  const practiceReady = isPracticeUnlocked(mp, mod.lessons.length);
-  const gqaReady = isGqaUnlocked(mp);
+  const practiceReady = isPracticeUnlocked(mp, mod.lessons.length, isSuperUser);
+  const gqaReady = isGqaUnlocked(mp, isSuperUser);
   const complete = isModuleComplete(mp);
   const failed = mp.gqa.passed === false;
   const Icon = mod.icon;
@@ -90,7 +92,7 @@ const ModuleOverview = () => {
             const done = mp.lessons[lesson.id]?.completed;
             // Unlock: first lesson always, or previous completed
             const prevDone = i === 0 || mp.lessons[mod.lessons[i - 1].id]?.completed;
-            const isLocked = !prevDone && !done;
+            const isLocked = !isSuperUser && !prevDone && !done;
 
             return (
               <Link
@@ -204,7 +206,7 @@ const ModuleOverview = () => {
                     </p>
                   </div>
                 </div>
-                {canResitGqa(mp) ? (
+                {canResitGqa(mp, isSuperUser) ? (
                   <Button asChild className="w-full h-11">
                     <Link to={`/gqa-test/${moduleId}`}>
                       <RotateCcw className="mr-2 h-4 w-4" /> Resit Module {moduleId}

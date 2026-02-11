@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ProgressProvider } from "@/contexts/ProgressContext";
 import { GamificationProvider } from "@/contexts/GamificationContext";
 import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
+import { SuperUserProvider } from "@/contexts/SuperUserContext";
 import AppLayout from "@/components/layout/AppLayout";
 import OfflineBanner from "@/components/layout/OfflineBanner";
 import Landing from "@/pages/Landing";
@@ -29,6 +30,7 @@ const App = () => (
     <LanguageProvider>
       <ProgressProvider>
         <GamificationProvider>
+        <SuperUserProvider>
         <AccessibilityProvider>
         <TooltipProvider>
           <Toaster />
@@ -54,6 +56,7 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
         </AccessibilityProvider>
+        </SuperUserProvider>
         </GamificationProvider>
       </ProgressProvider>
     </LanguageProvider>

@@ -6,6 +6,7 @@ import { MODULES } from "@/data/courseData";
 import { getQuestionsForModule, getFlashcardsForModule } from "@/data/quizQuestions";
 import { useProgress } from "@/contexts/ProgressContext";
 import { getModuleProgress, isPracticeUnlocked } from "@/contexts/ProgressContext";
+import { useSuperUser } from "@/contexts/SuperUserContext";
 import FullQuiz from "@/components/practice/FullQuiz";
 import DrillMode from "@/components/practice/DrillMode";
 import FlashcardMode from "@/components/practice/FlashcardMode";
@@ -22,13 +23,14 @@ const PracticeQuiz = () => {
   const { moduleId: mIdStr } = useParams();
   const moduleId = Number(mIdStr);
   const { progress, recordPractice } = useProgress();
+  const { isSuperUser } = useSuperUser();
   const mp = getModuleProgress(progress, moduleId);
 
   const mod = MODULES.find((m) => m.id === moduleId);
   const questions = useMemo(() => getQuestionsForModule(moduleId), [moduleId]);
   const flashcards = useMemo(() => getFlashcardsForModule(moduleId), [moduleId]);
 
-  const unlocked = isPracticeUnlocked(mp, mod?.lessons.length ?? 0);
+  const unlocked = isPracticeUnlocked(mp, mod?.lessons.length ?? 0, isSuperUser);
 
   const [mode, setMode] = useState<Mode>("full");
   const [quizStarted, setQuizStarted] = useState(false);

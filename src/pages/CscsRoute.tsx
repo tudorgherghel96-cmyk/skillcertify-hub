@@ -12,6 +12,7 @@ import {
   areAllLessonsComplete,
   getOverallProgress,
 } from "@/contexts/ProgressContext";
+import { useSuperUser } from "@/contexts/SuperUserContext";
 import { MODULES } from "@/data/courseData";
 
 /* ─── flowchart steps ─── */
@@ -92,7 +93,7 @@ function getCurrentStep(progress: ReturnType<typeof useProgress>["progress"]): n
     return mp.practice.bestScore >= 80;
   });
 
-  const allGqa = allGqaPassed(progress);
+  const allGqa = allGqaPassed(progress); // superUser not needed here, just shows current step
   const cscsPassed = progress.cscs.passed === true;
 
   if (cscsPassed) return 7;

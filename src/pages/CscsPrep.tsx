@@ -20,6 +20,7 @@ import {
   allGqaPassed,
   isModuleComplete,
 } from "@/contexts/ProgressContext";
+import { useSuperUser } from "@/contexts/SuperUserContext";
 import { getAllQuestions } from "@/data/quizQuestions";
 import type { QuizQuestion } from "@/data/quizQuestions";
 import FullQuiz from "@/components/practice/FullQuiz";
@@ -27,7 +28,8 @@ import FullQuiz from "@/components/practice/FullQuiz";
 const CscsPrep = () => {
   const { progress } = useProgress();
   const navigate = useNavigate();
-  const allPassed = allGqaPassed(progress);
+  const { isSuperUser } = useSuperUser();
+  const allPassed = allGqaPassed(progress, isSuperUser);
 
   const [mockStarted, setMockStarted] = useState(false);
   const [mockResult, setMockResult] = useState<{

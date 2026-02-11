@@ -8,10 +8,13 @@ import { ProgressProvider } from "@/contexts/ProgressContext";
 import { GamificationProvider } from "@/contexts/GamificationContext";
 import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import { SuperUserProvider } from "@/contexts/SuperUserContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
 import OfflineBanner from "@/components/layout/OfflineBanner";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Landing from "@/pages/Landing";
 import SelectLanguage from "@/pages/SelectLanguage";
+import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
 import ModuleOverview from "@/pages/ModuleOverview";
 import LessonPlayer from "@/pages/LessonPlayer";
@@ -27,6 +30,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <AuthProvider>
     <LanguageProvider>
       <ProgressProvider>
         <GamificationProvider>
@@ -39,8 +43,9 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Landing />} />
+              <Route path="/auth" element={<Auth />} />
               <Route path="/select-language" element={<SelectLanguage />} />
-              <Route element={<AppLayout />}>
+              <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/module/:id" element={<ModuleOverview />} />
                 <Route path="/lesson/:moduleId/:lessonId" element={<LessonPlayer />} />
@@ -60,6 +65,7 @@ const App = () => (
         </GamificationProvider>
       </ProgressProvider>
     </LanguageProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

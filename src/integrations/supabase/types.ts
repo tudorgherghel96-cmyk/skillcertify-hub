@@ -86,6 +86,33 @@ export type Database = {
         }
         Relationships: []
       }
+      mock_attempts: {
+        Row: {
+          attempted_at: string | null
+          duration_seconds: number | null
+          id: string
+          score: number | null
+          total: number | null
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string | null
+          duration_seconds?: number | null
+          id?: string
+          score?: number | null
+          total?: number | null
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string | null
+          duration_seconds?: number | null
+          id?: string
+          score?: number | null
+          total?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       practice_attempts: {
         Row: {
           answers_json: Json | null
@@ -182,6 +209,42 @@ export type Database = {
         }
         Relationships: []
       }
+      readiness_snapshots: {
+        Row: {
+          components: Json | null
+          computed_at: string | null
+          gates: Json | null
+          id: string
+          next_action: string | null
+          readiness: number | null
+          tier: string | null
+          user_id: string
+          weak_modules: number[] | null
+        }
+        Insert: {
+          components?: Json | null
+          computed_at?: string | null
+          gates?: Json | null
+          id?: string
+          next_action?: string | null
+          readiness?: number | null
+          tier?: string | null
+          user_id: string
+          weak_modules?: number[] | null
+        }
+        Update: {
+          components?: Json | null
+          computed_at?: string | null
+          gates?: Json | null
+          id?: string
+          next_action?: string | null
+          readiness?: number | null
+          tier?: string | null
+          user_id?: string
+          weak_modules?: number[] | null
+        }
+        Relationships: []
+      }
       streaks: {
         Row: {
           current_streak: number | null
@@ -226,9 +289,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_module_stats: {
+        Row: {
+          avg_practice_score: number | null
+          best_practice_score: number | null
+          gqa_passed: boolean | null
+          gqa_score: number | null
+          lessons_completed: number | null
+          module_id: number | null
+          total_practice_attempts: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      compute_readiness: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

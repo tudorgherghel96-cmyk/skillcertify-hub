@@ -1,7 +1,8 @@
-import { Globe } from "lucide-react";
+import { Globe, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,7 @@ interface TopNavProps {
 
 const TopNav = ({ currentModule, currentLesson, overallProgress = 0 }: TopNavProps) => {
   const { language, setLanguage } = useLanguage();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -26,27 +28,39 @@ const TopNav = ({ currentModule, currentLesson, overallProgress = 0 }: TopNavPro
           <span className="text-lg font-bold text-primary tracking-tight">SKILLCERTIFY</span>
         </Link>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors p-2 -mr-2">
-              <span className="text-base">{language.flag}</span>
-              <Globe className="h-4 w-4" />
+        <div className="flex items-center gap-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors p-2">
+                <span className="text-base">{language.flag}</span>
+                <Globe className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              {LANGUAGES.map((lang) => (
+                <DropdownMenuItem
+                  key={lang.code}
+                  onClick={() => setLanguage(lang)}
+                  className={`gap-2 ${lang.code === language.code ? "bg-primary/10 font-medium" : ""}`}
+                >
+                  <span className="text-lg">{lang.flag}</span>
+                  <span className="text-sm">{lang.english}</span>
+                  <span className="text-xs text-muted-foreground ml-auto">{lang.native}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {user && (
+            <button
+              onClick={() => signOut()}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors p-2 -mr-2"
+              aria-label="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
             </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-52">
-            {LANGUAGES.map((lang) => (
-              <DropdownMenuItem
-                key={lang.code}
-                onClick={() => setLanguage(lang)}
-                className={`gap-2 ${lang.code === language.code ? "bg-primary/10 font-medium" : ""}`}
-              >
-                <span className="text-lg">{lang.flag}</span>
-                <span className="text-sm">{lang.english}</span>
-                <span className="text-xs text-muted-foreground ml-auto">{lang.native}</span>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          )}
+        </div>
       </div>
 
       {overallProgress > 0 && (

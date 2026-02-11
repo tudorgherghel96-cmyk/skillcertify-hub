@@ -1,8 +1,7 @@
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const BUCKET = 'course-media';
-
+/**
+ * Returns a public URL for a media asset stored in /public/media/.
+ * Usage: mediaUrl('module1/1.1_photo_1.jpeg')
+ */
 export function mediaUrl(path: string): string {
-  return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`;
+  return `/media/${path}`;
 }
-
-// Usage: mediaUrl('module1/1.1_photo_1.jpeg')

@@ -220,11 +220,11 @@ const Dashboard = () => {
               >
                 {/* Module thumbnail */}
                 {moduleThumbnails[mod.id] && (
-                  <div className="h-28 w-full overflow-hidden bg-muted">
+                  <div className="w-full overflow-hidden bg-muted" style={{ aspectRatio: "16/9" }}>
                     <img
                       src={moduleThumbnails[mod.id]}
                       alt={`Module ${mod.id} thumbnail`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover rounded-t-lg"
                       loading="lazy"
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />

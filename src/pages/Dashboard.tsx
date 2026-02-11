@@ -42,6 +42,7 @@ import BadgesGrid from "@/components/gamification/BadgesGrid";
 import SmartNudges from "@/components/gamification/SmartNudges";
 import MotivationalBanner from "@/components/gamification/MotivationalBanner";
 import QuickSession from "@/components/practice/QuickSession";
+import ReadinessCard from "@/components/readiness/ReadinessCard";
 
 const Dashboard = () => {
   const [quickMode, setQuickMode] = useState<"drill" | "blitz" | null>(null);
@@ -178,6 +179,9 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Readiness Index */}
+      <ReadinessCard />
 
       {/* Closed-book reminder */}
       <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4">

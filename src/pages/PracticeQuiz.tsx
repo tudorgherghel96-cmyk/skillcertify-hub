@@ -10,6 +10,7 @@ import { useSuperUser } from "@/contexts/SuperUserContext";
 import FullQuiz from "@/components/practice/FullQuiz";
 import DrillMode from "@/components/practice/DrillMode";
 import FlashcardMode from "@/components/practice/FlashcardMode";
+import { useTelemetry } from "@/hooks/useTelemetry";
 
 type Mode = "full" | "drill" | "flashcards";
 
@@ -24,6 +25,7 @@ const PracticeQuiz = () => {
   const moduleId = Number(mIdStr);
   const { progress, recordPractice } = useProgress();
   const { isSuperUser } = useSuperUser();
+  const { trackPracticeAttempt } = useTelemetry();
   const mp = getModuleProgress(progress, moduleId);
 
   const mod = MODULES.find((m) => m.id === moduleId);
@@ -36,9 +38,11 @@ const PracticeQuiz = () => {
   const [quizStarted, setQuizStarted] = useState(false);
   const [lastScore, setLastScore] = useState<number | null>(null);
 
-  const handleQuizComplete = (score: number) => {
-    setLastScore(score);
-    recordPractice(moduleId, score);
+  const handleQuizComplete = (score: number, answers: { questionId: string; selectedIndex: number; correct: boolean }[]) => {
+    const pct = Math.round((answers.filter(a => a.correct).length / answers.length) * 100);
+    setLastScore(pct);
+    recordPractice(moduleId, pct);
+    trackPracticeAttempt(moduleId, answers.filter(a => a.correct).length, answers.length, "full", answers);
     setQuizStarted(false);
   };
 

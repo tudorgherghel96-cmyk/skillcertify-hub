@@ -23,6 +23,7 @@ import MiniCheck from "@/components/lesson/MiniCheck";
 import KeyFactSummary from "@/components/lesson/KeyFactSummary";
 import { motion, AnimatePresence } from "framer-motion";
 import { LessonHeroMedia, getDistributedImages, MediaImage } from "@/components/lesson/LessonMedia";
+import { useTelemetry } from "@/hooks/useTelemetry";
 
 const MIN_TIME_SECONDS = 180;
 
@@ -34,6 +35,7 @@ const LessonPlayer = () => {
   const { progress, completeLesson } = useProgress();
   const { addStudyMinutes, recordStudySession } = useGamification();
   const { language } = useLanguage();
+  const { trackLessonComplete } = useTelemetry();
   const lang = language.code;
   const mp = getModuleProgress(progress, moduleId);
 
@@ -82,10 +84,14 @@ const LessonPlayer = () => {
   useEffect(() => {
     if (!isCompleted && hasScrolledToBottom && timeSpent >= MIN_TIME_SECONDS) {
       completeLesson(moduleId, lessonId);
+      trackLessonComplete(moduleId, lessonId);
     }
-  }, [hasScrolledToBottom, timeSpent, isCompleted, moduleId, lessonId, completeLesson]);
+  }, [hasScrolledToBottom, timeSpent, isCompleted, moduleId, lessonId, completeLesson, trackLessonComplete]);
 
-  const handleMarkComplete = () => completeLesson(moduleId, lessonId);
+  const handleMarkComplete = () => {
+    completeLesson(moduleId, lessonId);
+    trackLessonComplete(moduleId, lessonId);
+  };
 
   const totalLessons = mod?.lessons.length ?? 0;
   const hasPrev = lessonId > 1;

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, BookOpen, Award, ArrowRight } from "lucide-react";
+import { welcomeMedia } from "@/data/mediaMap";
 
 const benefits = [
   { icon: BookOpen, title: "5 Comprehensive Modules", desc: "Covering all Level 1 Health & Safety topics" },
@@ -12,7 +13,10 @@ const Landing = () => {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="relative bg-secondary text-secondary-foreground px-4 py-16 sm:py-24">
+      <section
+        className="relative bg-secondary text-secondary-foreground px-4 py-16 sm:py-24 bg-cover bg-center"
+        style={{ backgroundImage: `linear-gradient(to bottom, hsl(var(--secondary) / 0.85), hsl(var(--secondary) / 0.95)), url(${welcomeMedia.hero})` }}
+      >
         <div className="max-w-2xl mx-auto text-center space-y-6">
           <h1 className="text-3xl sm:text-5xl font-bold leading-tight">
             Get Your <span className="text-primary">CSCS Green Card</span> with Confidence
@@ -42,6 +46,19 @@ const Landing = () => {
               <p className="text-sm text-muted-foreground">{desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Impact / Stats */}
+      <section className="px-4 py-12 sm:py-16 max-w-3xl mx-auto w-full">
+        <div className="rounded-xl overflow-hidden shadow-sm">
+          <img
+            src={welcomeMedia.stats}
+            alt="SkillCertify impact statistics"
+            className="w-full rounded-xl"
+            loading="lazy"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
         </div>
       </section>
 

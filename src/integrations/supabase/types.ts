@@ -388,7 +388,15 @@ export type Database = {
       }
     }
     Functions: {
-      compute_concept_state: { Args: { p_user_id: string }; Returns: Json }
+      compute_concept_state: {
+        Args: { p_user_id: string }
+        Returns: {
+          accuracy: number
+          concept_id: string
+          memory_score: number
+          state: string
+        }[]
+      }
       compute_readiness: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
         Args: {

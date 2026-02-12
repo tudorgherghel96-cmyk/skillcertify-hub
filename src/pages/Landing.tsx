@@ -96,7 +96,8 @@ const Landing = () => {
 
           <CardWallet currentTarget="green" />
           <p className="text-xs text-muted-foreground text-center mt-3 px-4 leading-relaxed">
-            Start with Green. Then keep going — online learning, evidence, verification. All in one app.
+            One H&S test. Then NVQ Level 2 with us. Your test carries over for the Blue card — so you don't pay again.
+            <span className="block text-[10px] text-muted-foreground/60 mt-1">Valid test only.</span>
           </p>
         </motion.div>
       </section>

@@ -1,12 +1,12 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, ArrowRight, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
+import { Zap, CheckCircle2, XCircle, RotateCcw, TrendingUp, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getQuestionsForModule, type QuizQuestion } from "@/data/quizQuestions";
 import { MODULES } from "@/data/courseData";
 import { useProgress, getModuleProgress } from "@/contexts/ProgressContext";
+import { triggerHaptic } from "@/lib/haptics";
 
 interface QuickSessionProps {
   mode: "drill" | "blitz";
@@ -16,17 +16,13 @@ interface QuickSessionProps {
 const QuickSession = ({ mode, onClose }: QuickSessionProps) => {
   const { progress } = useProgress();
 
-  // Find weakest module (lowest practice score or least completed)
   const weakestModuleId = useMemo(() => {
     let worst = 1;
     let worstScore = Infinity;
     MODULES.forEach((m) => {
       const mp = getModuleProgress(progress, m.id);
       const score = mp.practice.attempts > 0 ? mp.practice.bestScore : 50;
-      if (score < worstScore) {
-        worstScore = score;
-        worst = m.id;
-      }
+      if (score < worstScore) { worstScore = score; worst = m.id; }
     });
     return worst;
   }, [progress]);
@@ -37,7 +33,6 @@ const QuickSession = ({ mode, onClose }: QuickSessionProps) => {
     return q;
   }, []);
 
-  // Pick 5 random questions, weighted toward weakest module
   const questions = useMemo(() => {
     const weakQ = getQuestionsForModule(weakestModuleId);
     const otherQ = allQuestions.filter((q) => !weakQ.includes(q));
@@ -57,7 +52,9 @@ const QuickSession = ({ mode, onClose }: QuickSessionProps) => {
     if (showFeedback) return;
     setSelected(index);
     setShowFeedback(true);
-    if (index === q.correctIndex) setScore((s) => s + 1);
+    const correct = index === q.correctIndex;
+    triggerHaptic(correct ? "success" : "error");
+    if (correct) setScore((s) => s + 1);
 
     setTimeout(() => {
       if (current + 1 >= questions.length) {
@@ -71,21 +68,34 @@ const QuickSession = ({ mode, onClose }: QuickSessionProps) => {
   };
 
   if (finished) {
+    const pct = Math.round((score / questions.length) * 100);
     return (
-      <Card className="border-primary/30">
+      <Card className="border-primary/30 overflow-hidden">
         <CardContent className="py-8 text-center space-y-4">
-          <div className={`h-16 w-16 mx-auto rounded-full flex items-center justify-center ${score >= 4 ? "bg-primary/10" : "bg-amber-100 dark:bg-amber-900/30"}`}>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            className={`h-16 w-16 mx-auto rounded-full flex items-center justify-center ${score >= 4 ? "bg-primary/10" : "bg-amber-100 dark:bg-amber-900/30"}`}
+          >
             {score >= 4 ? <CheckCircle2 className="h-8 w-8 text-primary" /> : <RotateCcw className="h-8 w-8 text-amber-500" />}
-          </div>
-          <p className="text-2xl font-bold text-foreground">{score}/5</p>
+          </motion.div>
+          <p className="text-2xl font-bold text-foreground">{score}/{questions.length}</p>
           <p className="text-sm text-muted-foreground">
-            {score >= 4 ? "Great memory! Keep it up." : "Keep practising — you'll get there."}
+            {score >= 4
+              ? "Nice. Your accuracy is improving!"
+              : "Keep practising — repetition builds memory."}
           </p>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={onClose} className="flex-1 min-h-[52px]">
+          {/* Readiness impact */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+            <TrendingUp className="h-3 w-3" />
+            Readiness +{Math.max(1, Math.round(pct / 20))}%
+          </div>
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" onClick={onClose} className="flex-1 min-h-[52px] active:scale-[0.97] transition-transform">
               Done
             </Button>
-            <Button onClick={() => { setCurrent(0); setSelected(null); setShowFeedback(false); setScore(0); setFinished(false); }} className="flex-1 min-h-[52px]">
+            <Button onClick={() => { setCurrent(0); setSelected(null); setShowFeedback(false); setScore(0); setFinished(false); }} className="flex-1 min-h-[52px] active:scale-[0.97] transition-transform">
               <RotateCcw className="mr-2 h-4 w-4" /> Again
             </Button>
           </div>
@@ -104,13 +114,17 @@ const QuickSession = ({ mode, onClose }: QuickSessionProps) => {
               {mode === "blitz" ? "2-Minute Blitz" : "Quick Drill"}
             </span>
           </div>
-          <span className="text-xs text-muted-foreground">{current + 1}/5</span>
+          <span className="text-xs text-muted-foreground tabular-nums">{current + 1}/{questions.length}</span>
         </div>
 
-        {/* Progress dots */}
+        {/* Progress bar */}
         <div className="flex gap-1.5">
           {questions.map((_, i) => (
-            <div key={i} className={`h-1.5 flex-1 rounded-full ${i < current ? "bg-primary" : i === current ? "bg-primary/50" : "bg-muted"}`} />
+            <motion.div
+              key={i}
+              className={`h-1.5 flex-1 rounded-full ${i < current ? "bg-primary" : i === current ? "bg-primary/50" : "bg-muted"}`}
+              animate={{ backgroundColor: i < current ? "hsl(var(--primary))" : undefined }}
+            />
           ))}
         </div>
 
@@ -129,16 +143,15 @@ const QuickSession = ({ mode, onClose }: QuickSessionProps) => {
                 if (showFeedback) {
                   if (i === q.correctIndex) btnClass = "border-primary bg-primary/10 text-foreground";
                   else if (i === selected) btnClass = "border-destructive bg-destructive/10 text-foreground";
-                } else if (selected === i) {
-                  btnClass = "border-primary bg-primary/10 text-foreground";
                 }
 
                 return (
-                  <button
+                  <motion.button
                     key={i}
+                    whileTap={!showFeedback ? { scale: 0.97 } : undefined}
                     onClick={() => handleSelect(i)}
                     disabled={showFeedback}
-                    className={`w-full text-left px-4 py-4 rounded-xl text-base font-medium border-2 transition-all min-h-[56px] ${btnClass}`}
+                    className={`w-full text-left px-4 py-4 rounded-xl text-sm font-medium border-2 transition-all min-h-[56px] ${btnClass}`}
                   >
                     <span className="flex items-center gap-3">
                       <span className={`h-7 w-7 rounded-full border-2 flex items-center justify-center text-sm font-bold shrink-0 ${
@@ -150,7 +163,7 @@ const QuickSession = ({ mode, onClose }: QuickSessionProps) => {
                       </span>
                       {opt}
                     </span>
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
@@ -158,9 +171,15 @@ const QuickSession = ({ mode, onClose }: QuickSessionProps) => {
               <motion.p
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-muted-foreground italic px-1"
+                className={`text-sm font-medium px-3 py-2 rounded-lg ${
+                  selected === q.correctIndex
+                    ? "bg-primary/10 text-primary"
+                    : "bg-destructive/10 text-destructive"
+                }`}
               >
-                {q.explanation}
+                {selected === q.correctIndex
+                  ? `✓ ${q.explanation}`
+                  : `Not quite — ${q.explanation}`}
               </motion.p>
             )}
           </motion.div>

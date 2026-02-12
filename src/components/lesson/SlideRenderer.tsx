@@ -13,7 +13,7 @@ import type { Slide } from "@/data/slidesSchema";
 /* ─── Shared wrapper ─── */
 function SlideShell({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`h-full w-full flex flex-col items-center justify-center px-6 py-8 ${className}`}>
+    <div className={`h-full w-full flex flex-col items-center justify-center px-6 py-8 overflow-y-auto ${className}`}>
       {children}
     </div>
   );
@@ -25,7 +25,7 @@ const pop = {
   show: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
-/* ─── English overlay (shown below translated text) ─── */
+/* ─── English overlay ─── */
 function EnglishOverlay({ text }: { text?: string }) {
   const [show, setShow] = useState(false);
   if (!text) return null;
@@ -138,7 +138,7 @@ function VideoSlide({ slide, isActive }: { slide: Extract<Slide, { type: "video"
   );
 }
 
-/* ─── Text Slide (with dual-language) ─── */
+/* ─── Text Slide ─── */
 function TextSlide({ slide }: { slide: Extract<Slide, { type: "text" }> }) {
   return (
     <SlideShell>
@@ -203,7 +203,7 @@ function KeyTermSlide({ slide }: { slide: Extract<Slide, { type: "keyterm" }> })
   );
 }
 
-/* ─── Remember This Slide (with dual-language) ─── */
+/* ─── Remember This Slide ─── */
 function RememberSlide({ slide }: { slide: Extract<Slide, { type: "remember" }> }) {
   const reducedMotion = useReducedMotion();
   return (
@@ -224,7 +224,7 @@ function RememberSlide({ slide }: { slide: Extract<Slide, { type: "remember" }> 
   );
 }
 
-/* ─── Test Tip Slide (with dual-language) ─── */
+/* ─── Test Tip Slide ─── */
 function TipSlide({ slide }: { slide: Extract<Slide, { type: "tip" }> }) {
   const reducedMotion = useReducedMotion();
   return (
@@ -245,7 +245,7 @@ function TipSlide({ slide }: { slide: Extract<Slide, { type: "tip" }> }) {
   );
 }
 
-/* ─── Quiz Slide (locks swipe until answered, with dual-language) ─── */
+/* ─── Quiz Slide ─── */
 function QuizSlide({
   slide,
   onQuizAnswered,
@@ -341,11 +341,9 @@ function QuizSlide({
                 isCorrect ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
               }`}
             >
-              {slide.feedback
-                ? (isCorrect ? "✓ " : "✗ ") + slide.feedback
-                : isCorrect
-                ? "✓ Correct!"
-                : `✗ The answer is: ${slide.options[slide.correct]}`}
+              {isCorrect
+                ? `✓ ${slide.feedback || "Correct!"}`
+                : `Not quite — ${slide.feedback || `The answer is: ${slide.options[slide.correct]}`}`}
             </motion.div>
           )}
         </AnimatePresence>

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Brain, Target, Layers, Zap, Timer, ArrowRight, Lock, ShieldCheck } from "lucide-react";
+import { Brain, Target, Zap, Timer, ArrowRight, Lock, ShieldCheck, RotateCcw, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MODULES } from "@/data/courseData";
@@ -44,43 +44,50 @@ export default function PracticeHub() {
       <motion.div variants={fadeUp}>
         <h1 className="text-lg font-bold text-foreground">Practice & Test</h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Drills, quizzes, mock exams
+          3 modes: Quick Drill, Targeted Practice, Mock CSCS Test
         </p>
       </motion.div>
 
       {/* Quick sessions */}
-      <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3">
-        <Button
-          onClick={() => setQuickMode("drill")}
-          variant="outline"
-          className="h-16 flex flex-col items-center gap-1 border-border"
-        >
-          <Zap className="h-5 w-5 text-primary" />
-          <span className="text-xs font-semibold">Quick Drill</span>
-          <span className="text-[10px] text-muted-foreground">5 random questions</span>
-        </Button>
-        <Button
-          onClick={() => setQuickMode("blitz")}
-          variant="outline"
-          className="h-16 flex flex-col items-center gap-1 border-border"
-        >
-          <Timer className="h-5 w-5 text-primary" />
-          <span className="text-xs font-semibold">2-Min Blitz</span>
-          <span className="text-[10px] text-muted-foreground">Speed challenge</span>
-        </Button>
+      <motion.div variants={fadeUp}>
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Quick Sessions</p>
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            onClick={() => setQuickMode("drill")}
+            variant="outline"
+            className="h-20 flex flex-col items-center gap-1.5 border-border active:scale-[0.97] transition-transform"
+          >
+            <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-primary" />
+            </div>
+            <span className="text-xs font-semibold">Quick Drill</span>
+            <span className="text-[10px] text-muted-foreground">~5 min • Spaced recall</span>
+          </Button>
+          <Button
+            onClick={() => setQuickMode("blitz")}
+            variant="outline"
+            className="h-20 flex flex-col items-center gap-1.5 border-border active:scale-[0.97] transition-transform"
+          >
+            <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+              <Timer className="h-5 w-5 text-primary" />
+            </div>
+            <span className="text-xs font-semibold">2-Min Blitz</span>
+            <span className="text-[10px] text-muted-foreground">Speed challenge</span>
+          </Button>
+        </div>
       </motion.div>
 
       {/* Adaptive Boost */}
       <motion.div variants={fadeUp}>
-        <Card className="border-primary/20">
-          <CardContent className="py-4">
-            <Link to="/practice/boost" className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+        <Card className="border-primary/20 overflow-hidden">
+          <CardContent className="py-0">
+            <Link to="/boost-drill" className="flex items-center gap-3 py-4">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <Brain className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-foreground">Adaptive Boost Drill</p>
-                <p className="text-xs text-muted-foreground">Focus on your weakest concepts</p>
+                <p className="text-xs text-muted-foreground">AI picks your weakest concepts</p>
               </div>
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
             </Link>
@@ -88,12 +95,13 @@ export default function PracticeHub() {
         </Card>
       </motion.div>
 
-      {/* Module practice quizzes */}
+      {/* Targeted Practice — Module quizzes */}
       <motion.div variants={fadeUp} className="space-y-2">
-        <h2 className="text-sm font-bold text-foreground">Module Practice Quizzes</h2>
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Targeted Practice</p>
         {MODULES.map((mod) => {
           const mp = getModuleProgress(progress, mod.id);
           const ready = isPracticeUnlocked(mp, mod.lessons.length, isSuperUser);
+          const passed80 = mp.practice.bestScore >= 80;
 
           return (
             <Link
@@ -101,22 +109,22 @@ export default function PracticeHub() {
               to={ready ? `/practice/${mod.id}` : "#"}
               className={!ready ? "pointer-events-none" : ""}
             >
-              <div className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${
-                ready ? "border-border hover:border-primary/20 bg-card" : "border-border opacity-40"
+              <div className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                ready ? "border-border hover:border-primary/20 bg-card active:scale-[0.99]" : "border-border opacity-40"
               }`}>
-                <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${
-                  mp.practice.bestScore >= 80 ? "bg-primary text-primary-foreground" : "bg-primary/10"
+                <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${
+                  passed80 ? "bg-primary text-primary-foreground" : ready ? "bg-primary/10" : "bg-muted"
                 }`}>
                   {!ready ? <Lock className="h-4 w-4 text-muted-foreground" /> : <Target className="h-4 w-4 text-primary" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">Module {mod.id}: {mod.title}</p>
+                  <p className="text-sm font-medium">M{mod.id}: {mod.title}</p>
                   <p className="text-[10px] text-muted-foreground">
                     {ready
                       ? mp.practice.attempts > 0
-                        ? `Best: ${mp.practice.bestScore}% • ${mp.practice.attempts} attempts`
-                        : "Ready to start"
-                      : "Complete all lessons first"}
+                        ? `Best: ${mp.practice.bestScore}% • ${mp.practice.attempts} attempt${mp.practice.attempts !== 1 ? "s" : ""}`
+                        : "Ready — tap to start"
+                      : `Complete all ${mod.lessons.length} lessons first`}
                   </p>
                 </div>
                 {ready && <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />}
@@ -128,6 +136,7 @@ export default function PracticeHub() {
 
       {/* CSCS Mock / Test */}
       <motion.div variants={fadeUp}>
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">CSCS Health & Safety</p>
         <Card className={showCscs ? "border-primary/30" : "opacity-50"}>
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
@@ -145,10 +154,10 @@ export default function PracticeHub() {
             </div>
             {showCscs && (
               <div className="grid grid-cols-2 gap-2 mt-3">
-                <Button asChild variant="outline" size="sm">
+                <Button asChild variant="outline" size="sm" className="active:scale-[0.97] transition-transform">
                   <Link to="/cscs-prep"><Brain className="mr-1.5 h-4 w-4" /> Mock Test</Link>
                 </Button>
-                <Button asChild size="sm">
+                <Button asChild size="sm" className="active:scale-[0.97] transition-transform">
                   <Link to="/cscs-test">Take Test <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
                 </Button>
               </div>

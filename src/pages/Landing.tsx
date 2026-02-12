@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Smartphone, Target, CreditCard, HardHat } from "lucide-react";
+import { ArrowRight, Smartphone, Target, CreditCard } from "lucide-react";
 import CardWallet from "@/components/journey/CardWallet";
+import skillcertifyLogo from "@/assets/skillcertify-logo.png";
 
 const benefits = [
 {
@@ -23,13 +24,16 @@ const Landing = () => {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Hero */}
-      <section className="relative bg-secondary text-secondary-foreground px-4 pt-14 pb-10 sm:pt-20 sm:pb-14">
+      <section className="relative px-4 pt-10 pb-10 sm:pt-16 sm:pb-14">
         <div className="max-w-2xl mx-auto text-center space-y-4">
-          
-
-
-
-
+          <motion.img
+            src={skillcertifyLogo}
+            alt="SkillCertify"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="h-14 sm:h-16 mx-auto mb-2"
+          />
 
 
 

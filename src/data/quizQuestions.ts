@@ -1,12 +1,14 @@
 /**
  * Quiz question bank for practice mode.
- * Each question has moduleId for filtering and lessonId for review linking.
+ * Each question has moduleId for filtering, lessonId for review linking,
+ * and conceptSlug for concept-level telemetry tracking.
  */
 
 export interface QuizQuestion {
   id: string;
   moduleId: number;
   lessonId: number;
+  conceptSlug: string;
   question: string;
   options: string[];
   correctIndex: number;
@@ -31,6 +33,7 @@ const m1Questions: QuizQuestion[] = [
     id: "m1q1",
     moduleId: 1,
     lessonId: 1,
+    conceptSlug: "hazard_vs_risk_difference",
     question: "What is a HAZARD?",
     options: [
       "Something with the potential to cause harm",
@@ -48,6 +51,7 @@ const m1Questions: QuizQuestion[] = [
     id: "m1q2",
     moduleId: 1,
     lessonId: 1,
+    conceptSlug: "employer_vs_employee_responsibility",
     question: "Who is responsible for health and safety on a construction site?",
     options: [
       "Only the site manager",
@@ -65,6 +69,7 @@ const m1Questions: QuizQuestion[] = [
     id: "m1q3",
     moduleId: 1,
     lessonId: 1,
+    conceptSlug: "emergency_procedures",
     question: "What does a Prohibition Notice require?",
     options: [
       "Fix the problem within 30 days",
@@ -82,6 +87,7 @@ const m1Questions: QuizQuestion[] = [
     id: "m1q4",
     moduleId: 1,
     lessonId: 1,
+    conceptSlug: "risk_assessment_definition",
     question:
       "Approximately how many construction workers die each year in the UK?",
     options: ["5-10", "15-20", "30-40", "100+"],
@@ -95,6 +101,7 @@ const m1Questions: QuizQuestion[] = [
     id: "m1q5",
     moduleId: 1,
     lessonId: 2,
+    conceptSlug: "employer_vs_employee_responsibility",
     question: "The Health and Safety at Work Act was introduced in which year?",
     options: ["1964", "1974", "1984", "1994"],
     correctIndex: 1,
@@ -105,6 +112,7 @@ const m1Questions: QuizQuestion[] = [
     id: "m1q6",
     moduleId: 1,
     lessonId: 2,
+    conceptSlug: "employer_vs_employee_responsibility",
     question:
       "When must an employer have a written health and safety policy?",
     options: [
@@ -123,6 +131,7 @@ const m1Questions: QuizQuestion[] = [
     id: "m1q7",
     moduleId: 1,
     lessonId: 2,
+    conceptSlug: "employer_vs_employee_responsibility",
     question: "Which of these is an EMPLOYEE duty under HASAWA?",
     options: [
       "Provide PPE to all workers",
@@ -140,6 +149,7 @@ const m1Questions: QuizQuestion[] = [
     id: "m1q8",
     moduleId: 1,
     lessonId: 1,
+    conceptSlug: "hazard_vs_risk_difference",
     question: "What is a RISK?",
     options: [
       "A piece of safety equipment",
@@ -157,6 +167,7 @@ const m1Questions: QuizQuestion[] = [
     id: "m1q9",
     moduleId: 1,
     lessonId: 1,
+    conceptSlug: "employer_vs_employee_responsibility",
     question: "HSE inspectors can visit a construction site:",
     options: [
       "Only with 24 hours notice",
@@ -173,6 +184,7 @@ const m1Questions: QuizQuestion[] = [
     id: "m1q10",
     moduleId: 1,
     lessonId: 2,
+    conceptSlug: "employer_vs_employee_responsibility",
     question:
       "Under HASAWA, what must an employer provide? (Select the BEST answer)",
     options: [
@@ -191,6 +203,7 @@ const m1Questions: QuizQuestion[] = [
     id: "m1q11",
     moduleId: 1,
     lessonId: 3,
+    conceptSlug: "five_steps_risk_assessment",
     question: "What is the PRIMARY purpose of a risk assessment?",
     options: [
       "To blame someone when an accident happens",
@@ -208,6 +221,7 @@ const m1Questions: QuizQuestion[] = [
     id: "m1q12",
     moduleId: 1,
     lessonId: 4,
+    conceptSlug: "method_statement_purpose",
     question: "What is a method statement?",
     options: [
       "A record of accidents on site",
@@ -230,6 +244,7 @@ const m2Questions: QuizQuestion[] = [
     id: "m2q1",
     moduleId: 2,
     lessonId: 1,
+    conceptSlug: "safe_lifting_posture",
     question: "What is the correct first step when lifting a heavy load?",
     options: [
       "Bend your back and lift quickly",
@@ -247,6 +262,7 @@ const m2Questions: QuizQuestion[] = [
     id: "m2q2",
     moduleId: 2,
     lessonId: 2,
+    conceptSlug: "tile_principle",
     question: "What does TILEO stand for in manual handling?",
     options: [
       "Task, Individual, Load, Environment, Other",
@@ -264,6 +280,7 @@ const m2Questions: QuizQuestion[] = [
     id: "m2q3",
     moduleId: 2,
     lessonId: 2,
+    conceptSlug: "safe_lifting_posture",
     question: "When lifting, you should bend at the:",
     options: [
       "Back",
@@ -281,6 +298,7 @@ const m2Questions: QuizQuestion[] = [
     id: "m2q4",
     moduleId: 2,
     lessonId: 1,
+    conceptSlug: "injury_types_msk",
     question: "The most common manual handling injury is to the:",
     options: [
       "Hands and fingers",
@@ -298,6 +316,7 @@ const m2Questions: QuizQuestion[] = [
     id: "m2q5",
     moduleId: 2,
     lessonId: 1,
+    conceptSlug: "manual_handling_definition",
     question: "Why is safe manual handling important on a construction site?",
     options: [
       "To make the work slower",
@@ -315,6 +334,7 @@ const m2Questions: QuizQuestion[] = [
     id: "m2q6",
     moduleId: 2,
     lessonId: 2,
+    conceptSlug: "load_assessment",
     question: "A load is too heavy for you. What should you do?",
     options: [
       "Try your best and lift it quickly",
@@ -332,6 +352,7 @@ const m2Questions: QuizQuestion[] = [
     id: "m2q7",
     moduleId: 2,
     lessonId: 3,
+    conceptSlug: "mechanical_aids",
     question: "Which of the following is a manual handling lifting aid?",
     options: [
       "Hard hat",
@@ -349,6 +370,7 @@ const m2Questions: QuizQuestion[] = [
     id: "m2q8",
     moduleId: 2,
     lessonId: 1,
+    conceptSlug: "injury_types_msk",
     question: "What is a long-term effect of repeated poor manual handling?",
     options: [
       "Improved fitness",
@@ -371,6 +393,7 @@ const m3Questions: QuizQuestion[] = [
     id: "m3q1",
     moduleId: 3,
     lessonId: 1,
+    conceptSlug: "working_at_height_definition",
     question: "What caused ALL 35 construction deaths in 2024/25?",
     options: [
       "Electrocution",
@@ -388,6 +411,7 @@ const m3Questions: QuizQuestion[] = [
     id: "m3q2",
     moduleId: 3,
     lessonId: 2,
+    conceptSlug: "ladder_safety_requirements",
     question: "The correct ladder angle ratio is:",
     options: [
       "1 in 2",
@@ -405,6 +429,7 @@ const m3Questions: QuizQuestion[] = [
     id: "m3q3",
     moduleId: 3,
     lessonId: 3,
+    conceptSlug: "scaffold_safety_basics",
     question: "Who can erect scaffolding on a construction site?",
     options: [
       "Any experienced worker",
@@ -422,6 +447,7 @@ const m3Questions: QuizQuestion[] = [
     id: "m3q4",
     moduleId: 3,
     lessonId: 4,
+    conceptSlug: "fall_prevention_vs_fall_arrest",
     question: "What PPE is used as a LAST RESORT when working at height?",
     options: [
       "Hard hat",
@@ -439,6 +465,7 @@ const m3Questions: QuizQuestion[] = [
     id: "m3q5",
     moduleId: 3,
     lessonId: 1,
+    conceptSlug: "hierarchy_wah_controls",
     question: "What is the MOST effective control for working at height?",
     options: [
       "Wear a safety harness",
@@ -456,6 +483,7 @@ const m3Questions: QuizQuestion[] = [
     id: "m3q6",
     moduleId: 3,
     lessonId: 4,
+    conceptSlug: "fragile_surfaces",
     question: "When working on a fragile roof, you should:",
     options: [
       "Walk along the strongest-looking areas",
@@ -473,6 +501,7 @@ const m3Questions: QuizQuestion[] = [
     id: "m3q7",
     moduleId: 3,
     lessonId: 2,
+    conceptSlug: "ladder_safety_requirements",
     question: "Three points of contact on a ladder means:",
     options: [
       "Three hands on the ladder",
@@ -490,6 +519,7 @@ const m3Questions: QuizQuestion[] = [
     id: "m3q8",
     moduleId: 3,
     lessonId: 3,
+    conceptSlug: "inspection_requirements",
     question: "When must scaffolding be inspected?",
     options: [
       "Once a month",
@@ -512,6 +542,7 @@ const m4Questions: QuizQuestion[] = [
     id: "m4q1",
     moduleId: 4,
     lessonId: 1,
+    conceptSlug: "coshh_definition",
     question: "What does COSHH stand for?",
     options: [
       "Control of Substances Hazardous to Health",
@@ -529,6 +560,7 @@ const m4Questions: QuizQuestion[] = [
     id: "m4q2",
     moduleId: 4,
     lessonId: 2,
+    conceptSlug: "asbestos_types",
     question: "If you discover what you think might be asbestos, you should:",
     options: [
       "Put on a dust mask and remove it carefully",
@@ -546,6 +578,7 @@ const m4Questions: QuizQuestion[] = [
     id: "m4q3",
     moduleId: 4,
     lessonId: 2,
+    conceptSlug: "asbestos_types",
     question: "What are the three types of asbestos?",
     options: [
       "Red, yellow, green",
@@ -563,6 +596,7 @@ const m4Questions: QuizQuestion[] = [
     id: "m4q4",
     moduleId: 4,
     lessonId: 1,
+    conceptSlug: "exposure_routes",
     question: "What are the three routes hazardous substances can enter the body?",
     options: [
       "Eyes, ears, mouth",
@@ -580,6 +614,7 @@ const m4Questions: QuizQuestion[] = [
     id: "m4q5",
     moduleId: 4,
     lessonId: 1,
+    conceptSlug: "hygiene_controls",
     question: "Why must you wash your hands before eating on a construction site?",
     options: [
       "To keep your hands warm",
@@ -597,6 +632,7 @@ const m4Questions: QuizQuestion[] = [
     id: "m4q6",
     moduleId: 4,
     lessonId: 1,
+    conceptSlug: "ppe_selection",
     question: "What PPE should you wear when handling corrosive materials?",
     options: [
       "Standard cotton gloves",
@@ -614,6 +650,7 @@ const m4Questions: QuizQuestion[] = [
     id: "m4q7",
     moduleId: 4,
     lessonId: 3,
+    conceptSlug: "ppe_selection",
     question: "Why does a dust mask not work properly with facial hair?",
     options: [
       "It looks unprofessional",
@@ -631,6 +668,7 @@ const m4Questions: QuizQuestion[] = [
     id: "m4q8",
     moduleId: 4,
     lessonId: 3,
+    conceptSlug: "noise_and_vibration",
     question: "When is hearing protection mandatory on site?",
     options: [
       "Only when using power tools",
@@ -648,6 +686,7 @@ const m4Questions: QuizQuestion[] = [
     id: "m4q9",
     moduleId: 4,
     lessonId: 3,
+    conceptSlug: "drugs_alcohol_policy",
     question: "What percentage of construction accidents are linked to drugs or alcohol?",
     options: [
       "5-10%",
@@ -665,6 +704,7 @@ const m4Questions: QuizQuestion[] = [
     id: "m4q10",
     moduleId: 4,
     lessonId: 3,
+    conceptSlug: "noise_and_vibration",
     question: "What are the symptoms of hand-arm vibration syndrome (HAVS)?",
     options: [
       "Improved grip strength and warm hands",
@@ -687,6 +727,7 @@ const m5Questions: QuizQuestion[] = [
     id: "m5q1",
     moduleId: 5,
     lessonId: 1,
+    conceptSlug: "plant_hazards",
     question: "What are the THREE biggest killers on construction sites?",
     options: [
       "Sunburn, dehydration, cold",
@@ -704,6 +745,7 @@ const m5Questions: QuizQuestion[] = [
     id: "m5q2",
     moduleId: 5,
     lessonId: 1,
+    conceptSlug: "exclusion_zones",
     question: "What is an exclusion zone?",
     options: [
       "A rest area for workers",
@@ -721,6 +763,7 @@ const m5Questions: QuizQuestion[] = [
     id: "m5q3",
     moduleId: 5,
     lessonId: 1,
+    conceptSlug: "banksman_signals",
     question: "Who guides reversing vehicles on a construction site?",
     options: [
       "Any available worker",
@@ -738,6 +781,7 @@ const m5Questions: QuizQuestion[] = [
     id: "m5q4",
     moduleId: 5,
     lessonId: 2,
+    conceptSlug: "machinery_guarding",
     question: "The emergency stop button on machinery is always what colour?",
     options: [
       "Green",
@@ -755,6 +799,7 @@ const m5Questions: QuizQuestion[] = [
     id: "m5q5",
     moduleId: 5,
     lessonId: 1,
+    conceptSlug: "plant_hazards",
     question: "Before operating plant on site, you must be:",
     options: [
       "Over 21 years old",
@@ -772,6 +817,7 @@ const m5Questions: QuizQuestion[] = [
     id: "m5q6",
     moduleId: 5,
     lessonId: 1,
+    conceptSlug: "overhead_service_risks",
     question: "What is the main risk when using a crane near overhead power lines?",
     options: [
       "The crane might tip over",
@@ -789,6 +835,7 @@ const m5Questions: QuizQuestion[] = [
     id: "m5q7",
     moduleId: 5,
     lessonId: 1,
+    conceptSlug: "plant_hazards",
     question: "You're asked to operate a machine you haven't been trained on. You should:",
     options: [
       "Try carefully — it looks simple",
@@ -806,6 +853,7 @@ const m5Questions: QuizQuestion[] = [
     id: "m5q8",
     moduleId: 5,
     lessonId: 2,
+    conceptSlug: "equipment_inspection",
     question: "Pre-start checks on plant include:",
     options: [
       "Only checking the fuel level",

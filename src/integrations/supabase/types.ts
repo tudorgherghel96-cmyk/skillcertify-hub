@@ -389,6 +389,17 @@ export type Database = {
         }
         Relationships: []
       }
+      v_performance_metrics: {
+        Row: {
+          active_days: number | null
+          avg_response_time: number | null
+          last_attempt_at: string | null
+          overall_accuracy: number | null
+          total_attempts: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       compute_concept_state: {
@@ -400,6 +411,7 @@ export type Database = {
           state: string
         }[]
       }
+      compute_pass_probability: { Args: { p_user_id: string }; Returns: Json }
       compute_readiness: { Args: { p_user_id: string }; Returns: Json }
       get_boost_concepts: {
         Args: { p_user_id: string }

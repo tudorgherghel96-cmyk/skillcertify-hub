@@ -46,6 +46,7 @@ import QuickSession from "@/components/practice/QuickSession";
 import ReadinessCard from "@/components/readiness/ReadinessCard";
 import WelcomeVideo from "@/components/dashboard/WelcomeVideo";
 import DueToday from "@/components/dashboard/DueToday";
+import PerformanceCard from "@/components/dashboard/PerformanceCard";
 
 const cardHover = {
   rest: { scale: 1, y: 0 },
@@ -249,6 +250,11 @@ const Dashboard = () => {
         {/* Readiness Index */}
         <motion.div variants={fadeUp}>
           <ReadinessCard />
+        </motion.div>
+
+        {/* Pass Probability */}
+        <motion.div variants={fadeUp}>
+          <PerformanceCard />
         </motion.div>
 
         {/* Closed-book reminder */}

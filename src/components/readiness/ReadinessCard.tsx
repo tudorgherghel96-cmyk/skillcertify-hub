@@ -5,7 +5,9 @@ import TierBadge from "./TierBadge";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, AlertTriangle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { MODULES } from "@/data/courseData";
 
 interface ReadinessData {
   readiness: number;
@@ -77,6 +79,26 @@ export default function ReadinessCard() {
               <SignalBar label="Experience" value={data.experience_score / 100} />
             </div>
           </div>
+
+          {data.weak_modules && data.weak_modules.length > 0 && (
+            <div className="flex items-start gap-2 text-xs">
+              <AlertTriangle className="h-3.5 w-3.5 text-destructive shrink-0 mt-0.5" />
+              <div>
+                <span className="font-semibold text-foreground">Focus areas: </span>
+                {data.weak_modules.map((mid, i) => {
+                  const mod = MODULES.find((m) => m.id === mid);
+                  return (
+                    <span key={mid}>
+                      {i > 0 && ", "}
+                      <Link to={`/module/${mid}`} className="text-primary hover:underline">
+                        M{mid}{mod ? `: ${mod.title}` : ""}
+                      </Link>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {data.next_action && (
             <p className="text-sm text-muted-foreground text-center">

@@ -52,7 +52,7 @@ const STATUS_CONFIG: Record<
     nodeClass: "border-primary bg-primary/10",
   },
   in_progress: {
-    label: "In Progress",
+    label: "Under way",
     pillClass: "bg-primary/15 text-primary",
     nodeClass: "border-primary bg-primary/10",
   },

@@ -58,7 +58,7 @@ export default function CardWallet({ currentTarget = "green" }: CardWalletProps)
   return (
     <>
       <div className="space-y-3">
-        <h3 className="text-sm font-bold text-foreground">Card Wallet</h3>
+        <h3 className="text-sm font-bold text-foreground">Your target card</h3>
 
         {/* Primary active card */}
         {cards

@@ -51,12 +51,12 @@ function useJourneySteps(): Step[] {
   };
 
   return [
-    { id: 1, label: "Lessons", icon: BookOpen, status: getStatus(allLessonsDone, true), percent: lessonsPercent },
+    { id: 1, label: "Learn", icon: BookOpen, status: getStatus(allLessonsDone, true), percent: lessonsPercent },
     { id: 2, label: "Practice", icon: Target, status: getStatus(allPractice80, allLessonsDone), percent: practicePercent },
-    { id: 3, label: "5× GQA", icon: ClipboardCheck, status: getStatus(allGqa, allPractice80), percent: gqaPercent },
+    { id: 3, label: "5 Tests", icon: ClipboardCheck, status: getStatus(allGqa, allPractice80), percent: gqaPercent },
     { id: 4, label: "Level 1", icon: Award, status: getStatus(allGqa, allGqa), percent: allGqa ? 100 : 0 },
     { id: 5, label: "CSCS Test", icon: ShieldCheck, status: getStatus(cscsPassed, allGqa), percent: cscsPassed ? 100 : 0 },
-    { id: 6, label: "Green Card", icon: CreditCard, status: getStatus(cscsPassed, cscsPassed), percent: cscsPassed ? 100 : 0 },
+    { id: 6, label: "Card", icon: CreditCard, status: getStatus(cscsPassed, cscsPassed), percent: cscsPassed ? 100 : 0 },
   ];
 }
 

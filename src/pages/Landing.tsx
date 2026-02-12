@@ -110,7 +110,7 @@ const Landing = () => {
               className="text-secondary-foreground/60 text-xs font-medium h-auto min-h-0 p-0"
             >
               <Link to="/journey">
-                See the full CSCS pathway
+                See the full card steps
                 <ChevronDown className="ml-1 h-3 w-3" />
               </Link>
             </Button>

@@ -9,7 +9,6 @@ import {
   HelpCircle,
   Mail,
   Phone,
-  Globe,
   Smartphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +31,7 @@ import StickyNextAction from "@/components/journey/StickyNextAction";
 import EvidenceSection, {
   type EvidenceItem,
 } from "@/components/journey/EvidenceSection";
+import CscsSmartCheck from "@/components/journey/CscsSmartCheck";
 import {
   Accordion,
   AccordionContent,
@@ -96,94 +96,94 @@ export default function Journey() {
     details: { whatYouDo: string; whatYouNeed: string; whyMatters: string; whatsNext: string };
   }> = [
     {
-      title: "Complete All Lessons",
+      title: "Finish your lessons",
       icon: BookOpen,
       status: st(allLessonsDone, true),
-      progressText: `${completedLessons}/${totalLessons} lessons`,
+      progressText: `${completedLessons}/${totalLessons} done`,
       progressPercent: Math.round((completedLessons / totalLessons) * 100),
       timeEstimate: "~8 hours",
-      ctaLabel: allLessonsDone ? undefined : "Continue Lessons",
+      ctaLabel: allLessonsDone ? undefined : "Continue",
       ctaTo: allLessonsDone ? undefined : "/learn",
       details: {
-        whatYouDo: "Study 5 modules covering health & safety, manual handling, working at height, health risks, and plant safety.",
-        whatYouNeed: "A device with internet access. Each lesson takes 15-30 minutes.",
-        whyMatters: "This is the knowledge base for your qualification and CSCS test.",
-        whatsNext: "Once all lessons are complete, you unlock practice quizzes.",
+        whatYouDo: "Study 5 short modules covering health & safety, manual handling, working at height, health risks, and plant safety.",
+        whatYouNeed: "A phone or tablet with internet. Each lesson takes 15–30 minutes.",
+        whyMatters: "This is the knowledge you need for your qualification and CSCS test.",
+        whatsNext: "Once done, you unlock practice questions.",
       },
     },
     {
-      title: "Pass Practice Quizzes",
+      title: "Pass practice questions",
       icon: Target,
       status: st(allPractice80, allLessonsDone),
       progressText: `${practiceModulesDone}/5 modules at 80%+`,
       progressPercent: Math.round((practiceModulesDone / 5) * 100),
       timeEstimate: "~2 hours",
-      ctaLabel: allPractice80 ? undefined : "Start Practice",
+      ctaLabel: allPractice80 ? undefined : "Start practice",
       ctaTo: allPractice80 ? undefined : "/practice-hub",
       details: {
-        whatYouDo: "Score 80% or higher on each module's practice quiz. Unlimited retakes.",
-        whatYouNeed: "Complete all lessons in the relevant module first.",
-        whyMatters: "Practice quizzes ensure you're ready for the formal GQA assessments.",
-        whatsNext: "Passing all practice quizzes unlocks GQA Module Tests.",
+        whatYouDo: "Score 80% or higher on each module's practice questions. Unlimited retakes.",
+        whatYouNeed: "Finish all lessons in the module first.",
+        whyMatters: "Practice questions make sure you're ready for the real tests.",
+        whatsNext: "Passing all practice unlocks your 5 short tests.",
       },
     },
     {
-      title: "Pass 5 GQA Module Tests",
+      title: "Pass 5 short tests",
       icon: ClipboardCheck,
       status: st(allGqa, allPractice80),
       progressText: `${gqaModulesPassed}/5 passed`,
       progressPercent: Math.round((gqaModulesPassed / 5) * 100),
       timeEstimate: "~5 hours",
-      ctaLabel: allGqa ? undefined : "Take GQA Tests",
+      ctaLabel: allGqa ? undefined : "Take tests",
       ctaTo: allGqa ? undefined : "/learn",
       details: {
-        whatYouDo: "Closed-book assessments. 80% pass mark required for each module.",
-        whatYouNeed: "80%+ on the corresponding practice quiz. 24-hour cooldown on resits.",
-        whyMatters: "These are the formal assessments that count toward your qualification.",
-        whatsNext: "Pass all 5 and your Level 1 Qualification is automatically issued.",
+        whatYouDo: "Closed-book tests. 80% pass mark needed for each module.",
+        whatYouNeed: "80%+ on the matching practice questions. 24-hour cooldown on resits.",
+        whyMatters: "These are the formal tests that count toward your Level 1.",
+        whatsNext: "Pass all 5 and your Level 1 is issued automatically.",
       },
     },
     {
-      title: "Level 1 Qualification Issued",
+      title: "Level 1 passed",
       icon: Award,
       status: allGqa ? "issued" : allPractice80 ? "awaiting_verification" : "locked",
-      progressText: allGqa ? "Qualification verified" : undefined,
-      timeEstimate: "1-3 days",
-      ctaLabel: allGqa ? "View Certificate" : undefined,
+      progressText: allGqa ? "Verified" : undefined,
+      timeEstimate: "1–3 days",
+      ctaLabel: allGqa ? "View certificate" : undefined,
       onCtaClick: allGqa ? () => setSubView("certificate") : undefined,
       details: {
-        whatYouDo: "Your results are submitted to the awarding body for verification.",
-        whatYouNeed: "All 5 GQA modules must be passed.",
-        whyMatters: "This qualification is a legal requirement for applying for a CSCS card.",
-        whatsNext: "Once verified, you can book and sit the CSCS Health & Safety Test.",
+        whatYouDo: "Your results are submitted for verification.",
+        whatYouNeed: "All 5 short tests must be passed.",
+        whyMatters: "This qualification is needed to apply for your CSCS card.",
+        whatsNext: "Once verified, you can sit the CSCS Health & Safety Test.",
       },
     },
     {
-      title: "CSCS Health & Safety Test",
+      title: "CSCS test passed",
       icon: ShieldCheck,
       status: st(cscsPassed, allGqa),
       timeEstimate: "~90 mins",
-      ctaLabel: cscsPassed ? undefined : allGqa ? "Prepare & Book" : undefined,
+      ctaLabel: cscsPassed ? undefined : allGqa ? "Prepare & book" : undefined,
       onCtaClick: !cscsPassed && allGqa ? () => setSubView("booking") : undefined,
       details: {
-        whatYouDo: "Final closed-book test covering all 5 modules. This earns your card.",
-        whatYouNeed: "Level 1 Qualification issued. Book via CITB.",
-        whyMatters: "Passing this test is the final requirement for your CSCS Green Card.",
-        whatsNext: "Pass and you can request your Green Card immediately.",
+        whatYouDo: "Final closed-book test covering all 5 modules.",
+        whatYouNeed: "Level 1 verified. Book via CITB.",
+        whyMatters: "Passing this test is the last step before your card.",
+        whatsNext: "Pass and you can request your Green Card straight away.",
       },
     },
     {
-      title: "Green Card Issued",
+      title: "Card requested",
       icon: CreditCard,
       status: cscsPassed ? "complete" : "locked",
       timeEstimate: "Same day processing",
-      ctaLabel: cscsPassed ? "Track Card" : undefined,
+      ctaLabel: cscsPassed ? "Track card" : undefined,
       onCtaClick: cscsPassed ? () => setSubView("greencard") : undefined,
       details: {
-        whatYouDo: "Same-day processing via CSCS Partner Alliance. No test centre visit needed.",
-        whatYouNeed: "Passed CSCS H&S Test + Level 1 Qualification.",
-        whyMatters: "Your Green Card proves you can work legally on UK construction sites.",
-        whatsNext: "Physical card arrives by post in 5-10 working days.",
+        whatYouDo: "Same-day processing. No test centre visit needed.",
+        whatYouNeed: "Passed CSCS test + Level 1 verified.",
+        whyMatters: "Your Green Card proves you can work on UK construction sites.",
+        whatsNext: "Physical card arrives by post in 5–10 working days.",
       },
     },
   ];
@@ -199,27 +199,30 @@ export default function Journey() {
   const evidenceItems: EvidenceItem[] = [
     {
       id: "id_verified",
-      label: "ID Verification",
+      label: "ID check",
       status: "not_started",
     },
     {
       id: "qual_submitted",
-      label: "Qualification Assessment",
+      label: "Tests completed",
       status: allGqa ? "complete" : gqaModulesPassed > 0 ? "pending" : "not_started",
       timestamp: allGqa ? "Submitted" : undefined,
     },
     {
       id: "assessor_verification",
-      label: "Assessor Verification",
+      label: "Verification",
       status: allGqa ? "complete" : "not_started",
     },
     {
       id: "qual_issued",
-      label: "Qualification Issued",
+      label: "Level 1 issued",
       status: allGqa ? "complete" : "not_started",
       reference: allGqa ? "GQA-L1-REF" : undefined,
     },
   ];
+
+  // Determine card request status for Smart Check
+  const cardRequestStatus = cscsPassed ? "active" as const : "not_started" as const;
 
   // Sub-views
   if (subView === "certificate") {
@@ -262,16 +265,16 @@ export default function Journey() {
     >
       {/* Header */}
       <motion.div variants={fadeUp}>
-        <h1 className="text-lg font-bold text-foreground">Your CSCS Journey</h1>
+        <h1 className="text-lg font-bold text-foreground">Your Card</h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          One platform → course → qualification → test → card
+          Your next step to get on site
         </p>
       </motion.div>
 
       {/* Sticky next action */}
       <StickyNextAction
         currentMilestone={currentMilestone.title}
-        nextMilestone={nextMilestone?.title || "Complete!"}
+        nextMilestone={nextMilestone?.title || "Done!"}
         ctaLabel={currentMilestone.ctaLabel || "Continue"}
         ctaTo={currentMilestone.ctaTo || "/learn"}
       />
@@ -281,9 +284,19 @@ export default function Journey() {
         <CardWallet currentTarget="green" />
       </motion.div>
 
+      {/* CSCS Smart Check */}
+      <motion.div variants={fadeUp}>
+        <CscsSmartCheck
+          cardRequestStatus={cardRequestStatus}
+          cscsRegNumber={cscsPassed ? "1234567890" : undefined}
+          expiryDate={cscsPassed ? "31/12/2031" : undefined}
+          cardType="Green Labourer"
+        />
+      </motion.div>
+
       {/* Timeline */}
       <motion.div variants={fadeUp} className="space-y-0">
-        <h3 className="text-sm font-bold text-foreground mb-3">Journey Timeline</h3>
+        <h3 className="text-sm font-bold text-foreground mb-3">Your steps</h3>
         {milestones.map((m, i) => (
           <TimelineMilestoneCard
             key={i}
@@ -303,33 +316,33 @@ export default function Journey() {
         ))}
       </motion.div>
 
+      {/* Upgrade ladder */}
+      <motion.div variants={fadeUp}>
+        <div className="rounded-xl bg-secondary text-secondary-foreground p-5 text-center space-y-2">
+          <Smartphone className="h-5 w-5 mx-auto opacity-80" />
+          <p className="text-sm font-semibold leading-snug">
+            Start with Green. Then level up — online NVQs, evidence, verification.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Your CSCS test pass is saved. If it's valid for your next card, we'll reuse it. If a different test is needed, we'll tell you clearly.
+          </p>
+        </div>
+      </motion.div>
+
       {/* Evidence */}
       <motion.div variants={fadeUp}>
         <EvidenceSection items={evidenceItems} />
       </motion.div>
 
-      {/* USP Banner */}
-      <motion.div variants={fadeUp}>
-        <div className="rounded-xl bg-secondary text-secondary-foreground p-5 text-center space-y-2">
-          <Smartphone className="h-5 w-5 mx-auto opacity-80" />
-          <p className="text-sm font-semibold leading-snug">
-            Fully online. No test centres. Same-day processing.
-          </p>
-          <p className="text-xs font-medium text-primary">
-            UK's first mobile-native CSCS route.
-          </p>
-        </div>
-      </motion.div>
-
       {/* FAQ */}
       <motion.div variants={fadeUp}>
         <Accordion type="single" collapsible className="space-y-2">
-          <h3 className="text-sm font-bold text-foreground mb-2">FAQs</h3>
+          <h3 className="text-sm font-bold text-foreground mb-2">Common questions</h3>
           {[
-            { q: "Do I need a CSCS test?", a: "Yes. The CSCS Health & Safety Test is required to get your Green Card. We prepare you fully before you book." },
-            { q: "How long does the whole journey take?", a: "Most learners complete everything in 2-4 weeks studying part-time. The course, quizzes, and tests are all online." },
-            { q: "What if I fail a module test?", a: "You only resit the failed module. All other passes remain valid. There's a 24-hour cooldown before your resit." },
-            { q: "How do I renew my card?", a: "CSCS Green Cards are valid for 5 years. Renewal requires retaking the Health & Safety Test." },
+            { q: "Do I need a CSCS test?", a: "Yes. The CSCS Health & Safety Test is needed to get your card. We'll prepare you fully before you book." },
+            { q: "How long does the whole thing take?", a: "Most people finish in 2–4 weeks studying part-time. The lessons, practice, and tests are all online." },
+            { q: "What if I fail a test?", a: "You only resit the one you failed. All other passes stay valid. There's a 24-hour wait before your resit." },
+            { q: "How do I renew my card?", a: "CSCS Green Cards last 5 years. To renew, you retake the Health & Safety Test." },
           ].map((faq, i) => (
             <AccordionItem key={i} value={`faq-${i}`} className="border rounded-xl overflow-hidden">
               <AccordionTrigger className="px-4 py-3 text-sm hover:no-underline">
@@ -352,12 +365,12 @@ export default function Journey() {
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Button variant="outline" size="sm" asChild>
                 <a href="mailto:support@skillcertify.co.uk">
-                  <Mail className="h-4 w-4 mr-1" /> Email Support
+                  <Mail className="h-4 w-4 mr-1" /> Email us
                 </a>
               </Button>
               <Button variant="outline" size="sm" asChild>
                 <a href="tel:+44XXXXXXXXXX">
-                  <Phone className="h-4 w-4 mr-1" /> Call Us
+                  <Phone className="h-4 w-4 mr-1" /> Call us
                 </a>
               </Button>
             </div>

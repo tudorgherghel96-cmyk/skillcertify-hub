@@ -170,7 +170,7 @@ export default function ReadinessCard() {
             }}
           >
             <Zap className="mr-2 h-4 w-4" />
-            {boosting ? "Loading…" : "Adaptive Boost Drill"}
+            {boosting ? "Loading…" : "5-minute Boost"}
           </Button>
         </CardContent>
       </Card>

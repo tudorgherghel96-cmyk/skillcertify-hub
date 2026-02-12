@@ -60,7 +60,7 @@ export default function JourneyDashboard() {
         <div>
           <h1 className="text-lg font-bold text-foreground">Welcome back 👋</h1>
           <p className="text-xs text-muted-foreground">
-            {overall.percentage}% towards your CSCS Green Card
+            You're {overall.percentage}% done — next: finish your lessons
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -92,8 +92,9 @@ export default function JourneyDashboard() {
         </div>
       </motion.div>
 
-      {/* Journey Strip */}
+      {/* Your card steps */}
       <motion.div variants={fadeUp}>
+        <h3 className="text-xs font-semibold text-muted-foreground mb-1">Your card steps</h3>
         <JourneyStrip />
       </motion.div>
 
@@ -116,7 +117,7 @@ export default function JourneyDashboard() {
             className="h-14 flex flex-col items-center gap-0.5 border-border active:scale-[0.97] transition-transform"
           >
             <Zap className="h-5 w-5 text-primary" />
-            <span className="text-xs font-semibold">Quick Drill</span>
+            <span className="text-xs font-semibold">5-min Drill</span>
           </Button>
           <Button
             onClick={() => setQuickMode("blitz")}
@@ -124,7 +125,7 @@ export default function JourneyDashboard() {
             className="h-14 flex flex-col items-center gap-0.5 border-border active:scale-[0.97] transition-transform"
           >
             <Timer className="h-5 w-5 text-primary" />
-            <span className="text-xs font-semibold">2-Min Blitz</span>
+            <span className="text-xs font-semibold">Fast practice</span>
           </Button>
         </motion.div>
       )}
@@ -133,10 +134,10 @@ export default function JourneyDashboard() {
       <motion.div variants={fadeUp}>
         <Accordion type="single" collapsible defaultValue="readiness" className="space-y-3">
           <AccordionItem value="readiness" className="border rounded-xl overflow-hidden">
-            <AccordionTrigger className="px-4 py-3 text-sm font-semibold hover:no-underline">
+             <AccordionTrigger className="px-4 py-3 text-sm font-semibold hover:no-underline">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-primary" />
-                Readiness & Pass Probability
+                Your readiness & pass estimate
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4 space-y-4">

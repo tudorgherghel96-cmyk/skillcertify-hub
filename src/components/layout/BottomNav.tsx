@@ -5,7 +5,7 @@ const navItems = [
   { to: "/dashboard", icon: Home, label: "Home" },
   { to: "/learn", icon: BookOpen, label: "Learn" },
   { to: "/practice-hub", icon: Brain, label: "Practice" },
-  { to: "/journey", icon: Route, label: "Journey" },
+  { to: "/journey", icon: Route, label: "Card" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
 

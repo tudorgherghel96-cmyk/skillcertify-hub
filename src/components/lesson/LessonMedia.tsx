@@ -3,6 +3,7 @@ import { Play, Loader2 } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { lessonMedia } from "@/data/mediaMap";
+import { getLessonVideoUrl } from "@/lib/media";
 
 interface LessonMediaProps {
   moduleId: number;
@@ -87,6 +88,9 @@ export function LessonHeroMedia({ moduleId, lessonId, videoDesc }: LessonMediaPr
   const key = `${moduleId}.${lessonId}`;
   const media = lessonMedia[key];
 
+  // Auto-resolve video URL from lessonId — no manual mapping needed
+  const videoUrl = getLessonVideoUrl(key);
+
   // Show hero image
   const heroImage = media?.images?.[0];
 
@@ -117,10 +121,8 @@ export function LessonHeroMedia({ moduleId, lessonId, videoDesc }: LessonMediaPr
         </AspectRatio>
       )}
 
-      {/* Video Player (below hero, above key terms) */}
-      {media?.video && (
-        <LessonVideo src={media.video} fallbackDesc={videoDesc} />
-      )}
+      {/* Video Player — auto-resolved from lessonId */}
+      <LessonVideo src={videoUrl} fallbackDesc={videoDesc} />
     </div>
   );
 }

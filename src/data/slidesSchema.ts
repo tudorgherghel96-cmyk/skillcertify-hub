@@ -2,12 +2,12 @@
  * Slide-based lesson schema.
  * Each lesson is an ordered array of full-screen slides.
  * Slides are auto-generated from existing i18n content — no manual mapping needed.
+ * Dual-language: English always present, translated text shown alongside when lang ≠ en.
  */
 
-import type { I18nLessonContent, I18nContentBlock } from "@/data/module1Content";
+import type { I18nLessonContent } from "@/data/module1Content";
 import { t } from "@/data/module1Content";
 import { lessonMedia } from "@/data/mediaMap";
-import type { KeyTermEntry } from "@/components/lesson/KeyTermsPanel";
 
 /* ─── Slide types ─── */
 
@@ -26,8 +26,9 @@ export interface HeroSlide {
 
 export interface TextSlide {
   type: "text";
-  title?: string;
   body: string;
+  bodyEn?: string; // English original (shown when lang ≠ en)
+  title?: string;
   bold?: boolean;
 }
 
@@ -47,19 +48,23 @@ export interface KeyTermSlide {
 export interface RememberSlide {
   type: "remember";
   text: string;
+  textEn?: string;
 }
 
 export interface TipSlide {
   type: "tip";
   text: string;
+  textEn?: string;
 }
 
 export interface QuizSlide {
   type: "quiz";
   question: string;
+  questionEn?: string;
   options: string[];
   correct: number;
   feedback?: string;
+  conceptSlug?: string; // links to concepts table for recall tracking
 }
 
 export interface SummarySlide {
@@ -90,8 +95,9 @@ export function buildSlidesFromI18n(
   const key = `${moduleId}.${lessonId}`;
   const media = lessonMedia[key];
   const slides: Slide[] = [];
+  const isTranslated = lang !== "en";
 
-  // 1. Hero slide with first image
+  // 1. Hero slide
   const heroImage = media?.images?.[0];
   slides.push({
     type: "hero",
@@ -104,55 +110,71 @@ export function buildSlidesFromI18n(
   // 2. Video slide
   slides.push({ type: "video", lessonId: key });
 
-  // 3. Key terms — one slide per term
+  // 3. Key terms — one slide per term (always English term + translated explanation)
   for (const kt of i18n.keyTerms) {
+    const translated = t(kt as any, lang);
     slides.push({
       type: "keyterm",
       term: kt.en,
-      explanation: kt.ro || kt.lt || kt.bg || "Key construction term",
+      explanation: isTranslated && translated !== kt.en ? translated : (kt.ro || kt.lt || kt.bg || "Key construction term"),
     });
   }
 
   // 4. Content blocks → slides
-  // Group consecutive paragraphs (max 2) into single text slides
   const imagePool = media?.images?.slice(1) ?? [];
   let imgIdx = 0;
   let paragraphBuffer: string[] = [];
+  let paragraphBufferEn: string[] = [];
 
   const flushParagraphs = () => {
     if (paragraphBuffer.length === 0) return;
     slides.push({
       type: "text",
       body: paragraphBuffer.join("\n\n"),
+      bodyEn: isTranslated ? paragraphBufferEn.join("\n\n") : undefined,
     });
-    // Insert image slide after text if available
     if (imgIdx < imagePool.length) {
       const img = imagePool[imgIdx++];
       slides.push({ type: "image", src: img.src, alt: img.alt });
     }
     paragraphBuffer = [];
+    paragraphBufferEn = [];
   };
 
   for (const block of i18n.content) {
     switch (block.type) {
       case "paragraph": {
         paragraphBuffer.push(t(block.text, lang));
+        if (isTranslated) paragraphBufferEn.push(block.text.en);
         if (paragraphBuffer.length >= 2) flushParagraphs();
         break;
       }
       case "bold": {
         flushParagraphs();
-        slides.push({ type: "text", body: t(block.text, lang), bold: true });
+        slides.push({
+          type: "text",
+          body: t(block.text, lang),
+          bodyEn: isTranslated ? block.text.en : undefined,
+          bold: true,
+        });
         break;
       }
       case "rememberThis": {
         flushParagraphs();
-        slides.push({ type: "remember", text: t(block.text, lang) });
+        slides.push({
+          type: "remember",
+          text: t(block.text, lang),
+          textEn: isTranslated ? block.text.en : undefined,
+        });
         break;
       }
       case "testTip": {
         flushParagraphs();
-        slides.push({ type: "tip", text: t(block.text, lang) });
+        slides.push({
+          type: "tip",
+          text: t(block.text, lang),
+          textEn: isTranslated ? block.text.en : undefined,
+        });
         break;
       }
       case "image": {
@@ -168,6 +190,7 @@ export function buildSlidesFromI18n(
         slides.push({
           type: "quiz",
           question: t(block.question, lang),
+          questionEn: isTranslated ? block.question.en : undefined,
           options: block.options.map((o) => t(o, lang)),
           correct: block.correct,
           feedback: t(block.feedback, lang),
@@ -178,7 +201,7 @@ export function buildSlidesFromI18n(
   }
   flushParagraphs();
 
-  // 5. Key summary slide
+  // 5. Key summary
   if (i18n.keySummary.length > 0) {
     slides.push({
       type: "summary",

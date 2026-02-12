@@ -41,6 +41,7 @@ export type Database = {
           created_at: string | null
           id: string
           is_correct: boolean
+          next_review_at: string | null
           response_time_ms: number
           user_id: string
         }
@@ -49,6 +50,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_correct: boolean
+          next_review_at?: string | null
           response_time_ms: number
           user_id: string
         }
@@ -57,6 +59,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_correct?: boolean
+          next_review_at?: string | null
           response_time_ms?: number
           user_id?: string
         }

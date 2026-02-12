@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain, Lightbulb, CheckCircle2, XCircle, HelpCircle,
-  Play, BookOpen, ListChecks
+  Play, BookOpen, ListChecks, Languages
 } from "lucide-react";
 import { getLessonVideoUrl } from "@/lib/media";
 import type { Slide } from "@/data/slidesSchema";
@@ -21,6 +21,36 @@ const pop = {
   hidden: { opacity: 0, scale: 0.92, y: 12 },
   show: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } },
 };
+
+/* ─── English overlay (shown below translated text) ─── */
+function EnglishOverlay({ text }: { text?: string }) {
+  const [show, setShow] = useState(false);
+  if (!text) return null;
+
+  return (
+    <div className="mt-3">
+      <button
+        onClick={() => setShow(!show)}
+        className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+      >
+        <Languages className="h-3 w-3" />
+        {show ? "Hide English" : "Show English"}
+      </button>
+      <AnimatePresence>
+        {show && (
+          <motion.p
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="text-sm text-muted-foreground/50 italic mt-1.5 leading-relaxed"
+          >
+            {text}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 /* ─── Hero Slide ─── */
 function HeroSlide({ slide }: { slide: Extract<Slide, { type: "hero" }> }) {
@@ -104,17 +134,18 @@ function VideoSlide({ slide, isActive }: { slide: Extract<Slide, { type: "video"
   );
 }
 
-/* ─── Text Slide ─── */
+/* ─── Text Slide (with dual-language) ─── */
 function TextSlide({ slide }: { slide: Extract<Slide, { type: "text" }> }) {
   return (
     <SlideShell>
-      <motion.div variants={pop} initial="hidden" animate="show" className="max-w-md space-y-4 text-center">
+      <motion.div variants={pop} initial="hidden" animate="show" className="max-w-md space-y-2 text-center">
         {slide.title && (
           <h2 className="text-xl font-bold text-foreground">{slide.title}</h2>
         )}
         <p className={`text-lg leading-relaxed text-foreground/85 ${slide.bold ? "font-bold text-foreground" : ""}`}>
           {slide.body}
         </p>
+        <EnglishOverlay text={slide.bodyEn} />
       </motion.div>
     </SlideShell>
   );
@@ -159,7 +190,7 @@ function KeyTermSlide({ slide }: { slide: Extract<Slide, { type: "keyterm" }> })
   );
 }
 
-/* ─── Remember This Slide ─── */
+/* ─── Remember This Slide (with dual-language) ─── */
 function RememberSlide({ slide }: { slide: Extract<Slide, { type: "remember" }> }) {
   return (
     <SlideShell>
@@ -173,12 +204,13 @@ function RememberSlide({ slide }: { slide: Extract<Slide, { type: "remember" }> 
         </motion.div>
         <p className="text-xs font-bold uppercase tracking-widest text-destructive">Remember This</p>
         <p className="text-lg font-semibold leading-relaxed text-foreground">{slide.text}</p>
+        <EnglishOverlay text={slide.textEn} />
       </motion.div>
     </SlideShell>
   );
 }
 
-/* ─── Test Tip Slide ─── */
+/* ─── Test Tip Slide (with dual-language) ─── */
 function TipSlide({ slide }: { slide: Extract<Slide, { type: "tip" }> }) {
   return (
     <SlideShell>
@@ -192,27 +224,30 @@ function TipSlide({ slide }: { slide: Extract<Slide, { type: "tip" }> }) {
         </motion.div>
         <p className="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">Test Tip</p>
         <p className="text-lg leading-relaxed text-foreground">{slide.text}</p>
+        <EnglishOverlay text={slide.textEn} />
       </motion.div>
     </SlideShell>
   );
 }
 
-/* ─── Quiz Slide (locks swipe until answered) ─── */
+/* ─── Quiz Slide (locks swipe until answered, with dual-language) ─── */
 function QuizSlide({
   slide,
   onQuizAnswered,
 }: {
   slide: Extract<Slide, { type: "quiz" }>;
-  onQuizAnswered?: () => void;
+  onQuizAnswered?: (correct: boolean, conceptSlug?: string, responseTimeMs?: number) => void;
 }) {
   const [selected, setSelected] = useState<number | null>(null);
+  const startTime = useRef(Date.now());
   const isAnswered = selected !== null;
   const isCorrect = selected === slide.correct;
 
   const handleSelect = (i: number) => {
     if (isAnswered) return;
     setSelected(i);
-    onQuizAnswered?.();
+    const responseTime = Date.now() - startTime.current;
+    onQuizAnswered?.(i === slide.correct, slide.conceptSlug, responseTime);
   };
 
   return (
@@ -224,6 +259,9 @@ function QuizSlide({
           </div>
           <p className="text-xs font-bold uppercase tracking-widest text-primary">Quick Check</p>
           <p className="text-lg font-semibold text-foreground">{slide.question}</p>
+          {slide.questionEn && (
+            <p className="text-sm text-muted-foreground/50 italic">{slide.questionEn}</p>
+          )}
         </div>
 
         <div className="space-y-2.5">
@@ -322,7 +360,7 @@ export default function SlideRenderer({
 }: {
   slide: Slide;
   isActive?: boolean;
-  onQuizAnswered?: () => void;
+  onQuizAnswered?: (correct: boolean, conceptSlug?: string, responseTimeMs?: number) => void;
 }) {
   switch (slide.type) {
     case "hero": return <HeroSlide slide={slide} />;

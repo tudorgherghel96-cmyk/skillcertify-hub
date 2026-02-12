@@ -45,6 +45,7 @@ import MotivationalBanner from "@/components/gamification/MotivationalBanner";
 import QuickSession from "@/components/practice/QuickSession";
 import ReadinessCard from "@/components/readiness/ReadinessCard";
 import WelcomeVideo from "@/components/dashboard/WelcomeVideo";
+import DueToday from "@/components/dashboard/DueToday";
 
 const cardHover = {
   rest: { scale: 1, y: 0 },
@@ -145,6 +146,11 @@ const Dashboard = () => {
         {/* Welcome Video */}
         <motion.div variants={fadeUp}>
           <WelcomeVideo />
+        </motion.div>
+
+        {/* Due Today — Spaced Recall */}
+        <motion.div variants={fadeUp}>
+          <DueToday />
         </motion.div>
 
         {/* Streak Banner */}

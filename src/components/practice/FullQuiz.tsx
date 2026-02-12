@@ -7,15 +7,17 @@ import type { QuizQuestion } from "@/data/quizQuestions";
 interface FullQuizProps {
   questions: QuizQuestion[];
   onComplete: (score: number, answers: { questionId: string; selectedIndex: number; correct: boolean }[]) => void;
+  onConceptAttempt?: (conceptSlug: string, isCorrect: boolean, responseTimeMs: number) => void;
 }
 
-const FullQuiz = ({ questions, onComplete }: FullQuizProps) => {
+const FullQuiz = ({ questions, onComplete, onConceptAttempt }: FullQuizProps) => {
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<
     { questionId: string; selectedIndex: number; correct: boolean }[]
   >([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [finished, setFinished] = useState(false);
+  const questionStartRef = useRef(Date.now());
 
   // Timer: ~1.5 min per question
   const totalSeconds = Math.ceil(questions.length * 93);
@@ -67,18 +69,24 @@ const FullQuiz = ({ questions, onComplete }: FullQuizProps) => {
   const handleNext = () => {
     if (selected === null) return;
     const q = questions[current];
+    const isCorrect = selected === q.correctIndex;
+    const responseTime = Date.now() - questionStartRef.current;
     const newAnswer = {
       questionId: q.id,
       selectedIndex: selected,
-      correct: selected === q.correctIndex,
+      correct: isCorrect,
     };
     const newAnswers = [...answers, newAnswer];
     setAnswers(newAnswers);
     setSelected(null);
 
+    // Track concept attempt
+    onConceptAttempt?.(q.conceptSlug, isCorrect, responseTime);
+
     if (current + 1 >= questions.length) {
       finishQuiz(newAnswers);
     } else {
+      questionStartRef.current = Date.now();
       setCurrent((c) => c + 1);
     }
   };

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flame, Brain } from "lucide-react";
 import type { QuizQuestion, QuestionPerformance } from "@/data/quizQuestions";
@@ -6,9 +6,10 @@ import { pickNextDrillQuestion } from "@/data/quizQuestions";
 
 interface DrillModeProps {
   questions: QuizQuestion[];
+  onConceptAttempt?: (conceptSlug: string, isCorrect: boolean, responseTimeMs: number) => void;
 }
 
-const DrillMode = ({ questions }: DrillModeProps) => {
+const DrillMode = ({ questions, onConceptAttempt }: DrillModeProps) => {
   const [performance, setPerformance] = useState<
     Record<string, QuestionPerformance>
   >({});
@@ -20,6 +21,7 @@ const DrillMode = ({ questions }: DrillModeProps) => {
   const [sessionCorrect, setSessionCorrect] = useState(0);
   const [sessionTotal, setSessionTotal] = useState(0);
   const [flash, setFlash] = useState<"correct" | "wrong" | null>(null);
+  const questionStartRef = useRef(Date.now());
 
   const nextQuestion = useCallback(
     (perf: Record<string, QuestionPerformance>) => {
@@ -34,6 +36,7 @@ const DrillMode = ({ questions }: DrillModeProps) => {
     if (selected !== null) return;
     setSelected(index);
     const correct = index === currentQ.correctIndex;
+    const responseTime = Date.now() - questionStartRef.current;
 
     setSessionTotal((t) => t + 1);
     if (correct) {
@@ -44,6 +47,9 @@ const DrillMode = ({ questions }: DrillModeProps) => {
       setStreak(0);
       setFlash("wrong");
     }
+
+    // Track concept attempt
+    onConceptAttempt?.(currentQ.conceptSlug, correct, responseTime);
 
     const prev = performance[currentQ.id] ?? {
       questionId: currentQ.id,
@@ -63,7 +69,10 @@ const DrillMode = ({ questions }: DrillModeProps) => {
     setPerformance(updated);
 
     // Auto-advance after delay
-    setTimeout(() => nextQuestion(updated), correct ? 1500 : 3500);
+    setTimeout(() => {
+      questionStartRef.current = Date.now();
+      nextQuestion(updated);
+    }, correct ? 1500 : 3500);
   };
 
   const pct =

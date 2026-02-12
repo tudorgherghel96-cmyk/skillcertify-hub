@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ArrowLeft, Brain, ListChecks, Repeat, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MODULES } from "@/data/courseData";
@@ -11,6 +11,7 @@ import FullQuiz from "@/components/practice/FullQuiz";
 import DrillMode from "@/components/practice/DrillMode";
 import FlashcardMode from "@/components/practice/FlashcardMode";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { getConceptIdMap } from "@/lib/conceptMap";
 
 type Mode = "full" | "drill" | "flashcards";
 
@@ -25,8 +26,26 @@ const PracticeQuiz = () => {
   const moduleId = Number(mIdStr);
   const { progress, recordPractice } = useProgress();
   const { isSuperUser } = useSuperUser();
-  const { trackPracticeAttempt } = useTelemetry();
+  const { trackPracticeAttempt, trackConceptAttempt } = useTelemetry();
   const mp = getModuleProgress(progress, moduleId);
+  const conceptMapRef = useRef<Record<string, string>>({});
+
+  // Load concept slug → UUID map once
+  useEffect(() => {
+    getConceptIdMap().then((map) => {
+      conceptMapRef.current = map;
+    });
+  }, []);
+
+  const handleConceptAttempt = useCallback(
+    (conceptSlug: string, isCorrect: boolean, responseTimeMs: number) => {
+      const conceptId = conceptMapRef.current[conceptSlug];
+      if (conceptId) {
+        trackConceptAttempt(conceptId, isCorrect, responseTimeMs);
+      }
+    },
+    [trackConceptAttempt]
+  );
 
   const mod = MODULES.find((m) => m.id === moduleId);
   const questions = useMemo(() => getQuestionsForModule(moduleId), [moduleId]);
@@ -177,10 +196,10 @@ const PracticeQuiz = () => {
       )}
 
       {mode === "full" && quizStarted && (
-        <FullQuiz questions={questions} onComplete={handleQuizComplete} />
+        <FullQuiz questions={questions} onComplete={handleQuizComplete} onConceptAttempt={handleConceptAttempt} />
       )}
 
-      {mode === "drill" && <DrillMode questions={questions} />}
+      {mode === "drill" && <DrillMode questions={questions} onConceptAttempt={handleConceptAttempt} />}
 
       {mode === "flashcards" && <FlashcardMode cards={flashcards} />}
     </div>

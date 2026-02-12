@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Globe, Flame, Zap, Timer, ArrowRight } from "lucide-react";
+import { Flame, Zap, Timer, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
 import { useGamification } from "@/contexts/GamificationContext";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   useProgress,
   getOverallProgress,
@@ -16,12 +15,6 @@ import {
 import { useSuperUser } from "@/contexts/SuperUserContext";
 import DueToday from "@/components/dashboard/DueToday";
 import QuickSession from "@/components/practice/QuickSession";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
@@ -35,13 +28,18 @@ const stagger = {
 
 export default function JourneyDashboard() {
   const [quickMode, setQuickMode] = useState<"drill" | "blitz" | null>(null);
-  const { language, setLanguage } = useLanguage();
   const { gamification } = useGamification();
+  const { user } = useAuth();
   const { progress } = useProgress();
   const { isSuperUser } = useSuperUser();
   const overall = getOverallProgress(progress);
   const nextAction = getNextAction(progress);
   const showCscs = allGqaPassed(progress, isSuperUser);
+
+  // Get first name from user metadata or email
+  const firstName = user?.user_metadata?.full_name?.split(" ")[0]
+    || user?.email?.split("@")[0]
+    || "there";
 
   // Determine step number and label
   const getStepInfo = () => {
@@ -74,40 +72,22 @@ export default function JourneyDashboard() {
         <QuickSession mode={quickMode} onClose={() => setQuickMode(null)} />
       )}
 
-      {/* Top bar */}
+      {/* Top bar with greeting */}
       <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold text-foreground">
-            {overall.percentage === 0 ? "Get your CSCS Green Card" : "Welcome back 👋"}
+            {overall.percentage === 0 ? "Get your CSCS Green Card" : `Hey ${firstName} 👋`}
           </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          {gamification.streak > 0 && (
-            <div className="flex items-center gap-1 text-xs font-semibold text-primary">
-              <Flame className="h-4 w-4" />
-              {gamification.streak}
-            </div>
+          {overall.percentage > 0 && (
+            <p className="text-xs text-muted-foreground mt-0.5">Get your CSCS Green Card</p>
           )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-sm">
-                {language.flag}
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
-              {LANGUAGES.map((lang) => (
-                <DropdownMenuItem
-                  key={lang.code}
-                  onClick={() => setLanguage(lang)}
-                  className={`gap-2 ${lang.code === language.code ? "bg-primary/10 font-medium" : ""}`}
-                >
-                  <span className="text-lg">{lang.flag}</span>
-                  <span className="text-sm">{lang.english}</span>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
+        {gamification.streak > 0 && (
+          <div className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+            <Flame className="h-3.5 w-3.5" />
+            {gamification.streak} day{gamification.streak !== 1 ? "s" : ""}
+          </div>
+        )}
       </motion.div>
 
       {/* Status card — THE main thing */}

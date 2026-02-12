@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { User, Globe, LogOut, Mail, Phone, Award, ChevronRight, Unlock, Download } from "lucide-react";
+import { User, Globe, LogOut, Mail, Award, ChevronRight, Unlock, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -81,7 +81,7 @@ export default function Profile() {
         </div>
         <div>
           <h1 className="text-lg font-bold text-foreground">
-            {user?.email?.split("@")[0] || "Worker"}
+            {user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Worker"}
           </h1>
           <p className="text-xs text-muted-foreground">{user?.email}</p>
         </div>
@@ -122,19 +122,24 @@ export default function Profile() {
       </motion.div>
 
       {/* Download certificate */}
-      {hasQualification && (
-        <motion.div variants={fadeUp}>
-          <Card>
-            <CardContent className="py-3">
-              <button className="flex items-center gap-3 w-full text-left">
-                <Download className="h-5 w-5 text-primary" />
-                <span className="text-sm font-medium flex-1">Download your certificate</span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+      <motion.div variants={fadeUp}>
+        <Card>
+          <CardContent className="py-3">
+            <div className="flex items-center gap-3">
+              <Download className="h-5 w-5 text-muted-foreground" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">Download your certificate</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {hasQualification
+                    ? "Your certificate is ready to download."
+                    : "Your certificate will appear here when you've passed all your tests."}
+                </p>
+              </div>
+              {hasQualification && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Support */}
       <motion.div variants={fadeUp}>
@@ -143,9 +148,6 @@ export default function Profile() {
             <h3 className="text-sm font-bold">Help & support</h3>
             <a href="mailto:support@skillcertify.co.uk" className="flex items-center gap-3 text-sm py-2 text-muted-foreground hover:text-foreground">
               <Mail className="h-4 w-4" /> support@skillcertify.co.uk
-            </a>
-            <a href="tel:+44XXXXXXXXXX" className="flex items-center gap-3 text-sm py-2 text-muted-foreground hover:text-foreground">
-              <Phone className="h-4 w-4" /> Call us
             </a>
           </CardContent>
         </Card>

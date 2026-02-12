@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage, LANGUAGES, type Language } from "@/contexts/LanguageContext";
+import { Link } from "react-router-dom";
 
 const headings = [
   "Choose Your Language",
@@ -30,13 +31,22 @@ const SelectLanguage = () => {
   const handleContinue = () => {
     if (selected) {
       setLanguage(selected);
-      navigate("/dashboard");
+      navigate("/auth");
     }
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <div className="flex-1 px-4 py-8 sm:py-12 max-w-2xl mx-auto w-full space-y-8">
+      <div className="px-4 pt-4">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back
+        </Link>
+      </div>
+
+      <div className="flex-1 px-4 py-6 sm:py-12 max-w-2xl mx-auto w-full space-y-6">
         {/* Multi-language heading stack */}
         <div className="space-y-1 text-center">
           {headings.map((h, i) => (
@@ -63,7 +73,7 @@ const SelectLanguage = () => {
           </p>
         </div>
 
-        {/* Language grid */}
+        {/* Language grid — 2 columns to fit on screen */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {LANGUAGES.map((lang) => {
             const isSelected = selected?.code === lang.code;

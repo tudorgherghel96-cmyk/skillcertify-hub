@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Circle, CreditCard, ExternalLink, HelpCircle, Mail, Phone } from "lucide-react";
+import { Check, Circle, CreditCard, ExternalLink, HelpCircle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -33,14 +33,10 @@ export default function MyCard() {
   const { isSuperUser } = useSuperUser();
 
   // Compute step statuses
-  const totalLessons = MODULES.reduce((acc, m) => acc + m.lessons.length, 0);
-  const completedLessons = MODULES.reduce(
-    (acc, m) => acc + getLessonsCompleted(getModuleProgress(progress, m.id), m.lessons.length),
-    0
-  );
-  const allLessonsDone = MODULES.every((m) =>
+  const topicsDone = MODULES.filter((m) =>
     areAllLessonsComplete(getModuleProgress(progress, m.id), m.lessons.length)
-  );
+  ).length;
+  const allLessonsDone = topicsDone === MODULES.length;
   const allPractice80 = MODULES.every(
     (m) => getModuleProgress(progress, m.id).practice.bestScore >= 80
   );
@@ -56,12 +52,12 @@ export default function MyCard() {
       status: "done",
     },
     {
-      label: "Complete your lessons",
+      label: "Finish your lessons",
       status: getStatus(allLessonsDone, true),
-      detail: `${completedLessons}/${totalLessons} done`,
+      detail: `${topicsDone} of 5 topics done`,
     },
     {
-      label: "Pass the mock test",
+      label: "Pass practice questions",
       status: getStatus(allPractice80, allLessonsDone),
     },
     {
@@ -134,6 +130,17 @@ export default function MyCard() {
                   {step.detail && step.status !== "done" && (
                     <p className="text-[11px] text-muted-foreground mt-0.5">{step.detail}</p>
                   )}
+                  {/* Book your test link */}
+                  {i === 3 && step.status === "current" && (
+                    <a
+                      href="https://www.citb.co.uk/courses-and-qualifications/health-safety-and-environment-test/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
+                    >
+                      Book at citb.co.uk <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
                 </div>
               </div>
             ))}
@@ -159,7 +166,7 @@ export default function MyCard() {
           {[
             { q: "Do I need a CSCS test?", a: "Yes — it's a short health & safety test. We'll prepare you fully before you book." },
             { q: "How long does it all take?", a: "Most people finish in 2–4 weeks studying part-time. Everything's online." },
-            { q: "What if I fail?", a: "You only redo the bit you failed. All other passes stay. There's a 24-hour wait before you can retry." },
+            { q: "What if I fail?", a: "Don't worry — if you fail, you only redo the bit you failed. All other passes stay. There's a 24-hour wait before you can retry." },
             { q: "How do I book my CSCS test?", a: "Through the CITB website. We'll give you the link when you're ready." },
           ].map((faq, i) => (
             <AccordionItem key={i} value={`faq-${i}`} className="border rounded-xl overflow-hidden">
@@ -180,18 +187,11 @@ export default function MyCard() {
           <CardContent className="p-4 text-center space-y-3">
             <HelpCircle className="h-5 w-5 mx-auto text-muted-foreground" />
             <h3 className="font-semibold text-sm">Need help?</h3>
-            <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              <Button variant="outline" size="sm" asChild>
-                <a href="mailto:support@skillcertify.co.uk">
-                  <Mail className="h-4 w-4 mr-1" /> Email us
-                </a>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <a href="tel:+44XXXXXXXXXX">
-                  <Phone className="h-4 w-4 mr-1" /> Call us
-                </a>
-              </Button>
-            </div>
+            <Button variant="outline" size="sm" asChild>
+              <a href="mailto:support@skillcertify.co.uk">
+                <Mail className="h-4 w-4 mr-1" /> Email us
+              </a>
+            </Button>
           </CardContent>
         </Card>
       </motion.div>

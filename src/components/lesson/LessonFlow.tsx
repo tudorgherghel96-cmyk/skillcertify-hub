@@ -1,10 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import SlideRenderer from "./SlideRenderer";
 import type { Slide } from "@/data/slidesSchema";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LessonFlowProps {
   slides: Slide[];
@@ -85,9 +86,46 @@ export default function LessonFlow({
     [go]
   );
 
-  const handleQuizAnswered = useCallback(() => {
-    setQuizLocked(false);
-  }, []);
+  const handleQuizAnswered = useCallback(
+    async (correct: boolean, conceptSlug?: string, responseTimeMs?: number) => {
+      setQuizLocked(false);
+
+      // Track concept attempt with spaced recall scheduling
+      if (conceptSlug) {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+
+          // Find concept by slug
+          const { data: concept } = await supabase
+            .from("concepts")
+            .select("id")
+            .eq("slug", conceptSlug)
+            .single();
+
+          if (concept) {
+            const nextReview = new Date();
+            if (correct) {
+              nextReview.setDate(nextReview.getDate() + 1); // 1 day
+            } else {
+              nextReview.setHours(nextReview.getHours() + 1); // 1 hour
+            }
+
+            await supabase.from("concept_attempts").insert({
+              user_id: user.id,
+              concept_id: concept.id,
+              is_correct: correct,
+              response_time_ms: responseTimeMs ?? 0,
+              next_review_at: nextReview.toISOString(),
+            });
+          }
+        } catch (e) {
+          // Silently fail — don't block UX
+        }
+      }
+    },
+    []
+  );
 
   const progress = ((index + 1) / total) * 100;
 

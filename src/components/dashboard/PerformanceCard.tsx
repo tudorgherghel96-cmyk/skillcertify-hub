@@ -5,7 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MODULES } from "@/data/courseData";
 import { Link } from "react-router-dom";
 import {
-  TrendingUp,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
+import {
   Clock,
   Calendar,
   Brain,
@@ -15,19 +22,38 @@ import {
   ArrowUp,
   ArrowDown,
   Minus,
+  TrendingUp,
+  TrendingDown,
+  ShieldAlert,
 } from "lucide-react";
+
+interface WeakConcept {
+  slug: string;
+  name: string;
+  module_id: number;
+  memory_score: number;
+  accuracy: number;
+  state: string;
+}
+
+interface MockTrendPoint {
+  score: number;
+  date: string;
+}
 
 interface PassData {
   probability: number;
   confidence: string;
   weakest_module: number | null;
-  weak_concepts: { slug: string; name: string; module_id: number; memory_score: number }[];
+  weak_concepts: WeakConcept[];
+  fragile_count: number;
   days_to_ready: number | null;
   avg_response_time_ms: number;
   total_study_days: number;
   days_since_last_study: number;
   concepts_mastered: number;
   concepts_total: number;
+  mock_trend: MockTrendPoint[];
 }
 
 interface CohortData {
@@ -97,6 +123,12 @@ export default function PerformanceCard() {
   const weakMod = data.weakest_module
     ? MODULES.find((m) => m.id === data.weakest_module)
     : null;
+
+  // Mock trend analysis
+  const trendData = (data.mock_trend || []).slice().reverse();
+  const isTrendUp =
+    trendData.length >= 2 &&
+    trendData[trendData.length - 1].score > trendData[0].score;
 
   return (
     <motion.div
@@ -173,23 +205,119 @@ export default function PerformanceCard() {
             </div>
           </div>
 
-          {/* Weak area */}
-          {weakMod && (
-            <div className="flex items-start gap-2 text-xs bg-destructive/5 rounded-lg p-3">
-              <AlertTriangle className="h-3.5 w-3.5 text-destructive shrink-0 mt-0.5" />
-              <div>
-                <span className="font-semibold text-foreground">
-                  Weakest:{" "}
-                  <Link to={`/module/${weakMod.id}`} className="text-primary hover:underline">
-                    M{weakMod.id}: {weakMod.title}
-                  </Link>
+          {/* Fragile concepts warning */}
+          {data.fragile_count > 0 && (
+            <div className="flex items-center gap-2 text-xs bg-destructive/8 rounded-lg px-3 py-2">
+              <ShieldAlert className="h-3.5 w-3.5 text-destructive shrink-0" />
+              <span className="text-foreground font-medium">
+                {data.fragile_count} fragile concept{data.fragile_count !== 1 ? "s" : ""} — review needed before test
+              </span>
+            </div>
+          )}
+
+          {/* Weak concepts breakdown */}
+          {data.weak_concepts.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
+                <span className="text-xs font-semibold text-foreground">
+                  Weak Concepts
+                  {weakMod && (
+                    <span className="font-normal text-muted-foreground">
+                      {" "}— weakest module:{" "}
+                      <Link to={`/module/${weakMod.id}`} className="text-primary hover:underline">
+                        M{weakMod.id}
+                      </Link>
+                    </span>
+                  )}
                 </span>
-                {data.weak_concepts.length > 0 && (
-                  <p className="text-muted-foreground mt-0.5">
-                    Fragile: {data.weak_concepts.slice(0, 4).map((c) => c.name).join(", ")}
-                    {data.weak_concepts.length > 4 && ` +${data.weak_concepts.length - 4} more`}
+              </div>
+              <div className="space-y-1.5">
+                {data.weak_concepts.slice(0, 6).map((c) => (
+                  <div
+                    key={c.slug}
+                    className="flex items-center justify-between text-xs bg-muted/40 rounded-lg px-3 py-2"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${
+                          c.state === "Fragile"
+                            ? "bg-destructive"
+                            : "bg-yellow-500"
+                        }`}
+                      />
+                      <span className="text-foreground truncate">{c.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                      <span className="text-muted-foreground">
+                        {Math.round(c.accuracy * 100)}% acc
+                      </span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                          c.state === "Fragile"
+                            ? "bg-destructive/10 text-destructive"
+                            : "bg-yellow-500/10 text-yellow-600"
+                        }`}
+                      >
+                        {c.state}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                {data.weak_concepts.length > 6 && (
+                  <p className="text-[10px] text-muted-foreground text-center">
+                    +{data.weak_concepts.length - 6} more weak concepts
                   </p>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Mock Trend Chart */}
+          {trendData.length >= 2 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  {isTrendUp ? (
+                    <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                  ) : (
+                    <TrendingDown className="h-3.5 w-3.5 text-destructive" />
+                  )}
+                  Mock Trend
+                </span>
+                <span
+                  className={`text-[10px] font-medium ${
+                    isTrendUp ? "text-primary" : "text-destructive"
+                  }`}
+                >
+                  {isTrendUp ? "Improving" : "Declining"}
+                </span>
+              </div>
+              <div className="h-24 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={trendData}>
+                    <XAxis dataKey="date" hide />
+                    <YAxis domain={[0, 100]} hide />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                        fontSize: "11px",
+                      }}
+                      formatter={(value: number) => [`${value}%`, "Score"]}
+                      labelFormatter={(label) => `Date: ${label}`}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="score"
+                      stroke={isTrendUp ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
+                      strokeWidth={2}
+                      dot={{ r: 3 }}
+                      activeDot={{ r: 5 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </div>
           )}

@@ -22,9 +22,9 @@ export default function HeroCTA() {
     if (showCscs && progress.cscs.passed !== true) {
       return {
         icon: ShieldCheck,
-        title: "You're ready for the CSCS Test",
-        subtitle: "All 5 GQA modules passed — take the final test",
-        cta: "Start CSCS Prep",
+        title: "You're ready for the CSCS test",
+        subtitle: "All 5 tests passed — take the final one",
+        cta: "Prepare for CSCS test",
         to: "/cscs-prep",
         gradient: "from-primary to-primary/80",
       };
@@ -38,9 +38,9 @@ export default function HeroCTA() {
         subtitle: isLesson
           ? "Continue where you left off"
           : isPractice
-          ? "Score 80%+ to unlock GQA test"
-          : "Closed-book assessment",
-        cta: isLesson ? "Continue Learning" : isPractice ? "Start Practice" : "Start Test",
+          ? "Score 80%+ to unlock the next step"
+          : "Closed-book test",
+        cta: isLesson ? "Continue" : isPractice ? "Start practice" : "Start test",
         to: nextAction.moduleId === 0
           ? "/cscs-prep"
           : nextAction.lessonId

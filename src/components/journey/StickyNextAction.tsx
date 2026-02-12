@@ -26,10 +26,10 @@ export default function StickyNextAction({
       <div className="flex items-center justify-between gap-3 max-w-2xl mx-auto">
         <div className="min-w-0 flex-1">
           <p className="text-[11px] text-muted-foreground truncate">
-            You are here: <span className="font-semibold text-foreground">{currentMilestone}</span>
+            Now: <span className="font-semibold text-foreground">{currentMilestone}</span>
           </p>
           <p className="text-[10px] text-muted-foreground truncate">
-            Next: {nextMilestone}
+            Next step: {nextMilestone}
           </p>
         </div>
         <Button asChild size="sm" className="h-8 shrink-0 text-xs">

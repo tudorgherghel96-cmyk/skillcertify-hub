@@ -85,14 +85,17 @@ export default function PerformanceCard() {
     load();
   }, []);
 
-  if (!data) {
+  // Gate: require minimum data before showing stats
+  const hasEnoughData = data && (data.concepts_mastered > 0 || data.total_study_days >= 2);
+
+  if (!data || !hasEnoughData) {
     return (
       <Card className="border-dashed opacity-70">
         <CardContent className="py-5 flex items-center gap-3">
           <Target className="h-5 w-5 text-muted-foreground shrink-0" />
           <div>
-            <p className="text-sm font-medium text-foreground">Pass Probability</p>
-            <p className="text-xs text-muted-foreground">Complete lessons and practice to unlock predictions.</p>
+            <p className="text-sm font-medium text-foreground">Chance of passing (estimate)</p>
+            <p className="text-xs text-muted-foreground">Answer a few practice questions to get your pass estimate.</p>
           </div>
         </CardContent>
       </Card>
@@ -154,13 +157,13 @@ export default function PerformanceCard() {
             </div>
             <div className="flex-1 space-y-2.5">
               <div>
-                <p className="text-sm font-semibold text-foreground">Pass Probability</p>
+               <p className="text-sm font-semibold text-foreground">Chance of passing (estimate)</p>
                 <p className="text-xs text-muted-foreground">
                   {prob}% ± {confidenceMargin}% • {data.confidence}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Top drivers</p>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">What's affecting your score</p>
                 {drivers.slice(0, 3).map((d, i) => (
                   <p key={i} className="text-xs text-foreground flex items-center gap-1.5">
                     <span className="h-1 w-1 rounded-full bg-primary shrink-0" />

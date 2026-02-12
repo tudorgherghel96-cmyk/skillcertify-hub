@@ -1,14 +1,12 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { User, Globe, LogOut, Mail, Phone, Settings, Shield, ChevronRight, Award, Unlock } from "lucide-react";
+import { User, Globe, LogOut, Mail, Phone, Award, ChevronRight, Unlock, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
 import { useSuperUser } from "@/contexts/SuperUserContext";
-import { MODULES } from "@/data/courseData";
-import { useProgress, getModuleProgress, isModuleComplete } from "@/contexts/ProgressContext";
+import { allGqaPassed, useProgress } from "@/contexts/ProgressContext";
 import { useState, useRef } from "react";
 import {
   DropdownMenu,
@@ -33,7 +31,7 @@ export default function Profile() {
   const { isSuperUser, isAdmin, toggleSuperUser } = useSuperUser();
   const { progress } = useProgress();
 
-  // Long-press on logo to show super user (for non-admins)
+  // Hidden admin access via long-press
   const [showSuperUser, setShowSuperUser] = useState(false);
   const [passcodeInput, setPasscodeInput] = useState("");
   const [showPasscode, setShowPasscode] = useState(false);
@@ -61,6 +59,8 @@ export default function Profile() {
     }
   };
 
+  const hasQualification = allGqaPassed(progress, false);
+
   return (
     <motion.div
       className="px-4 py-5 max-w-2xl mx-auto space-y-5 pb-24"
@@ -81,7 +81,7 @@ export default function Profile() {
         </div>
         <div>
           <h1 className="text-lg font-bold text-foreground">
-            {user?.email?.split("@")[0] || "Learner"}
+            {user?.email?.split("@")[0] || "Worker"}
           </h1>
           <p className="text-xs text-muted-foreground">{user?.email}</p>
         </div>
@@ -121,54 +121,37 @@ export default function Profile() {
         </Card>
       </motion.div>
 
-      {/* Certificates */}
-      <motion.div variants={fadeUp}>
-        <Card>
-          <CardContent className="py-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <Award className="h-5 w-5 text-primary" />
-              <h3 className="text-sm font-bold">Certificates & Qualifications</h3>
-            </div>
-            {MODULES.map((m) => {
-              const mp = getModuleProgress(progress, m.id);
-              const passed = isModuleComplete(mp);
-              return (
-                <div key={m.id} className="flex items-center justify-between text-sm py-1.5 border-b last:border-0 border-border/50">
-                  <span className={passed ? "text-foreground" : "text-muted-foreground"}>
-                    GQA Module {m.id}
-                  </span>
-                  <span className={`text-xs font-medium ${passed ? "text-primary" : "text-muted-foreground"}`}>
-                    {passed ? `✅ ${mp.gqa.score}%` : "Not passed"}
-                  </span>
-                </div>
-              );
-            })}
-            <div className="flex items-center justify-between text-sm py-1.5 border-t border-border">
-              <span className="font-semibold">CSCS H&S Test</span>
-              <span className={`text-xs font-medium ${progress.cscs.passed ? "text-primary" : "text-muted-foreground"}`}>
-                {progress.cscs.passed ? `✅ ${progress.cscs.score}%` : "Not taken"}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+      {/* Download certificate */}
+      {hasQualification && (
+        <motion.div variants={fadeUp}>
+          <Card>
+            <CardContent className="py-3">
+              <button className="flex items-center gap-3 w-full text-left">
+                <Download className="h-5 w-5 text-primary" />
+                <span className="text-sm font-medium flex-1">Download your certificate</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Support */}
       <motion.div variants={fadeUp}>
         <Card>
           <CardContent className="py-4 space-y-3">
-            <h3 className="text-sm font-bold">Support</h3>
+            <h3 className="text-sm font-bold">Help & support</h3>
             <a href="mailto:support@skillcertify.co.uk" className="flex items-center gap-3 text-sm py-2 text-muted-foreground hover:text-foreground">
               <Mail className="h-4 w-4" /> support@skillcertify.co.uk
             </a>
             <a href="tel:+44XXXXXXXXXX" className="flex items-center gap-3 text-sm py-2 text-muted-foreground hover:text-foreground">
-              <Phone className="h-4 w-4" /> Call Us
+              <Phone className="h-4 w-4" /> Call us
             </a>
           </CardContent>
         </Card>
       </motion.div>
 
-      {/* Super User (admin gate) */}
+      {/* Hidden super user (admin only) */}
       {(isAdmin || showSuperUser) && (
         <motion.div variants={fadeUp}>
           <Card className={`border ${isSuperUser ? "border-amber-500 bg-amber-500/10" : "border-border"}`}>
@@ -177,8 +160,8 @@ export default function Profile() {
                 <div className="flex items-center gap-3">
                   <Unlock className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-semibold">Super User Mode</p>
-                    <p className="text-[10px] text-muted-foreground">Bypass module locks for QA</p>
+                    <p className="text-sm font-semibold">QA Mode</p>
+                    <p className="text-[10px] text-muted-foreground">Bypass locks for testing</p>
                   </div>
                 </div>
                 <Switch
@@ -197,13 +180,13 @@ export default function Profile() {
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
           <Card className="w-full max-w-sm">
             <CardContent className="py-6 space-y-4">
-              <h3 className="text-sm font-bold text-center">Enter Admin Passcode</h3>
+              <h3 className="text-sm font-bold text-center">Enter Admin Code</h3>
               <input
                 type="password"
                 value={passcodeInput}
                 onChange={(e) => setPasscodeInput(e.target.value)}
                 className="w-full h-12 rounded-lg border bg-background px-4 text-sm"
-                placeholder="Passcode"
+                placeholder="Code"
                 autoFocus
               />
               <div className="flex gap-2">

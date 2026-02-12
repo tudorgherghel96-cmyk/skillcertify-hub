@@ -1,11 +1,10 @@
-import { Home, BookOpen, Brain, Route, User } from "lucide-react";
+import { Home, BookOpen, CreditCard, User } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 
 const navItems = [
   { to: "/dashboard", icon: Home, label: "Home" },
   { to: "/learn", icon: BookOpen, label: "Learn" },
-  { to: "/practice-hub", icon: Brain, label: "Practice" },
-  { to: "/journey", icon: Route, label: "Card" },
+  { to: "/my-card", icon: CreditCard, label: "My Card" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
 

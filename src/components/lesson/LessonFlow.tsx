@@ -1,25 +1,10 @@
-import { useState, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronUp, ChevronDown, CheckCircle2 } from "lucide-react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import SlideRenderer from "./SlideRenderer";
 import type { Slide } from "@/data/slidesSchema";
-
-const variants = {
-  enter: (dir: number) => ({
-    y: dir > 0 ? "100%" : "-100%",
-    opacity: 0,
-  }),
-  center: {
-    y: 0,
-    opacity: 1,
-  },
-  exit: (dir: number) => ({
-    y: dir > 0 ? "-100%" : "100%",
-    opacity: 0,
-  }),
-};
 
 interface LessonFlowProps {
   slides: Slide[];
@@ -40,178 +25,229 @@ export default function LessonFlow({
   isCompleted,
   onMarkComplete,
   onFinish,
-  lang,
 }: LessonFlowProps) {
-  const [[index, direction], setSlide] = useState([0, 0]);
-  const touchStartY = useRef(0);
-  const touchStartX = useRef(0);
+  const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+  const [quizLocked, setQuizLocked] = useState(false);
   const isAnimating = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const total = slides.length;
   const isLast = index === total - 1;
   const isFirst = index === 0;
+  const currentSlide = slides[index];
+
+  // Check if current slide is an unanswered quiz
+  useEffect(() => {
+    setQuizLocked(currentSlide?.type === "quiz");
+  }, [index, currentSlide?.type]);
 
   const go = useCallback(
     (dir: 1 | -1) => {
       if (isAnimating.current) return;
+      // Block forward swipe on locked quiz
+      if (dir === 1 && quizLocked) return;
       const next = index + dir;
       if (next < 0 || next >= total) {
         if (dir === 1 && isLast) onFinish();
         return;
       }
-      setSlide([next, dir]);
+      setDirection(dir);
+      setIndex(next);
     },
-    [index, total, isLast, onFinish]
+    [index, total, isLast, onFinish, quizLocked]
   );
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-    touchStartX.current = e.touches[0].clientX;
-  }, []);
+  // Keyboard nav
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowDown" || e.key === " ") { e.preventDefault(); go(1); }
+      if (e.key === "ArrowUp") { e.preventDefault(); go(-1); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [go]);
 
-  const handleTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      const dy = touchStartY.current - e.changedTouches[0].clientY;
-      const dx = Math.abs(e.changedTouches[0].clientX - touchStartX.current);
-      // Only register vertical swipes (not horizontal)
-      if (Math.abs(dy) > 60 && Math.abs(dy) > dx * 1.2) {
-        if (dy > 0) go(1);  // swipe up → next
-        else go(-1);         // swipe down → prev
+  // Pan/drag handler for momentum swipe
+  const handleDragEnd = useCallback(
+    (_: any, info: PanInfo) => {
+      const { offset, velocity } = info;
+      const swipeThreshold = 50;
+      const velocityThreshold = 300;
+
+      // Swipe up (next) or down (prev)
+      if (offset.y < -swipeThreshold || velocity.y < -velocityThreshold) {
+        go(1);
+      } else if (offset.y > swipeThreshold || velocity.y > velocityThreshold) {
+        go(-1);
       }
     },
     [go]
   );
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "ArrowDown" || e.key === " ") { e.preventDefault(); go(1); }
-      if (e.key === "ArrowUp") { e.preventDefault(); go(-1); }
-    },
-    [go]
-  );
+  const handleQuizAnswered = useCallback(() => {
+    setQuizLocked(false);
+  }, []);
 
   const progress = ((index + 1) / total) * 100;
 
+  const slideVariants = {
+    enter: (dir: number) => ({
+      y: dir > 0 ? "100%" : "-100%",
+      opacity: 0.5,
+      scale: 0.95,
+    }),
+    center: {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: (dir: number) => ({
+      y: dir > 0 ? "-50%" : "50%",
+      opacity: 0,
+      scale: 0.9,
+    }),
+  };
+
   return (
     <div
-      className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden outline-none"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      role="region"
-      aria-label="Lesson slides"
+      ref={containerRef}
+      className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden select-none"
+      style={{ touchAction: "none" }}
     >
-      {/* Top bar */}
-      <div className="relative z-20 flex items-center gap-3 px-4 py-3 bg-background/80 backdrop-blur-md border-b border-border/50">
+      {/* Minimal top bar */}
+      <div className="relative z-30 flex items-center gap-3 px-4 h-12 bg-background/60 backdrop-blur-xl">
         <Link
           to={`/module/${moduleId}`}
-          className="p-1.5 -ml-1.5 rounded-lg hover:bg-muted/60 transition-colors"
+          className="p-1.5 -ml-1.5 rounded-full hover:bg-muted/60 transition-colors"
         >
-          <ArrowLeft className="h-5 w-5 text-foreground" />
+          <ArrowLeft className="h-4 w-4 text-muted-foreground" />
         </Link>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs text-muted-foreground truncate">
-            Module {moduleId} · Lesson {lessonId}
-          </p>
-          <p className="text-sm font-semibold text-foreground truncate">{lessonTitle}</p>
-        </div>
-        <span className="text-xs text-muted-foreground tabular-nums">{index + 1}/{total}</span>
+        <p className="flex-1 text-xs font-medium text-muted-foreground truncate">
+          {lessonTitle}
+        </p>
+        <span className="text-[10px] text-muted-foreground/60 tabular-nums font-mono">
+          {index + 1}/{total}
+        </span>
       </div>
 
-      {/* Progress bar */}
-      <div className="h-0.5 bg-muted relative z-20">
+      {/* Progress bar — thin, clean */}
+      <div className="h-[2px] bg-muted/30 relative z-30">
         <motion.div
-          className="h-full bg-primary"
+          className="h-full bg-primary rounded-full"
+          initial={false}
           animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
+          transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
         />
       </div>
 
-      {/* Slide area */}
-      <div className="flex-1 relative overflow-hidden">
-        <AnimatePresence initial={false} custom={direction} mode="wait"
+      {/* Slide area with drag */}
+      <motion.div
+        className="flex-1 relative overflow-hidden"
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={0.15}
+        onDragEnd={handleDragEnd}
+        style={{ cursor: "grab" }}
+        whileTap={{ cursor: "grabbing" }}
+      >
+        <AnimatePresence
+          initial={false}
+          custom={direction}
+          mode="wait"
           onExitComplete={() => { isAnimating.current = false; }}
         >
           <motion.div
             key={index}
             custom={direction}
-            variants={variants}
+            variants={slideVariants}
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+            transition={{
+              y: { type: "spring", stiffness: 350, damping: 35 },
+              opacity: { duration: 0.25 },
+              scale: { duration: 0.3 },
+            }}
             onAnimationStart={() => { isAnimating.current = true; }}
+            onAnimationComplete={() => { isAnimating.current = false; }}
             className="absolute inset-0"
           >
-            <SlideRenderer slide={slides[index]} />
+            <SlideRenderer
+              slide={currentSlide}
+              isActive={true}
+              onQuizAnswered={handleQuizAnswered}
+            />
           </motion.div>
         </AnimatePresence>
-      </div>
 
-      {/* Bottom controls */}
-      <div className="relative z-20 px-4 py-3 bg-background/80 backdrop-blur-md border-t border-border/50">
-        <div className="flex items-center justify-between max-w-lg mx-auto">
-          {/* Prev */}
-          <button
-            onClick={() => go(-1)}
-            disabled={isFirst}
-            className="p-2.5 rounded-xl bg-muted/60 hover:bg-muted transition-colors disabled:opacity-30 disabled:pointer-events-none"
-            aria-label="Previous slide"
-          >
-            <ChevronUp className="h-5 w-5 text-foreground" />
-          </button>
-
-          {/* Center action */}
-          {isLast && !isCompleted ? (
-            <Button onClick={onMarkComplete} className="h-10 px-6 gap-2 text-sm font-semibold">
-              <CheckCircle2 className="h-4 w-4" /> Complete
-            </Button>
-          ) : isLast && isCompleted ? (
-            <Button onClick={onFinish} variant="outline" className="h-10 px-6 text-sm font-semibold">
-              Finish
-            </Button>
-          ) : (
-            /* Progress dots */
-            <div className="flex items-center gap-1">
-              {slides.map((_, i) => (
-                <div
-                  key={i}
-                  className={`rounded-full transition-all duration-200 ${
-                    i === index
-                      ? "w-5 h-1.5 bg-primary"
-                      : i < index
-                      ? "w-1.5 h-1.5 bg-primary/40"
-                      : "w-1.5 h-1.5 bg-muted-foreground/20"
-                  }`}
-                />
-              ))}
-            </div>
+        {/* Quiz lock overlay hint */}
+        <AnimatePresence>
+          {quizLocked && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute bottom-6 left-0 right-0 flex justify-center z-20 pointer-events-none"
+            >
+              <div className="px-4 py-1.5 rounded-full bg-primary/10 backdrop-blur-sm">
+                <p className="text-[11px] font-medium text-primary">Answer to continue</p>
+              </div>
+            </motion.div>
           )}
+        </AnimatePresence>
+      </motion.div>
 
-          {/* Next */}
-          <button
-            onClick={() => go(1)}
-            disabled={isLast}
-            className="p-2.5 rounded-xl bg-muted/60 hover:bg-muted transition-colors disabled:opacity-30 disabled:pointer-events-none"
-            aria-label="Next slide"
+      {/* Bottom — only shows on last slide */}
+      <AnimatePresence>
+        {isLast && (
+          <motion.div
+            initial={{ y: 60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 60, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="relative z-30 px-6 py-4 bg-background/60 backdrop-blur-xl"
           >
-            <ChevronDown className="h-5 w-5 text-foreground" />
-          </button>
-        </div>
-
-        {/* Swipe hint on first slide */}
-        {isFirst && (
-          <motion.p
-            className="text-center text-[10px] text-muted-foreground mt-2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
-          >
-            Swipe up or tap ↓ to continue
-          </motion.p>
+            {!isCompleted ? (
+              <Button onClick={onMarkComplete} className="w-full h-12 gap-2 text-sm font-semibold rounded-xl">
+                <CheckCircle2 className="h-4 w-4" /> Mark Complete
+              </Button>
+            ) : (
+              <Button onClick={onFinish} variant="outline" className="w-full h-12 text-sm font-semibold rounded-xl">
+                Continue →
+              </Button>
+            )}
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
+
+      {/* Swipe hint — only first slide, fades out */}
+      <AnimatePresence>
+        {isFirst && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ delay: 1.2, duration: 0.5 }}
+            className="absolute bottom-8 left-0 right-0 flex justify-center z-20 pointer-events-none"
+          >
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ repeat: 3, duration: 1.2, ease: "easeInOut" }}
+              className="flex flex-col items-center gap-1"
+            >
+              <div className="w-5 h-8 rounded-full border-2 border-muted-foreground/30 flex justify-center pt-1.5">
+                <motion.div
+                  animate={{ y: [0, 8, 0] }}
+                  transition={{ repeat: 3, duration: 1.2, ease: "easeInOut" }}
+                  className="w-1 h-1.5 rounded-full bg-muted-foreground/50"
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground/50">Swipe up</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

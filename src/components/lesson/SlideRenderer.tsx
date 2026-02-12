@@ -2,9 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain, Lightbulb, CheckCircle2, XCircle, HelpCircle,
-  Play, BookOpen, ListChecks, Languages
+  Play, BookOpen, ListChecks, Languages, Volume2
 } from "lucide-react";
 import { getLessonVideoUrl } from "@/lib/media";
+import { triggerHaptic } from "@/lib/haptics";
+import { speakWord } from "@/lib/pronunciation";
 import type { Slide } from "@/data/slidesSchema";
 
 /* ─── Shared wrapper ─── */
@@ -183,7 +185,16 @@ function KeyTermSlide({ slide }: { slide: Extract<Slide, { type: "keyterm" }> })
         <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
           <BookOpen className="h-7 w-7 text-primary" />
         </div>
-        <h2 className="text-2xl font-bold text-primary tracking-tight">{slide.term}</h2>
+        <div className="flex items-center gap-3 justify-center">
+          <h2 className="text-2xl font-bold text-primary tracking-tight">{slide.term}</h2>
+          <button
+            onClick={() => { speakWord(slide.term); triggerHaptic("tap"); }}
+            className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 active:scale-90 transition-all"
+            aria-label={`Pronounce ${slide.term}`}
+          >
+            <Volume2 className="h-5 w-5 text-primary" />
+          </button>
+        </div>
         <p className="text-base text-foreground/75 leading-relaxed">{slide.explanation}</p>
       </motion.div>
     </SlideShell>
@@ -247,12 +258,20 @@ function QuizSlide({
     if (isAnswered) return;
     setSelected(i);
     const responseTime = Date.now() - startTime.current;
-    onQuizAnswered?.(i === slide.correct, slide.conceptSlug, responseTime);
+    const correct = i === slide.correct;
+    triggerHaptic(correct ? "success" : "error");
+    onQuizAnswered?.(correct, slide.conceptSlug, responseTime);
   };
 
   return (
     <SlideShell>
-      <motion.div variants={pop} initial="hidden" animate="show" className="max-w-md w-full space-y-6">
+      <motion.div
+        variants={pop}
+        initial="hidden"
+        animate={isAnswered ? (isCorrect ? { scale: [1, 1.05, 1] } : { x: [-5, 5, -5, 5, 0] }) : "show"}
+        transition={isAnswered ? { duration: 0.3 } : undefined}
+        className="max-w-md w-full space-y-6"
+      >
         <div className="text-center space-y-3">
           <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
             <HelpCircle className="h-6 w-6 text-primary" />

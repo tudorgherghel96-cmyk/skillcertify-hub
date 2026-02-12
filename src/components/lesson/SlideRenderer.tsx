@@ -7,6 +7,7 @@ import {
 import { getLessonVideoUrl } from "@/lib/media";
 import { triggerHaptic } from "@/lib/haptics";
 import { speakWord } from "@/lib/pronunciation";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { Slide } from "@/data/slidesSchema";
 
 /* ─── Shared wrapper ─── */
@@ -203,13 +204,14 @@ function KeyTermSlide({ slide }: { slide: Extract<Slide, { type: "keyterm" }> })
 
 /* ─── Remember This Slide (with dual-language) ─── */
 function RememberSlide({ slide }: { slide: Extract<Slide, { type: "remember" }> }) {
+  const reducedMotion = useReducedMotion();
   return (
     <SlideShell>
       <motion.div variants={pop} initial="hidden" animate="show" className="max-w-md text-center space-y-5">
         <motion.div
-          animate={{ scale: [1, 1.08, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto"
+          animate={reducedMotion ? undefined : { scale: [1, 1.08, 1] }}
+          transition={reducedMotion ? undefined : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto ring-2 ring-destructive/20"
         >
           <Brain className="h-8 w-8 text-destructive" />
         </motion.div>
@@ -223,13 +225,14 @@ function RememberSlide({ slide }: { slide: Extract<Slide, { type: "remember" }> 
 
 /* ─── Test Tip Slide (with dual-language) ─── */
 function TipSlide({ slide }: { slide: Extract<Slide, { type: "tip" }> }) {
+  const reducedMotion = useReducedMotion();
   return (
     <SlideShell>
       <motion.div variants={pop} initial="hidden" animate="show" className="max-w-md text-center space-y-5">
         <motion.div
-          animate={{ rotate: [0, 8, -8, 0] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          className="h-16 w-16 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto"
+          animate={reducedMotion ? undefined : { rotate: [0, 8, -8, 0] }}
+          transition={reducedMotion ? undefined : { duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          className="h-16 w-16 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto ring-2 ring-amber-500/20"
         >
           <Lightbulb className="h-8 w-8 text-amber-500" />
         </motion.div>
@@ -249,6 +252,7 @@ function QuizSlide({
   slide: Extract<Slide, { type: "quiz" }>;
   onQuizAnswered?: (correct: boolean, conceptSlug?: string, responseTimeMs?: number) => void;
 }) {
+  const reducedMotion = useReducedMotion();
   const [selected, setSelected] = useState<number | null>(null);
   const startTime = useRef(Date.now());
   const isAnswered = selected !== null;
@@ -259,7 +263,7 @@ function QuizSlide({
     setSelected(i);
     const responseTime = Date.now() - startTime.current;
     const correct = i === slide.correct;
-    triggerHaptic(correct ? "success" : "error");
+    if (!reducedMotion) triggerHaptic(correct ? "success" : "error");
     onQuizAnswered?.(correct, slide.conceptSlug, responseTime);
   };
 
@@ -268,8 +272,16 @@ function QuizSlide({
       <motion.div
         variants={pop}
         initial="hidden"
-        animate={isAnswered ? (isCorrect ? { scale: [1, 1.05, 1] } : { x: [-5, 5, -5, 5, 0] }) : "show"}
-        transition={isAnswered ? { duration: 0.3 } : undefined}
+        animate={
+          isAnswered
+            ? reducedMotion
+              ? "show"
+              : isCorrect
+              ? { scale: [1, 1.05, 1] }
+              : { x: [-5, 5, -5, 5, 0] }
+            : "show"
+        }
+        transition={isAnswered && !reducedMotion ? { duration: 0.3 } : undefined}
         className="max-w-md w-full space-y-6"
       >
         <div className="text-center space-y-3">

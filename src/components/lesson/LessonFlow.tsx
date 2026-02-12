@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import SlideRenderer from "./SlideRenderer";
 import type { Slide } from "@/data/slidesSchema";
 import { supabase } from "@/integrations/supabase/client";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface LessonFlowProps {
   slides: Slide[];
@@ -33,6 +34,7 @@ export default function LessonFlow({
   const [quizLocked, setQuizLocked] = useState(false);
   const isAnimating = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
 
   const total = slides.length;
   const isLast = index === total - 1;
@@ -70,20 +72,18 @@ export default function LessonFlow({
     return () => window.removeEventListener("keydown", handler);
   }, [go]);
 
-  // @use-gesture/react drag handler
+  // @use-gesture/react drag handler with swipe config
   const bind = useDrag(
-    ({ movement: [, my], velocity: [, vy], direction: [, dy], cancel, active }) => {
-      if (!active) return;
-      const distanceThreshold = 80;
-      const velocityThreshold = 0.3;
-
-      if (Math.abs(my) >= distanceThreshold || Math.abs(vy) >= velocityThreshold) {
-        cancel();
-        if (dy < 0) go(1);   // swiped up → next
-        else if (dy > 0) go(-1); // swiped down → prev
-      }
+    ({ swipe: [, sy], movement: [, my], velocity: [, vy] }) => {
+      if (sy === -1 || my < -80 || vy > 0.3) go(1);   // swiped up → next
+      if (sy === 1 || my > 80 || vy > 0.3) go(-1);     // swiped down → prev
     },
-    { axis: "y", filterTaps: true, threshold: 10 }
+    {
+      axis: "y",
+      filterTaps: true,
+      threshold: 10,
+      swipe: { distance: 80, velocity: 0.3 },
+    }
   );
 
   const handleQuizAnswered = useCallback(
@@ -129,23 +129,34 @@ export default function LessonFlow({
 
   const progress = ((index + 1) / total) * 100;
 
-  const slideVariants = {
-    enter: (dir: number) => ({
-      y: dir > 0 ? "100%" : "-100%",
-      opacity: 0.5,
-      scale: 0.95,
-    }),
-    center: {
-      y: 0,
-      opacity: 1,
-      scale: 1,
-    },
-    exit: (dir: number) => ({
-      y: dir > 0 ? "-50%" : "50%",
-      opacity: 0,
-      scale: 0.9,
-    }),
-  };
+  // Material-style ~300ms ease; reduced motion = instant opacity crossfade
+  const slideVariants = reducedMotion
+    ? {
+        enter: () => ({ opacity: 0 }),
+        center: { opacity: 1 },
+        exit: () => ({ opacity: 0 }),
+      }
+    : {
+        enter: (dir: number) => ({
+          y: dir > 0 ? 80 : -80,
+          opacity: 0,
+          scale: 0.98,
+        }),
+        center: {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+        },
+        exit: (dir: number) => ({
+          y: dir > 0 ? -80 : 80,
+          opacity: 0,
+          scale: 0.98,
+        }),
+      };
+
+  const slideTransition = reducedMotion
+    ? { duration: 0.15 }
+    : { duration: 0.32, ease: [0.4, 0, 0.2, 1] as const };
 
   return (
     <div
@@ -198,11 +209,7 @@ export default function LessonFlow({
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{
-              y: { type: "spring", stiffness: 350, damping: 35 },
-              opacity: { duration: 0.25 },
-              scale: { duration: 0.3 },
-            }}
+            transition={slideTransition}
             onAnimationStart={() => { isAnimating.current = true; }}
             onAnimationComplete={() => { isAnimating.current = false; }}
             className="absolute inset-0"

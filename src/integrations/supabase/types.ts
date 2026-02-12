@@ -35,6 +35,36 @@ export type Database = {
         }
         Relationships: []
       }
+      concepts: {
+        Row: {
+          created_at: string
+          difficulty_weight: number | null
+          id: string
+          learning_outcome_ref: string | null
+          module_id: number
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          difficulty_weight?: number | null
+          id?: string
+          learning_outcome_ref?: string | null
+          module_id: number
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          difficulty_weight?: number | null
+          id?: string
+          learning_outcome_ref?: string | null
+          module_id?: number
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       cscs_results: {
         Row: {
           attempted_at: string | null

@@ -313,6 +313,7 @@ export type Database = {
         Returns: boolean
       }
       is_super_user: { Args: { _user_id: string }; Returns: boolean }
+      set_super_user: { Args: { target_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

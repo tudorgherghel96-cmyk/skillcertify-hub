@@ -421,6 +421,7 @@ export type Database = {
           slug: string
         }[]
       }
+      get_cohort_benchmark: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

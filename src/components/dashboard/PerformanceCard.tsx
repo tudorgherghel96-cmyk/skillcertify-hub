@@ -11,6 +11,10 @@ import {
   Brain,
   AlertTriangle,
   Target,
+  Users,
+  ArrowUp,
+  ArrowDown,
+  Minus,
 } from "lucide-react";
 
 interface PassData {
@@ -26,22 +30,29 @@ interface PassData {
   concepts_total: number;
 }
 
+interface CohortData {
+  avg_probability: number;
+  avg_accuracy: number;
+  avg_response_time_ms: number;
+  total_users: number;
+}
+
 export default function PerformanceCard() {
   const [data, setData] = useState<PassData | null>(null);
+  const [cohort, setCohort] = useState<CohortData | null>(null);
 
   useEffect(() => {
     const load = async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return;
 
-      const { data: result } = await supabase.rpc(
-        "compute_pass_probability" as any,
-        { p_user_id: userData.user.id }
-      );
+      const [probRes, cohortRes] = await Promise.all([
+        supabase.rpc("compute_pass_probability" as any, { p_user_id: userData.user.id }),
+        supabase.rpc("get_cohort_benchmark" as any),
+      ]);
 
-      if (result) {
-        setData(result as unknown as PassData);
-      }
+      if (probRes.data) setData(probRes.data as unknown as PassData);
+      if (cohortRes.data) setCohort(cohortRes.data as unknown as CohortData);
     };
     load();
   }, []);
@@ -204,6 +215,43 @@ export default function PerformanceCard() {
               <p className="text-[10px] text-muted-foreground">Avg Speed</p>
             </div>
           </div>
+
+          {/* Cohort Benchmarking */}
+          {cohort && cohort.total_users > 0 && (() => {
+            const diff = Math.round(prob - cohort.avg_probability);
+            const DiffIcon = diff > 0 ? ArrowUp : diff < 0 ? ArrowDown : Minus;
+            const diffColor = diff > 0 ? "text-primary" : diff < 0 ? "text-destructive" : "text-muted-foreground";
+            const speedDiff = cohort.avg_response_time_ms - data.avg_response_time_ms;
+            const fasterSlower = speedDiff > 500 ? "Faster" : speedDiff < -500 ? "Slower" : "Average";
+            const speedColor = speedDiff > 500 ? "text-primary" : speedDiff < -500 ? "text-destructive" : "text-muted-foreground";
+
+            return (
+              <div className="border-t border-border/50 pt-4 space-y-3">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <Users className="h-3.5 w-3.5" />
+                  <span>vs {cohort.total_users} learner{cohort.total_users !== 1 ? "s" : ""}</span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-center p-2 rounded-lg bg-muted/30">
+                    <div className={`flex items-center justify-center gap-0.5 ${diffColor}`}>
+                      <DiffIcon className="h-3.5 w-3.5" />
+                      <span className="text-sm font-bold">{diff > 0 ? "+" : ""}{diff}%</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">vs Avg</p>
+                  </div>
+                  <div className="text-center p-2 rounded-lg bg-muted/30">
+                    <p className="text-sm font-bold text-foreground">{cohort.avg_probability}%</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Cohort Avg</p>
+                  </div>
+                  <div className="text-center p-2 rounded-lg bg-muted/30">
+                    <p className={`text-sm font-bold ${speedColor}`}>{fasterSlower}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Response</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
     </motion.div>

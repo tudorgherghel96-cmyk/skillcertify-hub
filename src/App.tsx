@@ -17,8 +17,7 @@ import SelectLanguage from "@/pages/SelectLanguage";
 import Auth from "@/pages/Auth";
 import JourneyDashboard from "@/pages/JourneyDashboard";
 import LearnHub from "@/pages/LearnHub";
-import PracticeHub from "@/pages/PracticeHub";
-import Journey from "@/pages/Journey";
+import MyCard from "@/pages/MyCard";
 import Profile from "@/pages/Profile";
 import ModuleOverview from "@/pages/ModuleOverview";
 import LessonPlayer from "@/pages/LessonPlayer";
@@ -27,7 +26,6 @@ import GqaTest from "@/pages/GqaTest";
 import CscsPrep from "@/pages/CscsPrep";
 import CscsTest from "@/pages/CscsTest";
 import Results from "@/pages/Results";
-import CscsRoute from "@/pages/CscsRoute";
 import NotFound from "@/pages/NotFound";
 import BoostDrill from "@/pages/BoostDrill";
 
@@ -53,8 +51,7 @@ const App = () => (
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                 <Route path="/dashboard" element={<JourneyDashboard />} />
                 <Route path="/learn" element={<LearnHub />} />
-                <Route path="/practice-hub" element={<PracticeHub />} />
-                <Route path="/journey" element={<Journey />} />
+                <Route path="/my-card" element={<MyCard />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/module/:id" element={<ModuleOverview />} />
                 <Route path="/lesson/:moduleId/:lessonId" element={<LessonPlayer />} />
@@ -64,7 +61,10 @@ const App = () => (
                 <Route path="/cscs-prep" element={<CscsPrep />} />
                 <Route path="/cscs-test" element={<CscsTest />} />
                 <Route path="/results" element={<Results />} />
-                <Route path="/cscs-route" element={<Navigate to="/journey" replace />} />
+                {/* Legacy redirects */}
+                <Route path="/journey" element={<Navigate to="/my-card" replace />} />
+                <Route path="/practice-hub" element={<Navigate to="/learn" replace />} />
+                <Route path="/cscs-route" element={<Navigate to="/my-card" replace />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

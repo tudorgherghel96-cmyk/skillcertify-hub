@@ -54,7 +54,7 @@ const Auth = () => {
           <div className="h-14 w-14 mx-auto rounded-2xl bg-primary flex items-center justify-center">
             <ShieldCheck className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">SkillCert Buddy</h1>
+          <h1 className="text-2xl font-bold text-foreground">SkillCertify</h1>
           <p className="text-sm text-muted-foreground">
             Your fastest route to the CSCS Green Card
           </p>
@@ -67,8 +67,8 @@ const Auth = () => {
             </CardTitle>
             <CardDescription>
               {isLogin
-                ? "Sign in to continue your progress"
-                : "Start your journey to the CSCS card"}
+                ? "Sign in to keep going"
+                : "Get started on your CSCS card"}
             </CardDescription>
           </CardHeader>
           <CardContent>

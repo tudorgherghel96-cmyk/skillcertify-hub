@@ -1,18 +1,18 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronRight, CheckCircle, Lock, BookOpen, Target, ClipboardCheck } from "lucide-react";
+import { ChevronRight, CheckCircle, Lock, BookOpen, Target, ArrowRight, ShieldCheck, Timer } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { MODULES } from "@/data/courseData";
 import { moduleThumbnails } from "@/data/mediaMap";
 import {
   useProgress,
   getModuleProgress,
   getLessonsCompleted,
-  isPracticeUnlocked,
-  isGqaUnlocked,
   isModuleComplete,
   isModuleUnlocked,
+  allGqaPassed,
 } from "@/contexts/ProgressContext";
 import { useSuperUser } from "@/contexts/SuperUserContext";
 
@@ -29,18 +29,20 @@ const stagger = {
 export default function LearnHub() {
   const { progress } = useProgress();
   const { isSuperUser } = useSuperUser();
+  const showCscs = allGqaPassed(progress, isSuperUser);
 
   return (
     <motion.div
-      className="px-4 py-5 max-w-2xl mx-auto space-y-5 pb-24"
+      className="px-4 py-5 max-w-2xl mx-auto space-y-6 pb-24"
       variants={stagger}
       initial="hidden"
       animate="show"
     >
+      {/* Your Lessons */}
       <motion.div variants={fadeUp}>
-        <h1 className="text-lg font-bold text-foreground">Modules & Lessons</h1>
+        <h1 className="text-lg font-bold text-foreground">Your Lessons</h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          5 modules • Complete lessons → Practice → GQA test
+          5 topics — work through them in order
         </p>
       </motion.div>
 
@@ -72,7 +74,7 @@ export default function LearnHub() {
                     <div className="w-full bg-muted/30" style={{ aspectRatio: "16/7" }}>
                       <img
                         src={moduleThumbnails[mod.id]}
-                        alt={`Module ${mod.id}`}
+                        alt={mod.title}
                         className="w-full h-full object-cover"
                         loading="lazy"
                         onError={(e) => { (e.target as HTMLImageElement).src = '/fallback.webp'; }}
@@ -94,10 +96,10 @@ export default function LearnHub() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-sm leading-tight">
-                          Module {mod.id}: {mod.title}
+                          {mod.title}
                         </h3>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {lessonsComplete}/{mod.lessons.length} lessons • {mod.topics.length} topics
+                          {lessonsComplete} of {mod.lessons.length} done
                         </p>
                       </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -106,23 +108,6 @@ export default function LearnHub() {
                     {unlocked && !complete && (
                       <Progress value={percent} className="h-1.5" />
                     )}
-
-                    {unlocked && (
-                      <div className="flex gap-4 text-[10px] text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <BookOpen className="h-3 w-3" />
-                          <span>{lessonsComplete}/{mod.lessons.length}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Target className="h-3 w-3" />
-                          <span>{mp.practice.bestScore > 0 ? `${mp.practice.bestScore}%` : "—"}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <ClipboardCheck className="h-3 w-3" />
-                          <span>{complete ? `✅ ${mp.gqa.score}%` : mp.gqa.passed === false ? "❌ Failed" : "—"}</span>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               </Link>
@@ -130,6 +115,31 @@ export default function LearnHub() {
           );
         })}
       </div>
+
+      {/* Practice section */}
+      <motion.div variants={fadeUp} className="space-y-3">
+        <h2 className="text-lg font-bold text-foreground">Practice</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <Link to="/practice/1">
+            <Card className="hover:border-primary/20 transition-all active:scale-[0.98]">
+              <CardContent className="py-4 flex flex-col items-center gap-2 text-center">
+                <Target className="h-6 w-6 text-primary" />
+                <p className="text-sm font-semibold">Quick Practice</p>
+                <p className="text-[10px] text-muted-foreground">10 random questions</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link to="/cscs-prep">
+            <Card className={`transition-all active:scale-[0.98] ${showCscs ? "hover:border-primary/20" : "opacity-50 pointer-events-none"}`}>
+              <CardContent className="py-4 flex flex-col items-center gap-2 text-center">
+                <ShieldCheck className="h-6 w-6 text-primary" />
+                <p className="text-sm font-semibold">Mock Test</p>
+                <p className="text-[10px] text-muted-foreground">Full timed CSCS mock</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      </motion.div>
     </motion.div>
   );
 }

@@ -1,11 +1,11 @@
-import { useState, useCallback, useRef } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Globe, Flame, Zap, Timer } from "lucide-react";
+import { Globe, Flame, Zap, Timer, RotateCcw, Brain, TrendingUp, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
 import { useGamification } from "@/contexts/GamificationContext";
 import { useProgress, getOverallProgress } from "@/contexts/ProgressContext";
-import { useSuperUser } from "@/contexts/SuperUserContext";
 import JourneyStrip from "@/components/journey/JourneyStrip";
 import HeroCTA from "@/components/journey/HeroCTA";
 import ReadinessCard from "@/components/readiness/ReadinessCard";
@@ -55,7 +55,7 @@ export default function JourneyDashboard() {
         <QuickSession mode={quickMode} onClose={() => setQuickMode(null)} />
       )}
 
-      {/* Top bar: Welcome + language */}
+      {/* Top bar */}
       <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold text-foreground">Welcome back 👋</h1>
@@ -92,7 +92,7 @@ export default function JourneyDashboard() {
         </div>
       </motion.div>
 
-      {/* Journey Strip Stepper */}
+      {/* Journey Strip */}
       <motion.div variants={fadeUp}>
         <JourneyStrip />
       </motion.div>
@@ -107,13 +107,13 @@ export default function JourneyDashboard() {
         <DueToday />
       </motion.div>
 
-      {/* Quick Session */}
+      {/* Quick Sessions */}
       {!quickMode && (
         <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3">
           <Button
             onClick={() => setQuickMode("drill")}
             variant="outline"
-            className="h-14 flex flex-col items-center gap-0.5 border-border"
+            className="h-14 flex flex-col items-center gap-0.5 border-border active:scale-[0.97] transition-transform"
           >
             <Zap className="h-5 w-5 text-primary" />
             <span className="text-xs font-semibold">Quick Drill</span>
@@ -121,7 +121,7 @@ export default function JourneyDashboard() {
           <Button
             onClick={() => setQuickMode("blitz")}
             variant="outline"
-            className="h-14 flex flex-col items-center gap-0.5 border-border"
+            className="h-14 flex flex-col items-center gap-0.5 border-border active:scale-[0.97] transition-transform"
           >
             <Timer className="h-5 w-5 text-primary" />
             <span className="text-xs font-semibold">2-Min Blitz</span>
@@ -129,12 +129,15 @@ export default function JourneyDashboard() {
         </motion.div>
       )}
 
-      {/* Secondary cards: Readiness + Performance */}
+      {/* Readiness + Performance */}
       <motion.div variants={fadeUp}>
         <Accordion type="single" collapsible defaultValue="readiness" className="space-y-3">
           <AccordionItem value="readiness" className="border rounded-xl overflow-hidden">
             <AccordionTrigger className="px-4 py-3 text-sm font-semibold hover:no-underline">
-              Readiness & Pass Probability
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                Readiness & Pass Probability
+              </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4 space-y-4">
               <ReadinessCard />
@@ -149,7 +152,10 @@ export default function JourneyDashboard() {
         <Accordion type="single" collapsible className="space-y-3">
           <AccordionItem value="rewards" className="border rounded-xl overflow-hidden">
             <AccordionTrigger className="px-4 py-3 text-sm font-semibold hover:no-underline">
-              Streak & Rewards
+              <div className="flex items-center gap-2">
+                <Flame className="h-4 w-4 text-primary" />
+                Streak & Rewards
+              </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4 space-y-4">
               <StreakBanner streak={gamification.streak} />

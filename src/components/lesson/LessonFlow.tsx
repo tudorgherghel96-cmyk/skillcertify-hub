@@ -1,13 +1,15 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, BookOpen, Volume2, Bookmark, BookmarkCheck, ChevronUp, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import SlideRenderer from "./SlideRenderer";
+import LessonGlossary from "./LessonGlossary";
 import type { Slide } from "@/data/slidesSchema";
 import { supabase } from "@/integrations/supabase/client";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { triggerHaptic } from "@/lib/haptics";
 
 interface LessonFlowProps {
   slides: Slide[];
@@ -32,6 +34,10 @@ export default function LessonFlow({
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [quizLocked, setQuizLocked] = useState(false);
+  const [showGlossary, setShowGlossary] = useState(false);
+  const [bookmarked, setBookmarked] = useState<Set<number>>(new Set());
+  const [showXpToast, setShowXpToast] = useState(false);
+  const [xpMessage, setXpMessage] = useState("");
   const isAnimating = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
@@ -41,6 +47,11 @@ export default function LessonFlow({
   const isFirst = index === 0;
   const currentSlide = slides[index];
 
+  // Extract key terms from slides for glossary
+  const keyTerms = slides
+    .filter((s): s is Extract<Slide, { type: "keyterm" }> => s.type === "keyterm")
+    .map((s) => ({ term: s.term, explanation: s.explanation }));
+
   // Check if current slide is an unanswered quiz
   useEffect(() => {
     setQuizLocked(currentSlide?.type === "quiz");
@@ -49,7 +60,6 @@ export default function LessonFlow({
   const go = useCallback(
     (dir: 1 | -1) => {
       if (isAnimating.current) return;
-      // Block forward swipe on locked quiz
       if (dir === 1 && quizLocked) return;
       const next = index + dir;
       if (next < 0 || next >= total) {
@@ -72,13 +82,11 @@ export default function LessonFlow({
     return () => window.removeEventListener("keydown", handler);
   }, [go]);
 
-  // @use-gesture/react drag handler with swipe config
   const bind = useDrag(
     ({ last, swipe: [, sy], movement: [, my], velocity: [, vy], direction: [, dy] }) => {
-      if (!last) return; // only act on gesture end
+      if (!last) return;
       if (sy === -1) return go(1);
-      if (sy ===  1) return go(-1);
-      // fallback: large movement or fast velocity WITH correct direction
+      if (sy === 1) return go(-1);
       if ((Math.abs(my) > 80 || vy > 0.3) && dy !== 0) {
         dy < 0 ? go(1) : go(-1);
       }
@@ -95,13 +103,18 @@ export default function LessonFlow({
     async (correct: boolean, conceptSlug?: string, responseTimeMs?: number) => {
       setQuizLocked(false);
 
-      // Track concept attempt with spaced recall scheduling
+      // Show XP toast
+      if (correct) {
+        triggerHaptic("success");
+        setXpMessage("+10 XP · Nice one!");
+        setShowXpToast(true);
+        setTimeout(() => setShowXpToast(false), 2000);
+      }
+
       if (conceptSlug) {
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (!user) return;
-
-          // Find concept by slug
           const { data: concept } = await supabase
             .from("concepts")
             .select("id")
@@ -111,11 +124,10 @@ export default function LessonFlow({
           if (concept) {
             const nextReview = new Date();
             if (correct) {
-              nextReview.setDate(nextReview.getDate() + 1); // 1 day
+              nextReview.setDate(nextReview.getDate() + 1);
             } else {
-              nextReview.setHours(nextReview.getHours() + 1); // 1 hour
+              nextReview.setHours(nextReview.getHours() + 1);
             }
-
             await supabase.from("concept_attempts").insert({
               user_id: user.id,
               concept_id: concept.id,
@@ -124,17 +136,34 @@ export default function LessonFlow({
               next_review_at: nextReview.toISOString(),
             });
           }
-        } catch (e) {
-          // Silently fail — don't block UX
+        } catch {
+          // Silently fail
         }
       }
     },
     []
   );
 
+  const toggleBookmark = () => {
+    setBookmarked((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      triggerHaptic("tap");
+      return next;
+    });
+  };
+
+  const handleMarkComplete = () => {
+    onMarkComplete();
+    triggerHaptic("success");
+    setXpMessage("+50 XP · Lesson Complete! 🎉");
+    setShowXpToast(true);
+    setTimeout(() => setShowXpToast(false), 3000);
+  };
+
   const progress = ((index + 1) / total) * 100;
 
-  // Material-style ~300ms ease; reduced motion = instant opacity crossfade
   const slideVariants = reducedMotion
     ? {
         enter: () => ({ opacity: 0 }),
@@ -147,11 +176,7 @@ export default function LessonFlow({
           opacity: 0,
           scale: 0.98,
         }),
-        center: {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-        },
+        center: { y: 0, opacity: 1, scale: 1 },
         exit: (dir: number) => ({
           y: dir > 0 ? -80 : 80,
           opacity: 0,
@@ -169,33 +194,58 @@ export default function LessonFlow({
       className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden select-none"
       style={{ touchAction: "none" }}
     >
-      {/* Minimal top bar */}
-      <div className="relative z-30 flex items-center gap-3 px-4 h-12 bg-background/60 backdrop-blur-xl">
+      {/* Top bar */}
+      <div className="relative z-30 flex items-center gap-2 px-3 h-12 bg-background/80 backdrop-blur-xl border-b border-border/30">
         <Link
           to={`/module/${moduleId}`}
-          className="p-1.5 -ml-1.5 rounded-full hover:bg-muted/60 transition-colors"
+          className="p-1.5 -ml-1 rounded-full hover:bg-muted/60 transition-colors"
         >
           <ArrowLeft className="h-4 w-4 text-muted-foreground" />
         </Link>
         <p className="flex-1 text-xs font-medium text-muted-foreground truncate">
           {lessonTitle}
         </p>
-        <span className="text-[10px] text-muted-foreground/60 tabular-nums font-mono">
-          {index + 1}/{total}
-        </span>
+        <div className="flex items-center gap-1">
+          {/* Glossary button */}
+          {keyTerms.length > 0 && (
+            <button
+              onClick={() => setShowGlossary(true)}
+              className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-muted/60 transition-colors"
+              aria-label="Quick Glossary"
+            >
+              <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
+          )}
+          {/* Bookmark */}
+          <button
+            onClick={toggleBookmark}
+            className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-muted/60 transition-colors"
+            aria-label="Bookmark"
+          >
+            {bookmarked.has(index) ? (
+              <BookmarkCheck className="h-3.5 w-3.5 text-primary" />
+            ) : (
+              <Bookmark className="h-3.5 w-3.5 text-muted-foreground" />
+            )}
+          </button>
+          {/* Slide counter */}
+          <span className="text-[10px] text-muted-foreground/60 tabular-nums font-mono ml-1">
+            {index + 1}/{total}
+          </span>
+        </div>
       </div>
 
-      {/* Progress bar — thin, clean */}
-      <div className="h-[2px] bg-muted/30 relative z-30">
+      {/* Progress bar */}
+      <div className="h-[3px] bg-muted/30 relative z-30">
         <motion.div
           className="h-full bg-primary rounded-full"
           initial={false}
           animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+          transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
         />
       </div>
 
-      {/* Slide area with drag */}
+      {/* Slide area */}
       <div
         {...bind()}
         className="flex-1 relative overflow-hidden"
@@ -227,7 +277,31 @@ export default function LessonFlow({
           </motion.div>
         </AnimatePresence>
 
-        {/* Quiz lock overlay hint */}
+        {/* Nav hints - bottom area */}
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-6 z-20 pointer-events-none">
+          {!isFirst && !quizLocked && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.4 }}
+              className="pointer-events-auto h-8 w-8 rounded-full bg-muted/60 backdrop-blur flex items-center justify-center"
+              onClick={() => go(-1)}
+            >
+              <ChevronDown className="h-4 w-4 text-muted-foreground rotate-180" />
+            </motion.button>
+          )}
+          {!isLast && !quizLocked && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.4 }}
+              className="pointer-events-auto h-8 w-8 rounded-full bg-muted/60 backdrop-blur flex items-center justify-center"
+              onClick={() => go(1)}
+            >
+              <ChevronUp className="h-4 w-4 text-muted-foreground rotate-180" />
+            </motion.button>
+          )}
+        </div>
+
+        {/* Quiz lock overlay */}
         <AnimatePresence>
           {quizLocked && (
             <motion.div
@@ -242,9 +316,26 @@ export default function LessonFlow({
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* XP Toast */}
+        <AnimatePresence>
+          {showXpToast && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              className="absolute top-4 left-0 right-0 flex justify-center z-30 pointer-events-none"
+            >
+              <div className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-lg">
+                {xpMessage}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Bottom — only shows on last slide */}
+      {/* Bottom — last slide */}
       <AnimatePresence>
         {isLast && (
           <motion.div
@@ -252,14 +343,21 @@ export default function LessonFlow({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 60, opacity: 0 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="relative z-30 px-6 py-4 bg-background/60 backdrop-blur-xl"
+            className="relative z-30 px-6 py-4 bg-background/80 backdrop-blur-xl border-t border-border/30"
           >
             {!isCompleted ? (
-              <Button onClick={onMarkComplete} className="w-full h-12 gap-2 text-sm font-semibold rounded-xl">
+              <Button
+                onClick={handleMarkComplete}
+                className="w-full h-12 gap-2 text-sm font-semibold rounded-xl active:scale-[0.97] transition-transform"
+              >
                 <CheckCircle2 className="h-4 w-4" /> Mark Complete
               </Button>
             ) : (
-              <Button onClick={onFinish} variant="outline" className="w-full h-12 text-sm font-semibold rounded-xl">
+              <Button
+                onClick={onFinish}
+                variant="outline"
+                className="w-full h-12 text-sm font-semibold rounded-xl active:scale-[0.97] transition-transform"
+              >
                 Continue →
               </Button>
             )}
@@ -267,7 +365,7 @@ export default function LessonFlow({
         )}
       </AnimatePresence>
 
-      {/* Swipe hint — only first slide, fades out */}
+      {/* Swipe hint — first slide only */}
       <AnimatePresence>
         {isFirst && (
           <motion.div
@@ -292,6 +390,13 @@ export default function LessonFlow({
               <p className="text-[10px] text-muted-foreground/50">Swipe up</p>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Quick Glossary Panel */}
+      <AnimatePresence>
+        {showGlossary && (
+          <LessonGlossary terms={keyTerms} onClose={() => setShowGlossary(false)} />
         )}
       </AnimatePresence>
     </div>

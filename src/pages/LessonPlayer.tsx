@@ -71,6 +71,10 @@ const LessonPlayer = () => {
   const touchStartY = useRef(0);
 
   useEffect(() => {
+    contentRef.current?.scrollTo(0, 0);
+  }, [moduleId, lessonId]);
+
+  useEffect(() => {
     recordStudySession();
     const id = setInterval(() => setTimeSpent((prev) => prev + 1), 1000);
     return () => {
@@ -105,8 +109,15 @@ const LessonPlayer = () => {
   const totalLessons = mod?.lessons.length ?? 0;
   const hasPrev = lessonId > 1;
   const hasNext = lessonId < totalLessons;
-  const goNext = () => hasNext ? navigate(`/lesson/${moduleId}/${lessonId + 1}`) : navigate(`/module/${moduleId}`);
-  const goPrev = () => hasPrev && navigate(`/lesson/${moduleId}/${lessonId - 1}`);
+  const goNext = () => {
+    if (hasNext) navigate(`/lesson/${moduleId}/${lessonId + 1}`);
+    else navigate(`/module/${moduleId}`);
+    contentRef.current?.scrollTo(0, 0);
+  };
+  const goPrev = () => {
+    if (hasPrev) navigate(`/lesson/${moduleId}/${lessonId - 1}`);
+    contentRef.current?.scrollTo(0, 0);
+  };
 
   // Swipe gestures
   const handleTouchStart = useCallback((e: React.TouchEvent) => {

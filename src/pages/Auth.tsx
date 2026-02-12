@@ -82,7 +82,7 @@ const Auth = () => {
       <div className="w-full max-w-sm space-y-6">
         {/* Logo / Brand */}
         <div className="text-center space-y-2">
-          <img src={skillcertifyIcon} alt="SkillCertify" className="h-14 w-14 mx-auto" />
+          <img src={skillcertifyIcon} alt="SkillCertify" className="h-12 w-auto mx-auto" />
           <h1 className="text-2xl font-bold text-foreground">SkillCertify</h1>
           <p className="text-sm text-muted-foreground">
             Your fastest route to the CSCS Green Card

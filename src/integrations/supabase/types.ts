@@ -35,6 +35,41 @@ export type Database = {
         }
         Relationships: []
       }
+      concept_attempts: {
+        Row: {
+          concept_id: string
+          created_at: string | null
+          id: string
+          is_correct: boolean
+          response_time_ms: number
+          user_id: string
+        }
+        Insert: {
+          concept_id: string
+          created_at?: string | null
+          id?: string
+          is_correct: boolean
+          response_time_ms: number
+          user_id: string
+        }
+        Update: {
+          concept_id?: string
+          created_at?: string | null
+          id?: string
+          is_correct?: boolean
+          response_time_ms?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "concept_attempts_concept_id_fkey"
+            columns: ["concept_id"]
+            isOneToOne: false
+            referencedRelation: "concepts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       concepts: {
         Row: {
           created_at: string
@@ -319,6 +354,25 @@ export type Database = {
       }
     }
     Views: {
+      v_concept_memory: {
+        Row: {
+          accuracy: number | null
+          attempts: number | null
+          concept_id: string | null
+          last_correct_at: string | null
+          median_response: number | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "concept_attempts_concept_id_fkey"
+            columns: ["concept_id"]
+            isOneToOne: false
+            referencedRelation: "concepts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_module_stats: {
         Row: {
           avg_practice_score: number | null
@@ -334,6 +388,7 @@ export type Database = {
       }
     }
     Functions: {
+      compute_concept_state: { Args: { p_user_id: string }; Returns: Json }
       compute_readiness: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
         Args: {

@@ -292,28 +292,28 @@ const LessonPlayer = () => {
           )}
 
           {/* Navigation */}
-          <motion.div variants={fadeUp} className="flex justify-between items-center pt-2 pb-4">
-            <Button variant="outline" size="sm" onClick={goPrev} disabled={!hasPrev}>
-              <ArrowLeft className="mr-1 h-4 w-4" /> {ui("previous", lang)}
+          <motion.div variants={fadeUp} className="flex justify-between items-center pt-2 pb-28">
+            <Button variant="outline" size="sm" onClick={goPrev} disabled={!hasPrev} className="gap-1">
+              <ArrowLeft className="h-4 w-4" /> {ui("previous", lang)}
             </Button>
             <span className="text-xs text-muted-foreground">{lessonId} / {totalLessons}</span>
-            <Button size="sm" onClick={goNext}>
-              {hasNext ? <>{ui("next", lang)} <ArrowRight className="ml-1 h-4 w-4" /></> : ui("back_to_module", lang)}
+            <Button size="sm" onClick={goNext} className="gap-1">
+              {hasNext ? <>{ui("next", lang)} <ArrowRight className="h-4 w-4" /></> : ui("back_to_module", lang)}
             </Button>
           </motion.div>
         </motion.div>
 
-        {/* Floating Mark Complete */}
+        {/* Floating Mark Complete — above bottom nav */}
         <AnimatePresence>
           {showMarkComplete && !isCompleted && (
             <motion.div
               initial={{ y: 80, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 80, opacity: 0 }}
-              className="fixed bottom-20 sm:bottom-6 left-0 right-0 px-4 z-40 max-w-2xl mx-auto"
+              className="fixed bottom-24 left-0 right-0 px-4 z-40 max-w-2xl mx-auto"
             >
-              <Button onClick={handleMarkComplete} className="w-full h-12 text-base font-semibold shadow-lg">
-                <CheckCircle2 className="mr-2 h-5 w-5" /> {ui("mark_complete", lang)}
+              <Button onClick={handleMarkComplete} className="w-full h-12 text-base font-semibold shadow-lg gap-2">
+                <CheckCircle2 className="h-5 w-5" /> {ui("mark_complete", lang)}
               </Button>
             </motion.div>
           )}

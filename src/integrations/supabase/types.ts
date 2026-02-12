@@ -398,6 +398,14 @@ export type Database = {
         }[]
       }
       compute_readiness: { Args: { p_user_id: string }; Returns: Json }
+      get_boost_concepts: {
+        Args: { p_user_id: string }
+        Returns: {
+          concept_id: string
+          priority: number
+          slug: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

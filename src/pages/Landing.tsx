@@ -57,7 +57,7 @@ const Landing = () => {
             alt="SkillCertify impact statistics"
             className="w-full rounded-xl"
             loading="lazy"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            onError={(e) => { (e.target as HTMLImageElement).src = '/fallback.webp'; }}
           />
         </div>
       </section>

@@ -103,11 +103,12 @@ function VideoSlide({ slide, isActive }: { slide: Extract<Slide, { type: "video"
   if (error) {
     return (
       <SlideShell>
-        <motion.div variants={pop} initial="hidden" animate="show" className="flex flex-col items-center gap-4">
+        <motion.div variants={pop} initial="hidden" animate="show" className="flex flex-col items-center gap-5">
           <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
             <Play className="h-7 w-7 text-muted-foreground ml-0.5" />
           </div>
           <p className="text-muted-foreground text-sm">Video coming soon</p>
+          <p className="text-[11px] text-muted-foreground/50 animate-pulse">Swipe up to continue ↑</p>
         </motion.div>
       </SlideShell>
     );

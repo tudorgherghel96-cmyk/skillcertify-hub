@@ -69,7 +69,7 @@ const ModuleOverview = () => {
   const { isSuperUser } = useSuperUser();
 
   if (!mod) {
-    return <div className="p-4 text-center text-muted-foreground">Module not found</div>;
+    return <div className="p-4 text-center text-muted-foreground">Topic not found</div>;
   }
 
   const mp = getModuleProgress(progress, moduleId);
@@ -92,10 +92,10 @@ const ModuleOverview = () => {
       >
         <motion.div variants={fadeUp}>
           <Link
-            to="/dashboard"
+            to="/learn"
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" /> Dashboard
+            <ArrowLeft className="h-4 w-4" /> Lessons
           </Link>
         </motion.div>
 
@@ -109,18 +109,18 @@ const ModuleOverview = () => {
             <Icon className={`h-6 w-6 ${complete ? "" : "text-primary"}`} />
           </div>
           <div>
-            <p className="text-xs text-primary font-medium">Module {moduleId}</p>
+            <p className="text-xs text-primary font-medium">Topic {moduleId}</p>
             <h1 className="text-lg font-bold leading-tight">{mod.title}</h1>
           </div>
         </motion.div>
 
-        {/* Closed-book reminder */}
+        {/* Test reminder */}
         <motion.div variants={fadeUp}>
           <GlassCard hoverable={false}>
             <div className="flex items-start gap-2 p-3">
               <Brain className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <p className="text-xs leading-snug">
-                <span className="font-semibold">Memorise everything.</span> The GQA test is closed-book — no notes.
+                You'll be tested on this without notes — but don't worry, we'll make sure you're ready.
               </p>
             </div>
           </GlassCard>
@@ -131,7 +131,7 @@ const ModuleOverview = () => {
           <div className="flex items-center gap-2 mb-3">
             <span className="text-base">📖</span>
             <h2 className="font-semibold text-sm">
-              Lessons — {lessonsComplete}/{mod.lessons.length} complete
+              Lessons — {lessonsComplete} of {mod.lessons.length} done
             </h2>
           </div>
           <div className="space-y-1.5">
@@ -176,24 +176,24 @@ const ModuleOverview = () => {
           </div>
         </motion.div>
 
-        {/* 🎯 PRACTICE QUIZ */}
+        {/* 🎯 PRACTICE */}
         <motion.div variants={fadeUp}>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-base">🎯</span>
-            <h2 className="font-semibold text-sm">Practice Quiz</h2>
+            <h2 className="font-semibold text-sm">Practice</h2>
           </div>
           <GlassCard hoverable={practiceReady} className={!practiceReady ? "opacity-50" : ""}>
             <CardContent className="py-4 space-y-3">
               <div className="flex items-center gap-3">
                 <Target className="h-5 w-5 text-primary shrink-0" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Drill until confident</p>
+                  <p className="text-sm font-medium">Practice until you're ready</p>
                   <p className="text-xs text-muted-foreground">
                     {practiceReady
                       ? mp.practice.attempts > 0
-                        ? `${mp.practice.attempts} attempt${mp.practice.attempts !== 1 ? "s" : ""} • Best score: ${mp.practice.bestScore}%`
+                        ? `${mp.practice.attempts} attempt${mp.practice.attempts !== 1 ? "s" : ""} · Best: ${mp.practice.bestScore}%`
                         : "Unlimited retakes — no score minimum to start"
-                      : "Complete all lessons to unlock"}
+                      : "Finish all lessons to unlock"}
                   </p>
                 </div>
                 {mp.practice.bestScore >= 80 && (
@@ -206,7 +206,7 @@ const ModuleOverview = () => {
                 <Button asChild variant="outline" className="w-full h-11">
                   <Link to={`/practice/${moduleId}`}>
                     <RotateCcw className="mr-2 h-4 w-4" />
-                    {mp.practice.attempts > 0 ? "Practice Again" : "Start Practice"}
+                    {mp.practice.attempts > 0 ? "Practice again" : "Start practice"}
                   </Link>
                 </Button>
               )}
@@ -214,11 +214,11 @@ const ModuleOverview = () => {
           </GlassCard>
         </motion.div>
 
-        {/* ✅ GQA MODULE TEST */}
+        {/* ✅ TOPIC TEST */}
         <motion.div variants={fadeUp}>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-base">✅</span>
-            <h2 className="font-semibold text-sm">GQA Module {moduleId} Test</h2>
+            <h2 className="font-semibold text-sm">Topic {moduleId} Test</h2>
           </div>
           <GlassCard
             hoverable={gqaReady && !complete}
@@ -238,7 +238,7 @@ const ModuleOverview = () => {
                   <CheckCircle className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-sm font-semibold text-primary">Passed — {mp.gqa.score}%</p>
-                    <p className="text-xs text-muted-foreground">Module {moduleId} complete</p>
+                    <p className="text-xs text-muted-foreground">Topic {moduleId} done</p>
                   </div>
                 </div>
               ) : failed ? (
@@ -250,21 +250,21 @@ const ModuleOverview = () => {
                         Not passed — {mp.gqa.score}%
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        You only need to resit this module. 80% required to pass.
+                        You only need to retake this topic. 80% needed to pass.
                       </p>
                     </div>
                   </div>
                   {canResitGqa(mp, isSuperUser) ? (
                     <Button asChild className="w-full h-11">
                       <Link to={`/gqa-test/${moduleId}`}>
-                        <RotateCcw className="mr-2 h-4 w-4" /> Resit Module {moduleId}
+                        <RotateCcw className="mr-2 h-4 w-4" /> Retake Topic {moduleId}
                       </Link>
                     </Button>
                   ) : (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 rounded-lg bg-muted">
                       <Clock className="h-4 w-4" />
                       <span>
-                        Resit available in {hoursUntilResit(mp)} hours. Review your lessons before then.
+                        Retake available in {hoursUntilResit(mp)} hours. Review your lessons.
                       </span>
                     </div>
                   )}
@@ -282,8 +282,8 @@ const ModuleOverview = () => {
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {gqaReady
-                        ? "Closed-book • 80% pass mark • 90 minutes"
-                        : "Score 80%+ on practice quiz to unlock"}
+                        ? "No notes · 80% to pass · 90 minutes"
+                        : "Score 80%+ in practice to unlock the test"}
                     </p>
                   </div>
                 </div>
@@ -291,7 +291,7 @@ const ModuleOverview = () => {
               {gqaReady && !complete && !failed && (
                 <Button asChild className="w-full h-11">
                   <Link to={`/gqa-test/${moduleId}`}>
-                    <ExternalLink className="mr-2 h-4 w-4" /> Open GQA Test
+                    <ExternalLink className="mr-2 h-4 w-4" /> Start test
                   </Link>
                 </Button>
               )}

@@ -92,7 +92,7 @@ const Landing = () => {
         >
           <CardWallet currentTarget="green" />
           <p className="text-xs text-muted-foreground text-center mt-3 px-4 leading-relaxed">
-            Start with Green. Then keep going — online learning, evidence, verification. All in one app.
+            Start with Green. Then go for Blue, Gold, or Black — all from the same app.
           </p>
         </motion.div>
       </section>

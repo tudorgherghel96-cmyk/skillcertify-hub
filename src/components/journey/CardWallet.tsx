@@ -48,7 +48,7 @@ const cards = [
     image: blackCard,
     level: "NVQ Level 6",
     unlocked: false,
-    prereqs: "NVQ Level 6 or 7 in Construction Management. Senior management pathway.",
+    prereqs: "NVQ Level 6 or 7 in Construction Management.",
   },
 ];
 
@@ -58,9 +58,7 @@ export default function CardWallet({ currentTarget = "green" }: CardWalletProps)
   return (
     <>
       <div className="space-y-3">
-        <h3 className="text-sm font-bold text-foreground">Your target card</h3>
-
-        {/* Primary active card */}
+        {/* Primary active card — no "YOUR TARGET" label */}
         {cards
           .filter((c) => c.id === currentTarget)
           .map((card) => (
@@ -78,11 +76,6 @@ export default function CardWallet({ currentTarget = "green" }: CardWalletProps)
                 className="w-full aspect-[1.586/1] object-cover"
                 loading="eager"
               />
-              <div className="absolute top-3 left-3">
-                <span className="text-[10px] font-bold bg-primary text-primary-foreground px-2.5 py-1 rounded-full badge-sm">
-                  YOUR TARGET
-                </span>
-              </div>
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 pt-10">
                 <p className="text-sm font-bold text-white">{card.label}</p>
                 <p className="text-xs text-white/80">{card.level}</p>
@@ -144,12 +137,12 @@ export default function CardWallet({ currentTarget = "green" }: CardWalletProps)
             </div>
             <div className="space-y-2">
               <div className="rounded-lg bg-muted p-3">
-                <p className="text-xs font-semibold text-foreground">Prerequisites</p>
+                <p className="text-xs font-semibold text-foreground">What you need</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{selectedLocked?.prereqs}</p>
               </div>
               <div className="flex items-center gap-2 text-xs text-primary">
                 <ChevronRight className="h-3.5 w-3.5" />
-                <span className="font-medium">Coming soon — upgrade path available later</span>
+                <span className="font-medium">Coming soon — upgrade available later</span>
               </div>
             </div>
           </div>

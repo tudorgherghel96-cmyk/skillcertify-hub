@@ -1,8 +1,7 @@
-import { Globe, LogOut } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Globe } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,14 +17,12 @@ interface TopNavProps {
 
 const TopNav = ({ currentModule, currentLesson, overallProgress = 0 }: TopNavProps) => {
   const { language, setLanguage } = useLanguage();
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
 
   return (
     <header className="sticky top-0 z-50 border-b bg-card">
       <div className="flex items-center justify-between px-4 h-14">
         <Link to="/" className="flex items-center gap-1.5">
-          <span className="text-lg font-bold text-primary tracking-tight">SKILLCERTIFY</span>
+          <span className="text-lg font-bold text-primary tracking-tight">SkillCertify</span>
         </Link>
 
         <div className="flex items-center gap-1">
@@ -50,16 +47,6 @@ const TopNav = ({ currentModule, currentLesson, overallProgress = 0 }: TopNavPro
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {user && (
-            <button
-              onClick={() => signOut()}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors p-2 -mr-2"
-              aria-label="Sign out"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-          )}
         </div>
       </div>
 
@@ -68,8 +55,8 @@ const TopNav = ({ currentModule, currentLesson, overallProgress = 0 }: TopNavPro
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
             {currentModule && (
               <span>
-                Module {currentModule} of 5
-                {currentLesson && ` — Lesson ${currentLesson}`}
+                Topic {currentModule} of 5
+                {currentLesson && ` · Lesson ${currentLesson}`}
               </span>
             )}
             <span>{overallProgress}% complete</span>

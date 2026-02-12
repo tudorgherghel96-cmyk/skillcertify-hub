@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Clock, AlertCircle, CreditCard, QrCode, ShieldCheck, Wifi, WifiOff } from "lucide-react";
+import { CheckCircle2, Clock, CreditCard, QrCode, ShieldCheck, WifiOff, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 type SmartCheckStatus = "not_requested" | "requested" | "checking" | "active" | "issue";
 
@@ -22,6 +23,11 @@ export default function CscsSmartCheck({
   const [showSiteCheck, setShowSiteCheck] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [cachedAt, setCachedAt] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  const workerName = user?.user_metadata?.full_name
+    || user?.email?.split("@")[0]
+    || "Worker";
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -58,46 +64,61 @@ export default function CscsSmartCheck({
 
   const hasRegNumber = !!cscsRegNumber && (cardRequestStatus === "reg_issued" || cardRequestStatus === "active");
 
+  // Full-screen site check pass — Apple Wallet style
   if (showSiteCheck) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 z-50 bg-background flex flex-col"
+        className="fixed inset-0 z-50 bg-white flex flex-col"
       >
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <h2 className="text-sm font-bold text-foreground">Site Check Pass</h2>
-          <Button variant="ghost" size="sm" onClick={() => setShowSiteCheck(false)}>
-            Close
-          </Button>
+          <button
+            onClick={() => setShowSiteCheck(false)}
+            className="h-8 w-8 rounded-full bg-muted flex items-center justify-center"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6">
-          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <ShieldCheck className="h-8 w-8 text-primary" />
+          {/* Green banner */}
+          <div className="w-full max-w-xs bg-emerald-600 text-white rounded-xl px-4 py-3 text-center">
+            <p className="text-xs font-bold uppercase tracking-wider">Valid for site access</p>
           </div>
+
+          {/* Worker name */}
+          <p className="text-xl font-bold text-foreground">{workerName}</p>
+
+          {/* CSCS reg number — huge and clear */}
           <div className="text-center space-y-1">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">CSCS Registration Number</p>
-            <p className="text-4xl font-bold tracking-wider text-foreground">{cscsRegNumber}</p>
+            <p className="text-4xl font-bold tracking-[0.15em] text-foreground font-mono">{cscsRegNumber}</p>
           </div>
+
           <div className="text-center space-y-1">
             <p className="text-sm font-semibold text-foreground">{cardType}</p>
             {expiryDate && (
               <p className="text-xs text-muted-foreground">Valid until {expiryDate}</p>
             )}
           </div>
-          <div className="h-32 w-32 rounded-xl border-2 border-border flex items-center justify-center bg-muted/30">
-            <QrCode className="h-16 w-16 text-muted-foreground/40" />
+
+          <div className="h-28 w-28 rounded-xl border-2 border-border flex items-center justify-center bg-muted/30">
+            <QrCode className="h-14 w-14 text-muted-foreground/40" />
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-primary font-medium">
+
+          <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
             <ShieldCheck className="h-3.5 w-3.5" />
             Verified via Smart Check
           </div>
+
           {!isOnline && cachedAt && (
-            <div className="flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-lg">
+            <div className="flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg">
               <WifiOff className="h-3.5 w-3.5" />
               Offline — last checked: {cachedAt}
             </div>
           )}
+
           <p className="text-[10px] text-muted-foreground text-center max-w-xs leading-relaxed">
             Always follow site rules. Some sites may require additional checks.
           </p>
@@ -116,10 +137,9 @@ export default function CscsSmartCheck({
 
         {!hasRegNumber && cardRequestStatus === "not_started" && (
           <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">Request your card to get your CSCS number.</p>
-            <Button size="sm" className="w-full h-9" disabled>
-              Request my card
-            </Button>
+            <p className="text-xs text-muted-foreground">
+              Your CSCS number will appear here once your card is requested. This is your digital pass to get on site.
+            </p>
           </div>
         )}
 
@@ -127,7 +147,7 @@ export default function CscsSmartCheck({
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-xs">
               <Clock className="h-3.5 w-3.5 text-amber-500" />
-              <span className="text-foreground font-medium">Card requested — waiting for CSCS number</span>
+              <span className="text-foreground font-medium">Card requested — waiting for your CSCS number</span>
             </div>
             <p className="text-xs text-muted-foreground">Your CSCS number will appear here as soon as it's issued.</p>
           </div>
@@ -135,25 +155,29 @@ export default function CscsSmartCheck({
 
         {hasRegNumber && (
           <div className="space-y-3">
-            <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 text-center space-y-1">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Registration Number</p>
-              <p className="text-2xl font-bold tracking-wider text-foreground">{cscsRegNumber}</p>
-              <div className="flex items-center justify-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                <span className="text-xs text-primary font-medium">
-                  {cardRequestStatus === "active" ? "Active" : "Issued"}
-                </span>
-                {expiryDate && (
-                  <span className="text-xs text-muted-foreground">• Valid until {expiryDate}</span>
-                )}
+            {/* Digital wallet-style card */}
+            <div className="bg-emerald-600 rounded-xl p-4 text-white space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] uppercase tracking-wider font-semibold opacity-80">CSCS Registration</p>
+                <div className="flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded-full">
+                  <CheckCircle2 className="h-3 w-3" />
+                  <span className="text-[10px] font-bold">VALID</span>
+                </div>
+              </div>
+              <p className="text-lg font-bold">{workerName}</p>
+              <p className="text-2xl font-bold tracking-[0.12em] font-mono">{cscsRegNumber}</p>
+              <div className="flex items-center justify-between text-xs opacity-80">
+                <span>{cardType}</span>
+                {expiryDate && <span>Valid until {expiryDate}</span>}
               </div>
             </div>
+
             <Button
               className="w-full h-11"
               onClick={() => setShowSiteCheck(true)}
             >
               <ShieldCheck className="mr-2 h-4 w-4" />
-              Show for site check
+              Show full screen
             </Button>
             {!isOnline && cachedAt && (
               <p className="text-[10px] text-muted-foreground text-center flex items-center justify-center gap-1">

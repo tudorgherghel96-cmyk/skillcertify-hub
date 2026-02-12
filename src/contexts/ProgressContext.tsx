@@ -120,16 +120,16 @@ export const getNextAction = (
         return {
           moduleId: mod.id,
           lessonId: lesson.id,
-          label: `Continue Module ${mod.id} — Lesson ${mod.id}.${lesson.id}`,
+          label: `Continue Topic ${mod.id} · Lesson ${lesson.id}`,
         };
       }
     }
 
     // all lessons done, practice or GQA next
     if (!isGqaUnlocked(mp)) {
-      return { moduleId: mod.id, lessonId: null, label: `Practice Quiz — Module ${mod.id}` };
+      return { moduleId: mod.id, lessonId: null, label: `Practice — Topic ${mod.id}` };
     }
-    return { moduleId: mod.id, lessonId: null, label: `Take GQA Module ${mod.id} Test` };
+    return { moduleId: mod.id, lessonId: null, label: `Take Topic ${mod.id} Test` };
   }
   if (allGqaPassed(state)) {
     return { moduleId: 0, lessonId: null, label: "Prepare for CSCS Test" };

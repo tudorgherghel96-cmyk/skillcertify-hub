@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronRight, CheckCircle, Lock, BookOpen, Target, ArrowRight, ShieldCheck, Timer } from "lucide-react";
+import { ChevronRight, CheckCircle, Lock, Target, ArrowRight, ShieldCheck } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { MODULES } from "@/data/courseData";
 import { moduleThumbnails } from "@/data/mediaMap";
 import {
@@ -31,6 +32,13 @@ export default function LearnHub() {
   const { isSuperUser } = useSuperUser();
   const showCscs = allGqaPassed(progress, isSuperUser);
 
+  // Find first incomplete topic
+  const firstIncompleteMod = MODULES.find((mod) => {
+    const mp = getModuleProgress(progress, mod.id);
+    const unlocked = isModuleUnlocked(progress, mod.id, isSuperUser);
+    return unlocked && !isModuleComplete(mp);
+  });
+
   return (
     <motion.div
       className="px-4 py-5 max-w-2xl mx-auto space-y-6 pb-24"
@@ -54,6 +62,7 @@ export default function LearnHub() {
           const complete = isModuleComplete(mp);
           const percent = Math.round((lessonsComplete / mod.lessons.length) * 100);
           const Icon = mod.icon;
+          const isNext = firstIncompleteMod?.id === mod.id;
 
           return (
             <motion.div key={mod.id} variants={fadeUp}>
@@ -65,6 +74,8 @@ export default function LearnHub() {
                   className={`rounded-xl border bg-card overflow-hidden transition-all ${
                     complete
                       ? "border-primary/30"
+                      : isNext
+                      ? "border-primary/40 ring-2 ring-primary/20"
                       : !unlocked
                       ? "opacity-40"
                       : "border-border hover:border-primary/20 hover:shadow-sm"
@@ -95,9 +106,16 @@ export default function LearnHub() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm leading-tight">
-                          {mod.title}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-sm leading-tight">
+                            {mod.title}
+                          </h3>
+                          {isNext && !complete && (
+                            <Badge variant="secondary" className="bg-primary text-primary-foreground text-[9px] px-1.5 py-0">
+                              NEXT
+                            </Badge>
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {lessonsComplete} of {mod.lessons.length} done
                         </p>

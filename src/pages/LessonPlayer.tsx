@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { MODULES } from "@/data/courseData";
 import { getLessonContent } from "@/data/lessonContent";
 import { getModule1Lesson, t } from "@/data/module1Content";
@@ -50,11 +50,20 @@ const LessonPlayer = () => {
     };
   }, []);
 
+  // Hide bottom nav during lesson
+  useEffect(() => {
+    const bottomNav = document.querySelector("nav.fixed.bottom-0");
+    if (bottomNav) (bottomNav as HTMLElement).style.display = "none";
+    return () => {
+      if (bottomNav) (bottomNav as HTMLElement).style.display = "";
+    };
+  }, []);
+
   if (!mod || !lesson) {
     return (
       <div className="px-4 py-12 text-center">
         <p className="text-muted-foreground">Lesson not found.</p>
-        <Link to="/dashboard" className="text-primary underline mt-2 inline-block text-sm">Back to Dashboard</Link>
+        <Link to="/learn" className="text-primary underline mt-2 inline-block text-sm">Back to lessons</Link>
       </div>
     );
   }
@@ -64,7 +73,7 @@ const LessonPlayer = () => {
   // Build slides from i18n content
   const slides = i18nContent
     ? buildSlidesFromI18n(i18nContent, lang, moduleId, lessonId, lessonTitle)
-    : [{ type: "hero" as const, title: lessonTitle, subtitle: `Module ${moduleId} · Lesson ${lessonId}` }];
+    : [{ type: "hero" as const, title: lessonTitle, subtitle: `Topic ${moduleId} · Lesson ${lessonId}` }];
 
   const handleMarkComplete = () => {
     completeLesson(moduleId, lessonId);

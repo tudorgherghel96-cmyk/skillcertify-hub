@@ -18,6 +18,7 @@ import { useProgress } from "@/contexts/ProgressContext";
 import {
   getModuleProgress,
   areAllLessonsComplete,
+  getLessonsCompleted,
   isGqaUnlocked,
   isModuleComplete,
   isModuleUnlocked,
@@ -35,15 +36,16 @@ const GqaTest = () => {
   if (!mod) {
     return (
       <div className="px-4 py-12 text-center">
-        <p className="text-muted-foreground">Module not found.</p>
-        <Link to="/dashboard" className="text-primary underline text-sm">
-          Back to Dashboard
+        <p className="text-muted-foreground">Topic not found.</p>
+        <Link to="/learn" className="text-primary underline text-sm">
+          Back to lessons
         </Link>
       </div>
     );
   }
 
   const totalLessons = mod.lessons.length;
+  const doneLessons = getLessonsCompleted(mp, totalLessons);
   const lessonsComplete = areAllLessonsComplete(mp, totalLessons);
   const practiceReady = isGqaUnlocked(mp);
   const passed = mp.gqa.passed === true;
@@ -63,15 +65,15 @@ const GqaTest = () => {
           to={`/module/${moduleId}`}
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" /> Module {moduleId}
+          <ArrowLeft className="h-4 w-4" /> Topic {moduleId}
         </Link>
         <h1 className="text-lg font-bold mt-1 text-foreground">
-          GQA Module {moduleId} Assessment
+          Topic {moduleId} Test
         </h1>
         <p className="text-sm text-muted-foreground">{mod.title}</p>
       </div>
 
-      {/* Module Pass Tracker */}
+      {/* Topic Pass Tracker */}
       <div className="flex gap-1.5 overflow-x-auto pb-1">
         {MODULES.map((m) => {
           const mmp = getModuleProgress(progress, m.id);
@@ -96,7 +98,7 @@ const GqaTest = () => {
                 <Clock className="h-3.5 w-3.5 text-amber-500 shrink-0" />
               )}
               <span className={complete ? "text-primary" : unlocked ? "text-foreground" : "text-muted-foreground"}>
-                M{m.id}
+                T{m.id}
                 {complete && mmp.gqa.score !== null && ` ${mmp.gqa.score}%`}
               </span>
             </div>
@@ -109,7 +111,7 @@ const GqaTest = () => {
         <div className="rounded-xl border-2 border-primary bg-primary/5 p-5 text-center space-y-3">
           <CheckCircle2 className="h-12 w-12 text-primary mx-auto" />
           <h2 className="text-xl font-bold text-foreground">
-            🎉 Module {moduleId} PASSED!
+            🎉 Topic {moduleId} passed!
           </h2>
           <p className="text-sm text-muted-foreground">
             Score: {mp.gqa.score}% — Well done!
@@ -117,13 +119,13 @@ const GqaTest = () => {
           {hasNextModule ? (
             <Button asChild className="h-11">
               <Link to={`/module/${nextModuleId}`}>
-                Next: Module {nextModuleId} <ArrowRight className="ml-1.5 h-4 w-4" />
+                Next: Topic {nextModuleId} <ArrowRight className="ml-1.5 h-4 w-4" />
               </Link>
             </Button>
           ) : (
             <Button asChild className="h-11">
               <Link to="/cscs-prep">
-                Prepare for CSCS Test <ArrowRight className="ml-1.5 h-4 w-4" />
+                Prepare for CSCS test <ArrowRight className="ml-1.5 h-4 w-4" />
               </Link>
             </Button>
           )}
@@ -136,7 +138,7 @@ const GqaTest = () => {
           <div className="text-center space-y-2">
             <XCircle className="h-10 w-10 text-destructive mx-auto" />
             <h2 className="text-lg font-bold text-foreground">
-              Module {moduleId} — Not passed this time
+              Topic {moduleId} — not passed this time
             </h2>
             <p className="text-sm text-muted-foreground">
               Score: {mp.gqa.score}%. You need 80% to pass.
@@ -145,42 +147,39 @@ const GqaTest = () => {
 
           <div className="bg-card border rounded-lg p-3 space-y-2">
             <p className="text-sm font-medium text-foreground">
-              ✓ Your other module passes are safe
+              ✓ Your other topic passes are safe
             </p>
             <p className="text-sm text-muted-foreground">
-              You only need to resit Module {moduleId}. All previously passed
-              modules remain valid.
+              Don't worry — if you fail, you only retake this one topic. Your other passes are safe.
             </p>
           </div>
 
           {canResit ? (
             <div className="text-center space-y-3">
               <p className="text-sm text-primary font-medium">
-                You can resit now.
+                You can retake it now.
               </p>
-              <div className="flex gap-3 justify-center">
-                <Button asChild variant="outline" size="sm">
-                  <Link to={`/practice/${moduleId}`}>
-                    <Repeat className="mr-1.5 h-4 w-4" /> Practice Drill
-                  </Link>
-                </Button>
-              </div>
+              <Button asChild variant="outline" size="sm">
+                <Link to={`/practice/${moduleId}`}>
+                  <Repeat className="mr-1.5 h-4 w-4" /> Practice first
+                </Link>
+              </Button>
             </div>
           ) : (
             <div className="text-center space-y-2">
               <div className="inline-flex items-center gap-2 bg-muted px-4 py-2 rounded-xl">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-semibold text-foreground">
-                  Resit available in {resitHours} hour
+                  Retake available in {resitHours} hour
                   {resitHours !== 1 ? "s" : ""}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Use this time to review lessons and practice.
+                Use this time to review your lessons and practice.
               </p>
               <Button asChild variant="outline" size="sm">
                 <Link to={`/practice/${moduleId}`}>
-                  <Repeat className="mr-1.5 h-4 w-4" /> Go to Practice Drill
+                  <Repeat className="mr-1.5 h-4 w-4" /> Practice now
                 </Link>
               </Button>
             </div>
@@ -188,21 +187,23 @@ const GqaTest = () => {
         </div>
       )}
 
-      {/* Readiness Check (if not yet attempted or can resit) */}
+      {/* Readiness Check */}
       {!passed && (
         <div className="border rounded-xl p-4 bg-card space-y-3">
           <h2 className="font-semibold text-sm text-foreground">
-            Readiness Check
+            Are you ready?
           </h2>
           <div className="space-y-2">
             <div className="flex items-center gap-2.5">
               {lessonsComplete ? (
-                <CheckCircle2 className="h-4.5 w-4.5 text-primary shrink-0" />
+                <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
               ) : (
-                <XCircle className="h-4.5 w-4.5 text-destructive shrink-0" />
+                <XCircle className="h-4 w-4 text-destructive shrink-0" />
               )}
               <span className={`text-sm ${lessonsComplete ? "text-foreground" : "text-muted-foreground"}`}>
-                All {totalLessons} lessons complete
+                {lessonsComplete
+                  ? `All ${totalLessons} lessons done`
+                  : `${doneLessons} of ${totalLessons} lessons done — finish the rest first`}
               </span>
               {!lessonsComplete && (
                 <Link
@@ -215,12 +216,12 @@ const GqaTest = () => {
             </div>
             <div className="flex items-center gap-2.5">
               {practiceReady ? (
-                <CheckCircle2 className="h-4.5 w-4.5 text-primary shrink-0" />
+                <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
               ) : (
-                <XCircle className="h-4.5 w-4.5 text-destructive shrink-0" />
+                <XCircle className="h-4 w-4 text-destructive shrink-0" />
               )}
               <span className={`text-sm ${practiceReady ? "text-foreground" : "text-muted-foreground"}`}>
-                Practice quiz passed (80%+)
+                Practice score 80%+
               </span>
               {!practiceReady && lessonsComplete && (
                 <Link
@@ -234,8 +235,7 @@ const GqaTest = () => {
           </div>
           {isReady && (
             <p className="text-sm text-primary font-semibold">
-              ✓ Your best practice score: {mp.practice.bestScore}% — You are
-              ready!
+              ✓ Best practice score: {mp.practice.bestScore}% — You're ready!
             </p>
           )}
         </div>
@@ -247,52 +247,38 @@ const GqaTest = () => {
           <div className="flex items-start gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
             <h2 className="font-bold text-sm text-foreground">
-              Real GQA Module {moduleId} Assessment
+              Topic {moduleId} Test
             </h2>
           </div>
           <ul className="space-y-2 text-sm text-foreground">
             <li className="flex items-start gap-2">
               <Brain className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
               <span>
-                <strong>CLOSED BOOK</strong> — No notes, no phone, no materials
-                allowed
+                You'll be tested without notes — but don't worry, we'll make sure you're ready.
               </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-destructive shrink-0 mt-0.5">📝</span>
-              <span>Multiple choice questions — read each carefully</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-destructive shrink-0 mt-0.5">🎯</span>
               <span>
-                <strong>80% required</strong> to pass
+                <strong>80% needed</strong> to pass
               </span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-destructive shrink-0 mt-0.5">⏱</span>
               <span>
-                Time limit applies — answer at a steady pace, don't rush
+                Time limit applies — answer at a steady pace
               </span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-destructive shrink-0 mt-0.5">🔁</span>
               <span>
-                If you don't pass, you can resit <strong>this module only</strong>{" "}
-                after 24 hours
+                If you don't pass, you can retake after 24 hours
               </span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-destructive shrink-0 mt-0.5">✅</span>
               <span>
-                You do <strong>NOT</strong> need to resit modules you have
-                already passed
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-destructive shrink-0 mt-0.5">👁</span>
-              <span>
-                This test will be <strong>invigilated</strong> (watched) —
-                follow all instructions
+                Don't worry — if you fail, you only retake this one topic. Your other passes are safe.
               </span>
             </li>
           </ul>
@@ -305,12 +291,12 @@ const GqaTest = () => {
           <div className="flex items-center gap-2">
             <Lightbulb className="h-4 w-4 text-amber-500" />
             <h2 className="font-semibold text-sm text-foreground">
-              Exam Tips
+              Tips
             </h2>
           </div>
           <ul className="space-y-1.5 text-sm text-muted-foreground">
             <li>• Read the WHOLE question before looking at answers</li>
-            <li>• Eliminate obviously wrong answers first</li>
+            <li>• Cross out obviously wrong answers first</li>
             <li>• If unsure, go with your first instinct</li>
             <li>
               • Don't spend too long on one question — move on and come back
@@ -329,12 +315,12 @@ const GqaTest = () => {
             <ExternalLink className="mr-2 h-5 w-5" />
             {failed
               ? canResit
-                ? `Resit GQA Module ${moduleId} Test`
-                : `Resit available in ${resitHours}h`
-              : `Start GQA Module ${moduleId} Test`}
+                ? `Retake Topic ${moduleId} Test`
+                : `Retake available in ${resitHours}h`
+              : `Start Topic ${moduleId} Test`}
           </Button>
           <p className="text-xs text-muted-foreground">
-            Coming soon — your trainer will provide access to this test
+            Coming soon — your assessor will provide access to this test
           </p>
         </div>
       )}

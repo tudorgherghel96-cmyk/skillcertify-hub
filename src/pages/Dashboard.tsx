@@ -286,7 +286,7 @@ const Dashboard = () => {
                           alt={`Module ${mod.id} thumbnail`}
                           className="w-full h-full object-cover"
                           loading="lazy"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/fallback.webp'; }}
                         />
                       </div>
                     )}

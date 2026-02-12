@@ -16,8 +16,8 @@ function MediaImage({ src, alt, eager = false, variant = "content" }: { src: str
 
   if (failed) {
     return (
-      <div className="w-full rounded-xl my-4 bg-muted flex items-center justify-center aspect-video">
-        <p className="text-sm text-muted-foreground px-4 text-center">{alt}</p>
+      <div className="w-full rounded-xl my-4 bg-muted flex items-center justify-center aspect-video overflow-hidden">
+        <img src="/fallback.webp" alt={alt} className="w-full h-full object-cover opacity-40" />
       </div>
     );
   }

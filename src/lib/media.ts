@@ -1,8 +1,12 @@
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+import { supabase } from "@/integrations/supabase/client";
+
 const BUCKET = 'course-media';
 
+/**
+ * Returns the public URL for a file in the course-media bucket.
+ * Uses the Supabase SDK — no manual URL construction.
+ */
 export function mediaUrl(path: string): string {
-  return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`;
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  return data.publicUrl;
 }
-
-// Usage: mediaUrl('module1/1.1_photo_1.jpeg')

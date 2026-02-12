@@ -10,7 +10,7 @@ interface LessonMediaProps {
   videoDesc: string;
 }
 
-function MediaImage({ src, alt, eager = false, variant = "content" }: { src: string; alt: string; eager?: boolean; variant?: "hero" | "content" }) {
+function MediaImage({ src, alt, eager = false }: { src: string; alt: string; eager?: boolean; variant?: "hero" | "content" }) {
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
@@ -22,19 +22,17 @@ function MediaImage({ src, alt, eager = false, variant = "content" }: { src: str
     );
   }
 
-  const isHero = variant === "hero";
-
   return (
-    <div className={`relative w-full ${isHero ? "" : "my-4"}`}>
+    <div className="relative w-full my-4">
       {!loaded && (
-        <Skeleton className={`w-full ${isHero ? "h-full absolute inset-0" : "aspect-video"} rounded-xl`} />
+        <Skeleton className="w-full aspect-video rounded-xl" />
       )}
       <img
         src={src}
         alt={alt}
-        className={`w-full rounded-xl shadow-sm transition-opacity duration-300 ${
+        className={`w-full h-auto rounded-xl shadow-sm transition-opacity duration-300 ${
           loaded ? "opacity-100" : "opacity-0"
-        } ${isHero ? "h-full object-contain" : "max-w-full h-auto object-contain"}`}
+        }`}
         loading={eager ? "eager" : "lazy"}
         onError={() => setFailed(true)}
         onLoad={() => setLoaded(true)}
@@ -91,11 +89,17 @@ export function LessonHeroMedia({ moduleId, lessonId, videoDesc }: LessonMediaPr
 
   return (
     <div className="space-y-4">
-      {/* Hero Image */}
+      {/* Hero Image — natural aspect ratio, no cropping */}
       {heroImage ? (
-        <AspectRatio ratio={16 / 9} className="rounded-xl overflow-hidden" style={{ backgroundColor: "hsl(var(--secondary))" }}>
-          <MediaImage src={heroImage.src} alt={heroImage.alt} eager variant="hero" />
-        </AspectRatio>
+        <div className="rounded-xl overflow-hidden" style={{ backgroundColor: "hsl(var(--secondary))" }}>
+          <img
+            src={heroImage.src}
+            alt={heroImage.alt}
+            className="w-full h-auto rounded-xl shadow-sm"
+            loading="eager"
+            onError={(e) => { e.currentTarget.src = "/fallback.webp"; }}
+          />
+        </div>
       ) : (
         <AspectRatio ratio={16 / 9} className="bg-muted rounded-xl overflow-hidden relative">
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">

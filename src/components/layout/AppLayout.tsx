@@ -8,7 +8,7 @@ const AppLayout = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <TopNav />
       <SuperUserBanner />
-      <main className="flex-1 pb-16 sm:pb-0">
+      <main className="flex-1 pb-20 sm:pb-0">
         <Outlet />
       </main>
       <BottomNav />

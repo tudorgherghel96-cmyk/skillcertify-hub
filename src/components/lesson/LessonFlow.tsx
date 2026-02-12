@@ -74,9 +74,14 @@ export default function LessonFlow({
 
   // @use-gesture/react drag handler with swipe config
   const bind = useDrag(
-    ({ swipe: [, sy], movement: [, my], velocity: [, vy] }) => {
-      if (sy === -1 || my < -80 || vy > 0.3) go(1);   // swiped up → next
-      if (sy === 1 || my > 80 || vy > 0.3) go(-1);     // swiped down → prev
+    ({ last, swipe: [, sy], movement: [, my], velocity: [, vy], direction: [, dy] }) => {
+      if (!last) return; // only act on gesture end
+      if (sy === -1) return go(1);
+      if (sy ===  1) return go(-1);
+      // fallback: large movement or fast velocity WITH correct direction
+      if ((Math.abs(my) > 80 || vy > 0.3) && dy !== 0) {
+        dy < 0 ? go(1) : go(-1);
+      }
     },
     {
       axis: "y",

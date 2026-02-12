@@ -63,7 +63,7 @@ function LessonVideo({ src, fallbackDesc }: { src: string; fallbackDesc: string 
   }
 
   return (
-    <AspectRatio ratio={16 / 9} className="bg-secondary rounded-xl overflow-hidden relative">
+    <div className="rounded-xl overflow-hidden relative" style={{ backgroundColor: "hsl(var(--secondary))" }}>
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <Loader2 className="h-8 w-8 text-primary animate-spin" />
@@ -74,13 +74,13 @@ function LessonVideo({ src, fallbackDesc }: { src: string; fallbackDesc: string 
         controls
         preload="metadata"
         playsInline
-        className={`w-full h-full object-cover transition-opacity duration-300 ${loading ? "opacity-0" : "opacity-100"}`}
+        className={`w-full h-auto rounded-xl transition-opacity duration-300 ${loading ? "opacity-0" : "opacity-100"}`}
         onError={() => setError(true)}
         onLoadedMetadata={() => setLoading(false)}
       >
         <track kind="captions" />
       </video>
-    </AspectRatio>
+    </div>
   );
 }
 

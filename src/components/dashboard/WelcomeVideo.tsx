@@ -14,18 +14,17 @@ export default function WelcomeVideo() {
 
   useEffect(() => {
     const seen = localStorage.getItem(STORAGE_KEY);
-    if (seen) {
-      // Already seen — start minimised
-      setExpanded(false);
-    } else {
-      // First time — show expanded
-      setExpanded(true);
-    }
+    setExpanded(!seen);
   }, []);
 
-  const handleLoaded = () => {
-    setLoading(false);
-  };
+  useEffect(() => {
+    if (expanded && videoRef.current && !loading) {
+      videoRef.current.play().catch(() => {});
+    }
+    if (!expanded && videoRef.current) {
+      videoRef.current.pause();
+    }
+  }, [expanded, loading]);
 
   const handleClose = () => {
     localStorage.setItem(STORAGE_KEY, "1");
@@ -40,11 +39,6 @@ export default function WelcomeVideo() {
 
   const handleExpand = () => {
     setExpanded(true);
-  };
-
-  const handleVideoEnded = () => {
-    localStorage.setItem(STORAGE_KEY, "1");
-    setExpanded(false);
   };
 
   const videoUrl = getLessonVideoUrl("welcome");
@@ -68,31 +62,20 @@ export default function WelcomeVideo() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {/* Header */}
             <div className="flex items-center justify-between px-4 pt-3 pb-2">
               <div className="flex items-center gap-2">
                 <Play className="h-4 w-4 text-primary" />
-                <span className="text-sm font-semibold text-foreground">Welcome Video</span>
+                <span className="text-sm font-semibold text-foreground">Your Journey Starts Here</span>
               </div>
               <div className="flex items-center gap-1">
-                <button
-                  onClick={handleClose}
-                  className="p-1.5 rounded-lg hover:bg-muted/60 transition-colors"
-                  aria-label="Minimise"
-                >
+                <button onClick={handleClose} className="p-1.5 rounded-lg hover:bg-muted/60 transition-colors" aria-label="Minimise">
                   <ChevronUp className="h-4 w-4 text-muted-foreground" />
                 </button>
-                <button
-                  onClick={handleDismiss}
-                  className="p-1.5 rounded-lg hover:bg-muted/60 transition-colors"
-                  aria-label="Dismiss"
-                >
+                <button onClick={handleDismiss} className="p-1.5 rounded-lg hover:bg-muted/60 transition-colors" aria-label="Dismiss">
                   <X className="h-4 w-4 text-muted-foreground" />
                 </button>
               </div>
             </div>
-
-            {/* Video */}
             <div className="px-3 pb-3">
               <div className="rounded-xl overflow-hidden relative" style={{ backgroundColor: "hsl(var(--secondary))" }}>
                 {loading && (
@@ -103,13 +86,14 @@ export default function WelcomeVideo() {
                 <video
                   ref={videoRef}
                   src={videoUrl}
-                  controls
+                  muted
+                  autoPlay
+                  loop
                   playsInline
                   preload="metadata"
                   className={`w-full h-auto rounded-xl transition-opacity duration-300 ${loading ? "opacity-0" : "opacity-100"}`}
                   onError={() => setError(true)}
-                  onLoadedMetadata={handleLoaded}
-                  onEnded={handleVideoEnded}
+                  onLoadedMetadata={() => setLoading(false)}
                 />
               </div>
             </div>
@@ -127,7 +111,7 @@ export default function WelcomeVideo() {
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
               <Play className="h-4 w-4 text-primary ml-0.5" />
             </div>
-            <span className="text-sm font-medium text-foreground flex-1 text-left">Watch Welcome Video</span>
+            <span className="text-sm font-medium text-foreground flex-1 text-left">Watch Introduction</span>
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
           </motion.button>
         )}

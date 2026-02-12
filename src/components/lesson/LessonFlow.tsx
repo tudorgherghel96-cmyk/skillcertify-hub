@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useDrag } from "@use-gesture/react";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -69,21 +70,20 @@ export default function LessonFlow({
     return () => window.removeEventListener("keydown", handler);
   }, [go]);
 
-  // Pan/drag handler for momentum swipe
-  const handleDragEnd = useCallback(
-    (_: any, info: PanInfo) => {
-      const { offset, velocity } = info;
-      const swipeThreshold = 50;
-      const velocityThreshold = 300;
+  // @use-gesture/react drag handler
+  const bind = useDrag(
+    ({ movement: [, my], velocity: [, vy], direction: [, dy], cancel, active }) => {
+      if (!active) return;
+      const distanceThreshold = 80;
+      const velocityThreshold = 0.3;
 
-      // Swipe up (next) or down (prev)
-      if (offset.y < -swipeThreshold || velocity.y < -velocityThreshold) {
-        go(1);
-      } else if (offset.y > swipeThreshold || velocity.y > velocityThreshold) {
-        go(-1);
+      if (Math.abs(my) >= distanceThreshold || Math.abs(vy) >= velocityThreshold) {
+        cancel();
+        if (dy < 0) go(1);   // swiped up → next
+        else if (dy > 0) go(-1); // swiped down → prev
       }
     },
-    [go]
+    { axis: "y", filterTaps: true, threshold: 10 }
   );
 
   const handleQuizAnswered = useCallback(
@@ -180,14 +180,10 @@ export default function LessonFlow({
       </div>
 
       {/* Slide area with drag */}
-      <motion.div
+      <div
+        {...bind()}
         className="flex-1 relative overflow-hidden"
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={0.15}
-        onDragEnd={handleDragEnd}
-        style={{ cursor: "grab" }}
-        whileTap={{ cursor: "grabbing" }}
+        style={{ touchAction: "none", cursor: "grab" }}
       >
         <AnimatePresence
           initial={false}
@@ -234,7 +230,7 @@ export default function LessonFlow({
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
 
       {/* Bottom — only shows on last slide */}
       <AnimatePresence>

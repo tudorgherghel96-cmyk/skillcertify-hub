@@ -5,8 +5,9 @@ import TierBadge from "./TierBadge";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, AlertTriangle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, AlertTriangle, Zap } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { MODULES } from "@/data/courseData";
 
 interface ReadinessData {
@@ -24,6 +25,8 @@ interface ReadinessData {
 
 export default function ReadinessCard() {
   const [data, setData] = useState<ReadinessData | null>(null);
+  const [boosting, setBoosting] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const load = async () => {
@@ -105,6 +108,32 @@ export default function ReadinessCard() {
               ⚡ {data.next_action}
             </p>
           )}
+
+          {/* Adaptive Boost Button */}
+          <Button
+            className="w-full h-11"
+            disabled={boosting}
+            onClick={async () => {
+              setBoosting(true);
+              try {
+                const { data: userData } = await supabase.auth.getUser();
+                if (!userData.user) return;
+                const { data: boostData } = await supabase.rpc(
+                  "get_boost_concepts" as any,
+                  { p_user_id: userData.user.id }
+                );
+                if (boostData && (boostData as any[]).length > 0) {
+                  const slugs = (boostData as any[]).map((b: any) => b.slug);
+                  navigate("/practice/boost", { state: { boostSlugs: slugs } });
+                }
+              } finally {
+                setBoosting(false);
+              }
+            }}
+          >
+            <Zap className="mr-2 h-4 w-4" />
+            {boosting ? "Loading…" : "Adaptive Boost Drill"}
+          </Button>
         </CardContent>
       </Card>
     </motion.div>

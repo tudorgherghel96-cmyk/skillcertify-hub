@@ -25,6 +25,7 @@ import CscsTest from "@/pages/CscsTest";
 import Results from "@/pages/Results";
 import CscsRoute from "@/pages/CscsRoute";
 import NotFound from "@/pages/NotFound";
+import BoostDrill from "@/pages/BoostDrill";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/module/:id" element={<ModuleOverview />} />
                 <Route path="/lesson/:moduleId/:lessonId" element={<LessonPlayer />} />
+                <Route path="/practice/boost" element={<BoostDrill />} />
                 <Route path="/practice/:moduleId" element={<PracticeQuiz />} />
                 <Route path="/gqa-test/:moduleId" element={<GqaTest />} />
                 <Route path="/cscs-prep" element={<CscsPrep />} />

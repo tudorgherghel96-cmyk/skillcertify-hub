@@ -34,6 +34,9 @@ function MediaImage({ src, alt, eager = false }: { src: string; alt: string; eag
           loaded ? "opacity-100" : "opacity-0"
         }`}
         loading={eager ? "eager" : "lazy"}
+        decoding={eager ? "sync" : "async"}
+        // @ts-ignore
+        fetchpriority={eager ? "high" : "auto"}
         onError={() => setFailed(true)}
         onLoad={() => setLoaded(true)}
       />
@@ -97,6 +100,9 @@ export function LessonHeroMedia({ moduleId, lessonId, videoDesc }: LessonMediaPr
             alt={heroImage.alt}
             className="w-full h-auto rounded-xl shadow-sm"
             loading="eager"
+            decoding="sync"
+            // @ts-ignore
+            fetchpriority="high"
             onError={(e) => { e.currentTarget.src = "/fallback.webp"; }}
           />
         </div>

@@ -81,5 +81,23 @@ export function useTelemetry() {
     []
   );
 
-  return { trackLessonComplete, trackPracticeAttempt, trackMockAttempt };
+  const trackConceptAttempt = useCallback(
+    async (conceptId: string, isCorrect: boolean, responseTimeMs: number) => {
+      const uid = userIdRef.current;
+      if (!uid) return;
+      try {
+        await supabase.from("concept_attempts").insert({
+          user_id: uid,
+          concept_id: conceptId,
+          is_correct: isCorrect,
+          response_time_ms: responseTimeMs,
+        });
+      } catch (e) {
+        console.warn("[telemetry] concept attempt write failed", e);
+      }
+    },
+    []
+  );
+
+  return { trackLessonComplete, trackPracticeAttempt, trackMockAttempt, trackConceptAttempt };
 }

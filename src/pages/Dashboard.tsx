@@ -44,6 +44,7 @@ import SmartNudges from "@/components/gamification/SmartNudges";
 import MotivationalBanner from "@/components/gamification/MotivationalBanner";
 import QuickSession from "@/components/practice/QuickSession";
 import ReadinessCard from "@/components/readiness/ReadinessCard";
+import WelcomeVideo from "@/components/dashboard/WelcomeVideo";
 
 const cardHover = {
   rest: { scale: 1, y: 0 },
@@ -139,6 +140,11 @@ const Dashboard = () => {
           <h1 className="text-xl sm:text-2xl font-bold">
             {ui("welcome_back", lang)} <span className="text-primary">{ui("fastest_route", lang)}</span>
           </h1>
+        </motion.div>
+
+        {/* Welcome Video */}
+        <motion.div variants={fadeUp}>
+          <WelcomeVideo />
         </motion.div>
 
         {/* Streak Banner */}

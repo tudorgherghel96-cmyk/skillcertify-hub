@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Check, Lock, ChevronRight, BookOpen, Target, ClipboardCheck, Award, ShieldCheck, CreditCard } from "lucide-react";
+import { Check, Lock, ChevronRight, BookOpen, ClipboardCheck, Award, ShieldCheck, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   useProgress,
@@ -30,7 +30,6 @@ function useTimelineSteps(): TimelineStep[] {
   const { isSuperUser } = useSuperUser();
 
   const allLessonsDone = MODULES.every(m => areAllLessonsComplete(getModuleProgress(progress, m.id), m.lessons.length));
-  const allPractice80 = MODULES.every(m => getModuleProgress(progress, m.id).practice.bestScore >= 80);
   const allGqa = allGqaPassed(progress, isSuperUser);
   const cscsPassed = progress.cscs.passed === true;
 
@@ -39,33 +38,28 @@ function useTimelineSteps(): TimelineStep[] {
 
   return [
     {
-      id: 1, title: "Complete All Lessons", description: "Study 5 modules covering health & safety, manual handling, working at height, health risks, and plant safety.",
-      timeEstimate: "~8 hours", requirements: "Sequential completion", icon: BookOpen,
+      id: 1, title: "Complete Each Course Topic", description: "Study 5 modules covering health & safety, manual handling, working at height, health risks, and plant safety.",
+      timeEstimate: "~6 hours", requirements: "Sequential completion", icon: BookOpen,
       status: st(allLessonsDone, true), ctaLabel: "Continue Lessons", ctaTo: "/learn",
     },
     {
-      id: 2, title: "Pass Practice Quizzes", description: "Score 80%+ on each module's practice quiz. Unlimited retakes.",
-      timeEstimate: "~2 hours", requirements: "All lessons complete", icon: Target,
-      status: st(allPractice80, allLessonsDone), ctaLabel: "Start Practice", ctaTo: "/practice-hub",
+      id: 2, title: "Pass Each Assessment Test", description: "Pass all 5 topic assessment tests. 80% pass mark. Retake as many times as you need.",
+      timeEstimate: "~3 hours", requirements: "All topics complete", icon: ClipboardCheck,
+      status: st(allGqa, allLessonsDone), ctaLabel: "Take Tests", ctaTo: "/learn",
     },
     {
-      id: 3, title: "Pass 5 GQA Module Tests", description: "Closed-book assessments. 80% pass mark. Fail? Only resit that module (24h cooldown).",
-      timeEstimate: "~5 hours", requirements: "80%+ on practice quizzes", icon: ClipboardCheck,
-      status: st(allGqa, allPractice80), ctaLabel: "Take GQA Tests", ctaTo: "/learn",
-    },
-    {
-      id: 4, title: "Level 1 Qualification Issued", description: "Automatically issued when all 5 GQA modules are passed. Recorded on the GQA system.",
-      timeEstimate: "Instant", requirements: "All 5 GQA passes", icon: Award,
+      id: 3, title: "Get Level 1 Certificate", description: "Automatically issued when all 5 assessment tests are passed.",
+      timeEstimate: "As fast as 1 day", requirements: "All 5 tests passed", icon: Award,
       status: st(allGqa, allGqa),
     },
     {
-      id: 5, title: "CSCS Health & Safety Test", description: "Final closed-book test covering all 5 modules. This is what earns your card.",
-      timeEstimate: "~90 mins", requirements: "Level 1 Qualification", icon: ShieldCheck,
+      id: 4, title: "Pass the CSCS Test", description: "Final closed-book test covering all 5 modules. This is what earns your card.",
+      timeEstimate: "~90 mins", requirements: "Level 1 Certificate", icon: ShieldCheck,
       status: st(cscsPassed, allGqa), ctaLabel: "Prepare for CSCS", ctaTo: "/cscs-prep",
     },
     {
-      id: 6, title: "Green Card / Q-Card Processing", description: "Same-day processing via CSCS Partner Alliance. No test centre visit needed — fully online.",
-      timeEstimate: "Same day", requirements: "CSCS test passed", icon: CreditCard,
+      id: 5, title: "Get the Green Card", description: "Same-day processing via CSCS Partner Alliance. No test centre visit needed — fully online.",
+      timeEstimate: "As fast as next day", requirements: "CSCS test passed", icon: CreditCard,
       status: st(cscsPassed, cscsPassed),
     },
   ];

@@ -116,7 +116,7 @@ export function buildSlidesFromI18n(
     slides.push({
       type: "keyterm",
       term: kt.en,
-      explanation: isTranslated && translated !== kt.en ? translated : (kt.ro || kt.lt || kt.bg || "Key construction term"),
+      explanation: isTranslated && translated !== kt.en ? translated : "Key construction term",
     });
   }
 

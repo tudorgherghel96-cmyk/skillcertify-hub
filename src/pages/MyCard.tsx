@@ -48,28 +48,25 @@ export default function MyCard() {
 
   const steps: Array<{ label: string; status: StepStatus; detail?: string }> = [
     {
-      label: "Choose your language",
-      status: "done",
-    },
-    {
-      label: "Finish your lessons",
+      label: "Complete each course topic",
       status: getStatus(allLessonsDone, true),
       detail: `${topicsDone} of 5 topics done`,
     },
     {
-      label: "Pass practice questions",
-      status: getStatus(allPractice80, allLessonsDone),
+      label: "Pass each assessment test",
+      status: getStatus(allGqa, allLessonsDone),
+      detail: `${MODULES.filter((m) => getModuleProgress(progress, m.id).gqa.passed === true).length} of 5 passed`,
     },
     {
-      label: "Book your CSCS test",
-      status: getStatus(allGqa, allPractice80),
+      label: "Get Level 1 certificate",
+      status: getStatus(allGqa, allGqa),
     },
     {
-      label: "Pass your CSCS test",
+      label: "Pass the CSCS test",
       status: getStatus(cscsPassed, allGqa),
     },
     {
-      label: "Get your card",
+      label: "Get the Green Card",
       status: getStatus(false, cscsPassed),
     },
   ];
@@ -164,10 +161,10 @@ export default function MyCard() {
         <Accordion type="single" collapsible className="space-y-2">
           <h3 className="text-sm font-bold text-foreground mb-2">Common questions</h3>
           {[
-            { q: "Do I need a CSCS test?", a: "Yes — it's a short health & safety test. We'll prepare you fully before you book." },
-            { q: "How long does it all take?", a: "Most people finish in 2–4 weeks studying part-time. Everything's online." },
-            { q: "What if I fail?", a: "Don't worry — if you fail, you only redo the bit you failed. All other passes stay. There's a 24-hour wait before you can retry." },
-            { q: "How do I book my CSCS test?", a: "Through the CITB website. We'll give you the link when you're ready." },
+            { q: "Do I need a CSCS test?", a: "Yes, you need the CSCS test to get the CSCS card. Luckily, we can do it here." },
+            { q: "How long does it take?", a: "It can take as little as 6 hours to complete. The certificate can be available digitally as fast as one day, and the CSCS Smart Checker app can digitally have your card as fast as the next day. The physical card can take up to 5 working days to reach home." },
+            { q: "What if I fail?", a: "If you fail an assessment topic, you can retake as many times as you need. If you fail the CSCS test, you can also retake as many times as you need." },
+            { q: "Do I need to visit a centre?", a: "You don't need to. It's all done here with us, in one place. No centre visit needed." },
           ].map((faq, i) => (
             <AccordionItem key={i} value={`faq-${i}`} className="border rounded-xl overflow-hidden">
               <AccordionTrigger className="px-4 py-3 text-sm hover:no-underline">

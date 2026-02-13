@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Smartphone, Target, CreditCard } from "lucide-react";
 import CardWallet from "@/components/journey/CardWallet";
 import skillcertifyLogo from "@/assets/skillcertify-logo.png";
+import heroMotivation from "@/assets/hero-motivation.webp";
 
 const benefits = [
 {
@@ -87,12 +88,31 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Motivational hero image */}
+      <section className="px-4 py-6 max-w-2xl mx-auto w-full">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
+          className="rounded-2xl overflow-hidden shadow-lg"
+        >
+          <img
+            src={heroMotivation}
+            alt="Worker holding their CSCS Green Card and phone showing congratulations on a construction site"
+            className="w-full h-auto"
+          />
+        </motion.div>
+        <p className="text-sm font-semibold text-foreground text-center mt-4">
+          This could be you. 🎉
+        </p>
+      </section>
+
       {/* Card Wallet */}
-      <section className="px-4 -mt-1 pt-6 pb-2 max-w-2xl mx-auto w-full">
+      <section className="px-4 pt-4 pb-2 max-w-2xl mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.25 }}>
+          transition={{ duration: 0.5, delay: 0.3 }}>
 
           <CardWallet currentTarget="green" />
           <p className="text-xs text-muted-foreground text-center mt-3 px-4 leading-relaxed">

@@ -138,7 +138,7 @@ const CscsPrep = () => {
               <span className="font-semibold text-foreground">
                 No notes allowed
               </span>{" "}
-              — just like the real test.
+              — the CSCS test is closed book, just like the real test.
             </p>
           </div>
         </div>
@@ -214,7 +214,7 @@ const CscsPrep = () => {
             <div>
               <h2 className="font-bold text-foreground">CSCS Mock Test</h2>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Practice test with 50 questions from all 5 topics. Timed, no notes — just like the real thing.
+                Practice test with 50 questions from all 5 topics. Timed, no notes — the CSCS test is closed book.
               </p>
             </div>
           </div>

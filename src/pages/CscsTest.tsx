@@ -120,7 +120,7 @@ const CscsTest = () => {
               <li className="flex items-start gap-2">
                 <Brain className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                 <span>
-                  <strong>No notes allowed</strong> — no phone, no materials
+                  <strong>No notes allowed</strong> — the CSCS test is closed book. No phone, no materials.
                 </span>
               </li>
               <li className="flex items-start gap-2">

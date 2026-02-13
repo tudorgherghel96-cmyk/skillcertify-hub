@@ -229,8 +229,8 @@ const CscsRoute = () => {
             </h3>
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
               5 separate tests, one per module. <strong>80% pass mark.</strong> Fail? Only resit
-              that module. Both tests are{" "}
-              <strong className="text-destructive">CLOSED BOOK — no notes.</strong>
+              that module. GQA tests are{" "}
+              <strong className="text-primary">OPEN BOOK — you can use your own handwritten notes.</strong>
             </p>
           </CardContent>
         </Card>

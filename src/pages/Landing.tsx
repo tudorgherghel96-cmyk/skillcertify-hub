@@ -11,6 +11,8 @@ import skillcertifyLogo from "@/assets/skillcertify-logo.png";
 import skillcertifyIcon from "@/assets/skillcertify-icon.png";
 import cscsLogo from "@/assets/cscs-logo.png";
 import gqaLogo from "@/assets/gqa-logo.png";
+import myCscsLogo from "@/assets/my-cscs-logo.png";
+import cscsFullLogo from "@/assets/cscs-full-logo.png";
 import officePhoto from "@/assets/office-zeus-house.jpg";
 import greenCard from "@/assets/cscs-green-card.webp";
 import blueCard from "@/assets/cscs-blue-card.webp";
@@ -81,7 +83,7 @@ const Landing = () => {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="h-14 sm:h-16 mx-auto mb-1 brightness-0 invert"
+            className="h-14 sm:h-16 mx-auto mb-1"
           />
 
           <motion.h1
@@ -139,12 +141,9 @@ const Landing = () => {
               <img src={gqaLogo} alt="GQA" className="h-6 w-auto" />
               <span className="text-[10px] sm:text-xs font-semibold text-secondary-foreground/60 tracking-wide uppercase">Approved</span>
             </div>
-            <div className="flex items-center justify-center h-10 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5">
-              <span className="text-[10px] sm:text-xs font-semibold text-secondary-foreground/60 tracking-wide uppercase">Ofqual Regulated</span>
-            </div>
             <div className="flex items-center justify-center h-10 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5 gap-2">
-              <img src={cscsLogo} alt="CSCS" className="h-6 w-auto rounded" />
-              <span className="text-[10px] sm:text-xs font-semibold text-secondary-foreground/60 tracking-wide uppercase">Partner</span>
+              <img src={myCscsLogo} alt="myCSCS" className="h-6 w-auto rounded" />
+              <span className="text-[10px] sm:text-xs font-semibold text-secondary-foreground/60 tracking-wide uppercase">Integrated</span>
             </div>
           </motion.div>
 
@@ -333,7 +332,8 @@ const Landing = () => {
       <footer className="bg-secondary px-4 py-10">
         <div className="max-w-2xl mx-auto space-y-6">
           <div className="flex items-center justify-center">
-            <img src={skillcertifyLogo} alt="SkillCertify" className="h-10 brightness-0 invert" />
+            <img src={skillcertifyLogo} alt="SkillCertify" className="h-10" />
+            <img src={cscsFullLogo} alt="CSCS - Construction Skills Certification Scheme" className="h-10 w-auto" />
           </div>
 
           <div className="text-center space-y-1.5">
@@ -341,7 +341,7 @@ const Landing = () => {
               Zeus House, London, N1 7NG
             </p>
             <p className="text-xs text-secondary-foreground/60">
-              GQA Centre Number: XXXXXX &nbsp;|&nbsp; Ofqual Recognition: XXXXXX
+              GQA Centre Number: XXXXXX
             </p>
             <p className="text-xs text-secondary-foreground/60">
               Support: <a href="mailto:support@skillcertify.co.uk" className="underline">support@skillcertify.co.uk</a>

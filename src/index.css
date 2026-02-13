@@ -224,3 +224,9 @@ nav button, nav a {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Social proof scroll animation */
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}

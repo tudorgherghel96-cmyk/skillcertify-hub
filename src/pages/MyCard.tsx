@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Circle, CheckCircle, XCircle, Minus, CreditCard, ExternalLink, HelpCircle, Mail, Clock } from "lucide-react";
+import { Check, Circle, CheckCircle, XCircle, Minus, CreditCard, ExternalLink, HelpCircle, Mail, Clock, Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +17,8 @@ import { useSuperUser } from "@/contexts/SuperUserContext";
 import { MODULES } from "@/data/courseData";
 import CscsSmartCheck from "@/components/journey/CscsSmartCheck";
 import CardWallet from "@/components/journey/CardWallet";
+import { shareProgress } from "@/lib/sharing";
+import { useGamification } from "@/contexts/GamificationContext";
 import {
   Accordion,
   AccordionContent,
@@ -35,6 +37,7 @@ type StepStatus = "done" | "current" | "todo";
 export default function MyCard() {
   const { progress } = useProgress();
   const { isSuperUser } = useSuperUser();
+  const { gamification } = useGamification();
 
   // Compute step statuses
   const topicsDone = MODULES.filter((m) =>
@@ -204,12 +207,22 @@ export default function MyCard() {
       {/* Your card */}
       <motion.div variants={fadeUp}>
         <CardWallet currentTarget="green" />
-        <p className="text-xs text-muted-foreground text-center mt-3 leading-relaxed px-2">
-          {cscsPassed
-            ? "Your Green Card is on its way."
-            : "Complete your steps above to get your card."
-          }
-        </p>
+        <div className="flex flex-col items-center gap-2 mt-3 px-2">
+          <p className="text-xs text-muted-foreground text-center leading-relaxed">
+            {cscsPassed
+              ? "Your Green Card is on its way."
+              : "Complete your steps above to get your card."
+            }
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => shareProgress(topicsDone, MODULES.length, gamification.streak)}
+          >
+            <Share2 className="h-4 w-4" /> Share my progress
+          </Button>
+        </div>
       </motion.div>
 
       {/* Common questions */}

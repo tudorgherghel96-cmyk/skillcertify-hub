@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { User, Globe, LogOut, Mail, Award, ChevronRight, Unlock, Download, Snowflake, Flame, Star, Eye, Type, Zap } from "lucide-react";
+import { User, Globe, LogOut, Mail, Award, ChevronRight, Unlock, Download, Snowflake, Flame, Star, Eye, Type, Zap, Users, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -9,6 +9,7 @@ import { useSuperUser } from "@/contexts/SuperUserContext";
 import { allGqaPassed, useProgress } from "@/contexts/ProgressContext";
 import { useGamification } from "@/contexts/GamificationContext";
 import { useAccessibility, type TextSize } from "@/contexts/AccessibilityContext";
+import { inviteFriend, generateReferralCode } from "@/lib/sharing";
 import { useState, useRef } from "react";
 import {
   DropdownMenu,
@@ -248,6 +249,32 @@ export default function Profile() {
                 </div>
               </div>
               <Switch checked={reducedMotion} onCheckedChange={toggleReducedMotion} />
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Invite a friend */}
+      <motion.div variants={fadeUp}>
+        <Card>
+          <CardContent className="py-4 space-y-3">
+            <h3 className="text-sm font-bold flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" /> Invite a friend
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Know someone who needs their CSCS card? Share SkillCertify with them.
+            </p>
+            <Button
+              className="w-full h-12 bg-green-600 hover:bg-green-700 text-white gap-2"
+              onClick={() => inviteFriend(language.english)}
+            >
+              <Share2 className="h-4 w-4" /> Share on WhatsApp
+            </Button>
+            <div className="flex items-center gap-2 pt-1">
+              <p className="text-[10px] text-muted-foreground">Your referral code:</p>
+              <code className="text-[10px] font-mono bg-muted px-2 py-0.5 rounded">
+                {generateReferralCode(user?.id)}
+              </code>
             </div>
           </CardContent>
         </Card>

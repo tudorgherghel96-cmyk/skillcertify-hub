@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { openWhatsAppSupport } from "@/lib/sharing";
 
-const WHATSAPP_NUMBER = "447000000000"; // Replace with real number
 const WHATSAPP_MESSAGE = encodeURIComponent("Hi, I need help with my CSCS card journey on SkillCertify.");
 
 interface Message {
@@ -14,6 +16,8 @@ interface Message {
 }
 
 export default function HelpChat() {
+  const { user } = useAuth();
+  const { language } = useLanguage();
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<"menu" | "chat">("menu");
   const [messages, setMessages] = useState<Message[]>([
@@ -53,7 +57,14 @@ export default function HelpChat() {
             {view === "menu" ? (
               <div className="p-4 space-y-3">
                 <a
-                  href={`https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openWhatsAppSupport({
+                      name: user?.user_metadata?.full_name || user?.email?.split("@")[0],
+                      language: language.english,
+                    });
+                  }}
+                  href="#"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-3 rounded-xl border hover:bg-accent transition-colors"

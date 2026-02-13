@@ -4,8 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ShieldCheck, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import skillcertifyIcon from "@/assets/skillcertify-icon.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -49,9 +50,7 @@ const Auth = () => {
       <div className="w-full max-w-sm space-y-6">
         {/* Logo / Brand */}
         <div className="text-center space-y-2">
-          <div className="h-14 w-14 mx-auto rounded-2xl bg-primary flex items-center justify-center">
-            <ShieldCheck className="h-7 w-7 text-primary-foreground" />
-          </div>
+          <img src={skillcertifyIcon} alt="SkillCertify" className="h-14 w-14 mx-auto" />
           <h1 className="text-2xl font-bold text-foreground">SkillCertify</h1>
           <p className="text-sm text-muted-foreground">Your fastest route to a CSCS Green Card</p>
         </div>

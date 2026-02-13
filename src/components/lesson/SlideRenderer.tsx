@@ -162,7 +162,7 @@ function ImageSlide({ slide }: { slide: Extract<Slide, { type: "image" }> }) {
   return (
     <SlideShell className="p-4">
       <motion.div variants={pop} initial="hidden" animate="show" className="w-full max-w-lg flex flex-col items-center gap-3">
-        <div className="w-full rounded-2xl overflow-hidden shadow-lg" style={{ backgroundColor: "hsl(var(--secondary))" }}>
+        <div className="w-full rounded-2xl overflow-hidden shadow-lg bg-background">
           <img
             src={failed ? "/fallback.webp" : slide.src}
             alt={slide.alt}

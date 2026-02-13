@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { User, Globe, LogOut, Mail, Award, ChevronRight, Unlock, Download } from "lucide-react";
+import { User, Globe, LogOut, Mail, Award, ChevronRight, Unlock, Download, Snowflake, Flame, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
 import { useSuperUser } from "@/contexts/SuperUserContext";
 import { allGqaPassed, useProgress } from "@/contexts/ProgressContext";
+import { useGamification } from "@/contexts/GamificationContext";
 import { useState, useRef } from "react";
 import {
   DropdownMenu,
@@ -30,7 +31,7 @@ export default function Profile() {
   const { language, setLanguage } = useLanguage();
   const { isSuperUser, isAdmin, toggleSuperUser } = useSuperUser();
   const { progress } = useProgress();
-
+  const { gamification } = useGamification();
   // Hidden admin access via long-press
   const [showSuperUser, setShowSuperUser] = useState(false);
   const [passcodeInput, setPasscodeInput] = useState("");
@@ -116,6 +117,58 @@ export default function Profile() {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Streak & XP Stats */}
+      <motion.div variants={fadeUp}>
+        <Card>
+          <CardContent className="py-4 space-y-3">
+            <h3 className="text-sm font-bold flex items-center gap-2">
+              <Star className="h-4 w-4 text-primary" /> Your Stats
+            </h3>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="text-center p-2 rounded-lg bg-muted/50">
+                <p className="text-lg font-bold text-foreground">{gamification.totalXp}</p>
+                <p className="text-[10px] text-muted-foreground">Total XP</p>
+              </div>
+              <div className="text-center p-2 rounded-lg bg-muted/50">
+                <p className="text-lg font-bold text-foreground">{gamification.level}</p>
+                <p className="text-[10px] text-muted-foreground">Level</p>
+              </div>
+              <div className="text-center p-2 rounded-lg bg-muted/50">
+                <p className="text-lg font-bold text-foreground">{gamification.longestStreak}</p>
+                <p className="text-[10px] text-muted-foreground">Best Streak</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Streak Freeze */}
+      <motion.div variants={fadeUp}>
+        <Card>
+          <CardContent className="py-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+                <Snowflake className="h-5 w-5 text-blue-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold">Streak Freeze</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {gamification.streakFreezesAvailable > 0
+                    ? `${gamification.streakFreezesAvailable} freeze${gamification.streakFreezesAvailable > 1 ? "s" : ""} available — auto-activates if you miss a day`
+                    : gamification.streak >= 3
+                    ? "Keep your 3+ day streak to earn a free freeze!"
+                    : "Reach a 3-day streak to earn your first freeze"}
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                <Flame className="h-4 w-4 text-orange-500" />
+                <span className="text-sm font-bold text-foreground">{gamification.streak}</span>
+              </div>
             </div>
           </CardContent>
         </Card>

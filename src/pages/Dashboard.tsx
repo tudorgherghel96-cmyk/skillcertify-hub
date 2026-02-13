@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,10 @@ import StreakBanner from "@/components/gamification/StreakBanner";
 import BadgesGrid from "@/components/gamification/BadgesGrid";
 import SmartNudges from "@/components/gamification/SmartNudges";
 import MotivationalBanner from "@/components/gamification/MotivationalBanner";
+import SocialProofNudge from "@/components/gamification/SocialProofNudge";
+import DailyGoalRing from "@/components/gamification/DailyGoalRing";
+import DailyGoalSelector from "@/components/gamification/DailyGoalSelector";
+import ProgressDecayBar from "@/components/gamification/ProgressDecayBar";
 import QuickSession from "@/components/practice/QuickSession";
 import ReadinessCard from "@/components/readiness/ReadinessCard";
 import WelcomeVideo from "@/components/dashboard/WelcomeVideo";
@@ -83,6 +87,7 @@ const GlassCard = ({ children, className = "", hoverable = true, ...props }: {
 const Dashboard = () => {
   const [quickMode, setQuickMode] = useState<"drill" | "blitz" | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [showGoalSelector, setShowGoalSelector] = useState(false);
   const startY = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -104,7 +109,7 @@ const Dashboard = () => {
   }, []);
 
   const { progress } = useProgress();
-  const { gamification, badges, nudges, motivationalMessage } = useGamification();
+  const { gamification, badges, nudges, motivationalMessage, refreshLessonStrength } = useGamification();
   const { language } = useLanguage();
   const { isSuperUser } = useSuperUser();
   const lang = language.code;
@@ -113,10 +118,21 @@ const Dashboard = () => {
   const showCscs = allGqaPassed(progress, isSuperUser);
   const gqaPassed = MODULES.filter((m) => isModuleComplete(getModuleProgress(progress, m.id))).length;
 
+  // Show daily goal selector on first login if not set
+  useEffect(() => {
+    if (!gamification.dailyGoalSet) {
+      const timer = setTimeout(() => setShowGoalSelector(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [gamification.dailyGoalSet]);
+
   return (
     <>
-      {/* Animated gradient aura background */}
       <div className="aura-bg" />
+
+      {showGoalSelector && (
+        <DailyGoalSelector onComplete={() => setShowGoalSelector(false)} />
+      )}
 
       <motion.div
         ref={scrollRef}
@@ -156,8 +172,34 @@ const Dashboard = () => {
 
         {/* Streak Banner */}
         <motion.div variants={fadeUp}>
-          <StreakBanner streak={gamification.streak} />
+          <StreakBanner
+            streak={gamification.streak}
+            frozen={gamification.streakFrozen}
+            freezesAvailable={gamification.streakFreezesAvailable}
+          />
         </motion.div>
+
+        {/* Social Proof */}
+        <motion.div variants={fadeUp}>
+          <SocialProofNudge />
+        </motion.div>
+
+        {/* Daily Goal Ring */}
+        {gamification.dailyGoalSet && (
+          <motion.div variants={fadeUp}>
+            <GlassCard hoverable={false}>
+              <CardContent className="py-4 flex items-center justify-center gap-6">
+                <DailyGoalRing />
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-foreground">Daily Goal</p>
+                  <p className="text-xs text-muted-foreground">
+                    Level {gamification.level} · {gamification.totalXp.toLocaleString()} XP total
+                  </p>
+                </div>
+              </CardContent>
+            </GlassCard>
+          </motion.div>
+        )}
 
         {/* Motivational Message */}
         <motion.div variants={fadeUp}>
@@ -225,10 +267,14 @@ const Dashboard = () => {
                 </Button>
               )}
 
-              <div className="grid grid-cols-3 gap-2 pt-1">
+              <div className="grid grid-cols-4 gap-2 pt-1">
                 <div className="text-center p-2 rounded-lg bg-muted/50">
                   <p className="text-lg font-bold text-foreground">{gamification.streak}</p>
                   <p className="text-[10px] text-muted-foreground">{ui("day_streak", lang)}</p>
+                </div>
+                <div className="text-center p-2 rounded-lg bg-muted/50">
+                  <p className="text-lg font-bold text-foreground">{gamification.totalXp}</p>
+                  <p className="text-[10px] text-muted-foreground">XP</p>
                 </div>
                 <div className="text-center p-2 rounded-lg bg-muted/50">
                   <p className="text-lg font-bold text-foreground">
@@ -238,9 +284,9 @@ const Dashboard = () => {
                 </div>
                 <div className="text-center p-2 rounded-lg bg-muted/50">
                   <p className="text-lg font-bold text-foreground">
-                    {Math.round(gamification.totalStudyMinutes)}
+                    {gamification.level}
                   </p>
-                  <p className="text-[10px] text-muted-foreground">{ui("minutes", lang)}</p>
+                  <p className="text-[10px] text-muted-foreground">Level</p>
                 </div>
               </div>
             </CardContent>
@@ -397,6 +443,27 @@ const Dashboard = () => {
                                 : "🔒"}
                             </span>
                           </div>
+                        </div>
+                      )}
+
+                      {/* Progress decay bars for completed lessons */}
+                      {unlocked && Object.keys(mp.lessons).length > 0 && (
+                        <div className="space-y-1 pt-1 border-t border-border/50">
+                          {mod.lessons.map((lesson) => {
+                            const key = `${mod.id}.${lesson.id}`;
+                            const strengthData = gamification.lessonStrength[key];
+                            if (!strengthData || !mp.lessons[lesson.id]?.completed) return null;
+                            if (strengthData.strength >= 75) return null; // Only show fading ones
+                            return (
+                              <div key={key} className="space-y-0.5">
+                                <span className="text-[10px] text-muted-foreground">L{lesson.id}</span>
+                                <ProgressDecayBar
+                                  lastReviewed={strengthData.lastReviewed}
+                                  onReview={() => refreshLessonStrength(mod.id, lesson.id)}
+                                />
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
 

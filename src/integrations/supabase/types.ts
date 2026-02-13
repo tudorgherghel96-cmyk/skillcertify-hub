@@ -184,6 +184,36 @@ export type Database = {
         }
         Relationships: []
       }
+      lesson_strength: {
+        Row: {
+          created_at: string
+          id: string
+          last_reviewed_at: string
+          lesson_id: number
+          module_id: number
+          strength: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_reviewed_at?: string
+          lesson_id: number
+          module_id: number
+          strength?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_reviewed_at?: string
+          lesson_id?: number
+          module_id?: number
+          strength?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       mock_attempts: {
         Row: {
           attempted_at: string | null
@@ -366,6 +396,51 @@ export type Database = {
           last_active_date?: string | null
           longest_streak?: number | null
           streak_frozen?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_gamification: {
+        Row: {
+          created_at: string
+          daily_goal: number
+          daily_xp: number
+          daily_xp_date: string
+          id: string
+          last_review_prompt: string | null
+          level: number
+          milestones_achieved: Json
+          streak_freezes_available: number
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_goal?: number
+          daily_xp?: number
+          daily_xp_date?: string
+          id?: string
+          last_review_prompt?: string | null
+          level?: number
+          milestones_achieved?: Json
+          streak_freezes_available?: number
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_goal?: number
+          daily_xp?: number
+          daily_xp_date?: string
+          id?: string
+          last_review_prompt?: string | null
+          level?: number
+          milestones_achieved?: Json
+          streak_freezes_available?: number
+          total_xp?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

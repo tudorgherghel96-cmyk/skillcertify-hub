@@ -7,6 +7,7 @@ import {
 import { getLessonVideoUrl } from "@/lib/media";
 import { triggerHaptic } from "@/lib/haptics";
 import { speakWord } from "@/lib/pronunciation";
+import VideoPlayer, { VideoPlaceholder } from "./VideoPlayer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { Slide } from "@/data/slidesSchema";
 
@@ -85,55 +86,20 @@ function HeroSlide({ slide }: { slide: Extract<Slide, { type: "hero" }> }) {
 
 /* ─── Video Slide ─── */
 function VideoSlide({ slide, isActive }: { slide: Extract<Slide, { type: "video" }>; isActive: boolean }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
   const url = getLessonVideoUrl(slide.lessonId);
 
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    if (isActive && !loading) {
-      v.play().catch(() => {});
-    } else {
-      v.pause();
-    }
-  }, [isActive, loading]);
-
-  if (error) {
-    return (
-      <SlideShell>
-        <motion.div variants={pop} initial="hidden" animate="show" className="flex flex-col items-center gap-5">
-          <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-            <Play className="h-7 w-7 text-muted-foreground ml-0.5" />
-          </div>
-          <p className="text-muted-foreground text-sm">Video coming soon</p>
-          <p className="text-[11px] text-muted-foreground/50 animate-pulse">Swipe up to continue ↑</p>
-        </motion.div>
-      </SlideShell>
-    );
-  }
+  // Build a videos map — currently all videos are English-only
+  // When multi-language videos are added, the slide schema can include a `videos` record
+  const videos = (slide as any).videos as Record<string, string> | undefined;
 
   return (
     <SlideShell className="p-0 bg-black">
-      <div className="w-full h-full flex items-center justify-center relative">
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div className="h-10 w-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
-        <video
-          ref={videoRef}
-          src={url}
-          playsInline
-          muted
-          loop
-          preload="metadata"
-          className={`w-full h-auto max-h-full transition-opacity duration-500 ${loading ? "opacity-0" : "opacity-100"}`}
-          onError={() => setError(true)}
-          onLoadedMetadata={() => setLoading(false)}
-        />
-      </div>
+      <VideoPlayer
+        videoUrl={url}
+        videos={videos}
+        autoPlay
+        isActive={isActive}
+      />
     </SlideShell>
   );
 }

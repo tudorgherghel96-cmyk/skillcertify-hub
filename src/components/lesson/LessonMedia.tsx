@@ -4,6 +4,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { lessonMedia } from "@/data/mediaMap";
 import { getLessonVideoUrl } from "@/lib/media";
+import VideoPlayer, { VideoPlaceholder } from "./VideoPlayer";
 
 interface LessonMediaProps {
   moduleId: number;
@@ -45,41 +46,12 @@ function MediaImage({ src, alt, eager = false }: { src: string; alt: string; eag
   );
 }
 
-function LessonVideo({ src, fallbackDesc }: { src: string; fallbackDesc: string }) {
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  if (error) {
-    return (
-      <AspectRatio ratio={16 / 9} className="bg-muted rounded-xl overflow-hidden relative">
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-          <div className="h-14 w-14 rounded-full bg-muted-foreground/10 flex items-center justify-center">
-            <Play className="h-6 w-6 text-muted-foreground ml-0.5" />
-          </div>
-          <p className="text-sm font-medium text-muted-foreground px-4 text-center">Video lesson coming soon</p>
-        </div>
-      </AspectRatio>
-    );
-  }
+function LessonVideo({ lessonKey }: { lessonKey: string }) {
+  const url = getLessonVideoUrl(lessonKey);
 
   return (
-    <div className="rounded-xl overflow-hidden relative" style={{ backgroundColor: "hsl(var(--secondary))" }}>
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          <Loader2 className="h-8 w-8 text-primary animate-spin" />
-        </div>
-      )}
-      <video
-        src={src}
-        controls
-        preload="metadata"
-        playsInline
-        className={`w-full h-auto rounded-xl transition-opacity duration-300 ${loading ? "opacity-0" : "opacity-100"}`}
-        onError={() => setError(true)}
-        onLoadedMetadata={() => setLoading(false)}
-      >
-        <track kind="captions" />
-      </video>
+    <div className="rounded-xl overflow-hidden aspect-video">
+      <VideoPlayer videoUrl={url} autoPlay={false} isActive />
     </div>
   );
 }
@@ -87,9 +59,6 @@ function LessonVideo({ src, fallbackDesc }: { src: string; fallbackDesc: string 
 export function LessonHeroMedia({ moduleId, lessonId, videoDesc }: LessonMediaProps) {
   const key = `${moduleId}.${lessonId}`;
   const media = lessonMedia[key];
-
-  // Auto-resolve video URL from lessonId — no manual mapping needed
-  const videoUrl = getLessonVideoUrl(key);
 
   // Show hero image
   const heroImage = media?.images?.[0];
@@ -121,8 +90,8 @@ export function LessonHeroMedia({ moduleId, lessonId, videoDesc }: LessonMediaPr
         </AspectRatio>
       )}
 
-      {/* Video Player — auto-resolved from lessonId */}
-      <LessonVideo src={videoUrl} fallbackDesc={videoDesc} />
+      {/* Video Player */}
+      <LessonVideo lessonKey={key} />
     </div>
   );
 }

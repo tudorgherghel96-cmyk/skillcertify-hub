@@ -331,7 +331,8 @@ const Landing = () => {
       {/* ═══ FOOTER ═══ */}
       <footer className="bg-secondary px-4 py-10">
         <div className="max-w-2xl mx-auto space-y-6">
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center gap-4">
+            <img src={skillcertifyIcon} alt="SkillCertify" className="h-10 w-auto" />
             <img src={skillcertifyLogo} alt="SkillCertify" className="h-10" />
             <img src={cscsFullLogo} alt="CSCS - Construction Skills Certification Scheme" className="h-10 w-auto" />
           </div>

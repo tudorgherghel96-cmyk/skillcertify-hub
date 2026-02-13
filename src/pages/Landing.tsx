@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Target, Award, CreditCard, Globe, Check } from "lucide-react";
+import { BookOpen, Target, Award, CreditCard, Globe, Check, ChevronDown, Mail, MessageCircle } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useLanguage, LANGUAGES, type Language } from "@/contexts/LanguageContext";
@@ -25,13 +25,6 @@ const Landing = () => {
   const { language, setLanguage } = useLanguage();
   const [sheetOpen, setSheetOpen] = useState(false);
   const t = (key: Parameters<typeof landingText>[0]) => landingText(key, language.code);
-
-  const socialProofItems = [
-    t("social_pass_rate"),
-    t("social_languages"),
-    t("social_hours"),
-    t("social_cert"),
-  ];
 
   const steps = [
     { icon: BookOpen, title: t("step_learn"), desc: t("step_learn_desc") },
@@ -66,50 +59,57 @@ const Landing = () => {
     <div className="flex flex-col min-h-screen bg-background">
       {/* ═══ HERO ═══ */}
       <section className="relative px-4 pt-10 pb-8 sm:pt-16 sm:pb-12 bg-secondary">
-        {/* Language globe — top right, always visible */}
+        {/* Language selector — compact, top right */}
         <button
           onClick={() => setSheetOpen(true)}
-          className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary-foreground/10 hover:bg-secondary-foreground/20 transition-colors"
+          className="absolute top-4 right-4 z-10 flex items-center gap-1 px-2 py-1.5 rounded-md hover:bg-secondary-foreground/10 transition-colors"
           aria-label="Select language"
         >
-          <Globe className="h-4 w-4 text-secondary-foreground/70" />
-          <span className="text-xs font-semibold text-secondary-foreground/80">{language.native}</span>
+          <Globe className="h-3.5 w-3.5 text-secondary-foreground/50" />
+          <span className="text-xs font-medium text-secondary-foreground/50 uppercase">{language.code}</span>
+          <ChevronDown className="h-3 w-3 text-secondary-foreground/40" />
         </button>
 
-        <div className="max-w-2xl mx-auto text-center space-y-5">
+        <div className="max-w-2xl mx-auto text-center">
+          {/* Logo — transparent icon only */}
           <motion.img
-            src={skillcertifyLogo}
+            src={skillcertifyIcon}
             alt="SkillCertify"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="h-14 sm:h-16 mx-auto mb-1"
+            className="h-8 w-auto mx-auto mb-6"
+            loading="eager"
+            decoding="sync"
+            fetchPriority="high"
           />
 
+          {/* H1 — single clear headline */}
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.05 }}
             className="text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-secondary-foreground font-[Poppins]"
           >
-            {t("hero_title_1")}{" "}
-            <span className="text-primary">{t("hero_title_2")}</span>
+            {t("hero_title_1")}
           </motion.h1>
 
+          {/* Subhead */}
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-sm sm:text-base text-secondary-foreground/70 max-w-md mx-auto"
+            className="mt-3 text-sm sm:text-base text-secondary-foreground/70 max-w-md mx-auto"
           >
-            {t("hero_subtitle")}
+            {t("hero_title_2")}
           </motion.p>
 
+          {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.18 }}
-            className="flex flex-col items-center gap-3 pt-1"
+            className="mt-5 flex flex-col items-center"
           >
             <Button
               asChild
@@ -118,54 +118,58 @@ const Landing = () => {
             >
               <Link to="/select-language">
                 {t("cta_start")}
-                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button
               asChild
               variant="link"
-              className="text-secondary-foreground/50 text-xs font-medium h-auto min-h-0 p-0"
+              className="mt-3 text-secondary-foreground/50 text-xs font-medium h-auto min-h-0 p-0"
             >
               <Link to="/auth">{t("cta_signin")}</Link>
             </Button>
           </motion.div>
 
-          {/* Trust badges with actual logos */}
+          {/* Trust badges */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="flex items-center justify-center gap-4 pt-4"
+            className="mt-6 flex items-center justify-center gap-3"
           >
-            <div className="flex items-center justify-center h-10 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5 gap-2">
-              <img src={gqaLogo} alt="GQA" className="h-6 w-auto" />
-              <span className="text-[10px] sm:text-xs font-semibold text-secondary-foreground/60 tracking-wide uppercase">Approved</span>
+            <div className="flex items-center gap-2 h-9 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5">
+              <img src={gqaLogo} alt="GQA" className="h-5 w-auto" />
+              <span className="text-[10px] sm:text-xs font-medium text-secondary-foreground/60">GQA Approved Centre</span>
             </div>
-            <div className="flex items-center justify-center h-10 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5 gap-2">
-              <img src={myCscsLogo} alt="myCSCS" className="h-6 w-auto rounded" />
-              <span className="text-[10px] sm:text-xs font-semibold text-secondary-foreground/60 tracking-wide uppercase">Integrated</span>
+            <div className="flex items-center gap-2 h-9 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5">
+              <img src={myCscsLogo} alt="myCSCS" className="h-5 w-auto rounded" />
+              <span className="text-[10px] sm:text-xs font-medium text-secondary-foreground/60">CSCS Smart Check</span>
             </div>
           </motion.div>
 
-          <motion.p
+          {/* Benefits row — replaces loud scrolling strip */}
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.35 }}
-            className="text-xs text-secondary-foreground/50 pt-1"
+            className="mt-4 flex items-center justify-center gap-4 flex-wrap"
+          >
+            {[t("social_pass_rate"), t("social_languages"), t("social_cert")].map((item, i) => (
+              <span key={i} className="text-[10px] sm:text-xs text-secondary-foreground/50 flex items-center gap-1">
+                <Check className="h-3 w-3 text-primary" />
+                {item}
+              </span>
+            ))}
+          </motion.div>
+
+          {/* Reassurance line */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="mt-4 text-xs text-secondary-foreground/45"
           >
             {t("no_laptop")}
           </motion.p>
-        </div>
-      </section>
-
-      {/* ═══ SOCIAL PROOF STRIP ═══ */}
-      <section className="bg-primary py-3 overflow-hidden">
-        <div className="flex animate-[scroll_20s_linear_infinite] gap-10 px-4 whitespace-nowrap">
-          {[...socialProofItems, ...socialProofItems].map((item, i) => (
-            <span key={i} className="text-sm font-semibold text-primary-foreground/90 flex-shrink-0">
-              ✓ {item}
-            </span>
-          ))}
         </div>
       </section>
 
@@ -241,7 +245,6 @@ const Landing = () => {
             >
               <Link to="/select-language">
                 {t("start_now")}
-                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </motion.div>
@@ -330,29 +333,42 @@ const Landing = () => {
 
       {/* ═══ FOOTER ═══ */}
       <footer className="bg-secondary px-4 py-10">
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-2xl mx-auto space-y-5">
+          {/* Logo row */}
           <div className="flex items-center justify-center gap-4">
-            <img src={skillcertifyIcon} alt="SkillCertify" className="h-10 w-auto" />
-            <img src={skillcertifyLogo} alt="SkillCertify" className="h-10" />
-            <img src={cscsFullLogo} alt="CSCS - Construction Skills Certification Scheme" className="h-10 w-auto" />
+            <img src={skillcertifyIcon} alt="SkillCertify" className="h-8 w-auto" />
+            <img src={skillcertifyLogo} alt="SkillCertify" className="h-8" />
+            <img src={cscsFullLogo} alt="CSCS" className="h-8 w-auto" />
           </div>
 
-          <div className="text-center space-y-1.5">
-            <p className="text-xs text-secondary-foreground/60">
-              Zeus House, London, N1 7NG
-            </p>
-            <p className="text-xs text-secondary-foreground/60">
-              GQA Centre Number: XXXXXX
-            </p>
-            <p className="text-xs text-secondary-foreground/60">
-              Support: <a href="mailto:support@skillcertify.co.uk" className="underline">support@skillcertify.co.uk</a>
-              &nbsp;|&nbsp;
-              <a href="https://wa.me/44XXXXXXXXXX" className="underline" target="_blank" rel="noopener noreferrer">
-                WhatsApp
-              </a>
+          {/* Address + centre number — compact */}
+          <div className="text-center">
+            <p className="text-xs text-secondary-foreground/50">
+              Zeus House, London, N1 7NG · GQA Centre: XXXXXX
             </p>
           </div>
 
+          {/* Support row with icons */}
+          <div className="flex items-center justify-center gap-6">
+            <a
+              href="mailto:support@skillcertify.co.uk"
+              className="flex items-center gap-1.5 text-xs text-secondary-foreground/60 hover:text-secondary-foreground/80 transition-colors"
+            >
+              <Mail className="h-3.5 w-3.5" />
+              Email support
+            </a>
+            <a
+              href="https://wa.me/44XXXXXXXXXX"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-xs text-secondary-foreground/60 hover:text-secondary-foreground/80 transition-colors"
+            >
+              <MessageCircle className="h-3.5 w-3.5" />
+              WhatsApp support
+            </a>
+          </div>
+
+          {/* Legal links */}
           <div className="flex items-center justify-center gap-4 text-xs text-secondary-foreground/50">
             <Link to="/privacy" className="hover:text-secondary-foreground/70 transition-colors">Privacy Policy</Link>
             <span>·</span>
@@ -361,6 +377,7 @@ const Landing = () => {
             <a href="#" className="hover:text-secondary-foreground/70 transition-colors">Accessibility</a>
           </div>
 
+          {/* Copyright */}
           <p className="text-[10px] text-secondary-foreground/40 text-center">
             © {new Date().getFullYear()} SkillCertify Ltd. All rights reserved. Registered in England & Wales.
           </p>

@@ -7,6 +7,8 @@ import {
   getOverallProgress,
   areAllLessonsComplete,
 } from "@/contexts/ProgressContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { MODULES } from "@/data/courseData";
 
 /* ─── types ─── */
@@ -22,22 +24,26 @@ export interface Badge {
 
 export interface GamificationState {
   streak: number;
+  longestStreak: number;
   lastStudyDate: string | null; // YYYY-MM-DD
   studyDates: string[]; // list of unique YYYY-MM-DD
   drillSessions: number;
   flashcardsMastered: Record<number, number>; // moduleId → count
   firstOpenDate: string | null;
   totalStudyMinutes: number;
+  streakFrozen: boolean;
 }
 
 const defaultState = (): GamificationState => ({
   streak: 0,
+  longestStreak: 0,
   lastStudyDate: null,
   studyDates: [],
   drillSessions: 0,
   flashcardsMastered: {},
   firstOpenDate: null,
   totalStudyMinutes: 0,
+  streakFrozen: false,
 });
 
 const STORAGE_KEY = "sc_gamification";
@@ -168,7 +174,6 @@ export function computeNudges(
   gam: GamificationState
 ): SmartNudge[] {
   const nudges: SmartNudge[] = [];
-  const overall = getOverallProgress(progress);
 
   // Weak module areas
   for (const mod of MODULES) {
@@ -242,6 +247,59 @@ export function getMotivationalMessage(
   return null;
 }
 
+/* ─── Supabase streak sync ─── */
+
+async function loadStreakFromSupabase(userId: string): Promise<{
+  current: number;
+  longest: number;
+  lastDate: string | null;
+  frozen: boolean;
+} | null> {
+  const { data } = await supabase
+    .from("streaks")
+    .select("current_streak, longest_streak, last_active_date, streak_frozen")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!data) return null;
+  return {
+    current: data.current_streak ?? 0,
+    longest: data.longest_streak ?? 0,
+    lastDate: data.last_active_date,
+    frozen: data.streak_frozen ?? false,
+  };
+}
+
+async function upsertStreak(userId: string, current: number, longest: number, lastDate: string, frozen: boolean) {
+  const { data: existing } = await supabase
+    .from("streaks")
+    .select("id")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase
+      .from("streaks")
+      .update({
+        current_streak: current,
+        longest_streak: longest,
+        last_active_date: lastDate,
+        streak_frozen: frozen,
+      })
+      .eq("user_id", userId);
+  } else {
+    await supabase
+      .from("streaks")
+      .insert({
+        user_id: userId,
+        current_streak: current,
+        longest_streak: longest,
+        last_active_date: lastDate,
+        streak_frozen: frozen,
+      });
+  }
+}
+
 /* ─── context ─── */
 
 interface GamificationContextValue {
@@ -259,6 +317,7 @@ const GamificationContext = createContext<GamificationContextValue | undefined>(
 
 export const GamificationProvider = ({ children }: { children: React.ReactNode }) => {
   const { progress } = useProgress();
+  const { user } = useAuth();
   const [gamification, setGamification] = useState<GamificationState>(load);
 
   const update = useCallback((fn: (prev: GamificationState) => GamificationState) => {
@@ -269,28 +328,67 @@ export const GamificationProvider = ({ children }: { children: React.ReactNode }
     });
   }, []);
 
+  // Load streak from Supabase when user logs in
+  useEffect(() => {
+    if (!user) return;
+
+    (async () => {
+      const remote = await loadStreakFromSupabase(user.id);
+      if (remote) {
+        update((prev) => ({
+          ...prev,
+          streak: remote.current,
+          longestStreak: remote.longest,
+          lastStudyDate: remote.lastDate,
+          streakFrozen: remote.frozen,
+        }));
+      }
+    })();
+  }, [user, update]);
+
   // Record study on mount / each page view
   const recordStudySession = useCallback(() => {
     const today = todayStr();
     update((prev) => {
       if (prev.lastStudyDate === today) return prev;
-      const newDates = [...new Set([...prev.studyDates, today])];
+
       let newStreak = prev.streak;
       if (prev.lastStudyDate) {
         const gap = daysBetween(prev.lastStudyDate, today);
-        newStreak = gap === 1 ? prev.streak + 1 : gap === 0 ? prev.streak : 1;
+        if (gap === 1) {
+          newStreak = prev.streak + 1;
+        } else if (gap === 0) {
+          newStreak = prev.streak;
+        } else if (gap > 1 && prev.streakFrozen) {
+          // Streak frozen — maintain but don't increment
+          newStreak = prev.streak;
+        } else {
+          // Gap > 1 day and not frozen — reset streak
+          newStreak = 1;
+        }
       } else {
         newStreak = 1;
       }
+
+      const newLongest = Math.max(prev.longestStreak, newStreak);
+      const newDates = [...new Set([...prev.studyDates, today])];
+
+      // Sync to Supabase
+      if (user) {
+        upsertStreak(user.id, newStreak, newLongest, today, prev.streakFrozen);
+      }
+
       return {
         ...prev,
         lastStudyDate: today,
         studyDates: newDates,
         streak: newStreak,
+        longestStreak: newLongest,
         firstOpenDate: prev.firstOpenDate ?? today,
+        streakFrozen: false, // Unfreeze on activity
       };
     });
-  }, [update]);
+  }, [update, user]);
 
   const recordDrillSession = useCallback(() => {
     update((prev) => ({ ...prev, drillSessions: prev.drillSessions + 1 }));

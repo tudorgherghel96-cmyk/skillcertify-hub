@@ -48,6 +48,10 @@ const App = () => (
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/select-language" element={<SelectLanguage />} />
+              {/* Play-first: Lesson 1.1 accessible without auth */}
+              <Route path="/lesson/1/1" element={<AppLayout />}>
+                <Route index element={<LessonPlayer />} />
+              </Route>
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                 <Route path="/dashboard" element={<JourneyDashboard />} />
                 <Route path="/learn" element={<LearnHub />} />

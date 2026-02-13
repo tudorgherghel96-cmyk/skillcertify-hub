@@ -264,6 +264,12 @@ export default function Profile() {
             <p className="text-xs text-muted-foreground">
               Know someone who needs their CSCS card? Share SkillCertify with them.
             </p>
+            <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 space-y-1">
+              <p className="text-xs font-semibold text-primary">🎉 Referral Rewards</p>
+              <p className="text-xs text-muted-foreground">
+                You'll instantly get <span className="font-bold text-foreground">£20</span> for every friend who signs up, and they'll get <span className="font-bold text-foreground">£10 off</span> the course price.
+              </p>
+            </div>
             <Button
               className="w-full h-12 bg-green-600 hover:bg-green-700 text-white gap-2"
               onClick={() => inviteFriend(language.english)}

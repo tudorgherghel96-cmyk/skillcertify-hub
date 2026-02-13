@@ -2,6 +2,7 @@ import { Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
+import skillcertifyIcon from "@/assets/skillcertify-icon.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +22,8 @@ const TopNav = ({ currentModule, currentLesson, overallProgress = 0 }: TopNavPro
   return (
     <header className="sticky top-0 z-50 border-b bg-card">
       <div className="flex items-center justify-between px-4 h-14">
-        <Link to="/" className="flex items-center gap-1.5">
+        <Link to="/" className="flex items-center gap-2">
+          <img src={skillcertifyIcon} alt="SkillCertify" className="h-7 w-7" />
           <span className="text-lg font-bold text-primary tracking-tight">SkillCertify</span>
         </Link>
 

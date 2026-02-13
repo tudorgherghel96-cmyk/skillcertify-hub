@@ -8,6 +8,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { useLanguage, LANGUAGES, type Language } from "@/contexts/LanguageContext";
 import { landingText } from "@/i18n/landingTranslations";
 import skillcertifyLogo from "@/assets/skillcertify-logo.png";
+import skillcertifyIcon from "@/assets/skillcertify-icon.png";
+import cscsLogo from "@/assets/cscs-logo.png";
+import gqaLogo from "@/assets/gqa-logo.png";
+import officePhoto from "@/assets/office-zeus-house.jpg";
 import greenCard from "@/assets/cscs-green-card.webp";
 import blueCard from "@/assets/cscs-blue-card.webp";
 import goldCard from "@/assets/cscs-gold-card.webp";
@@ -124,23 +128,24 @@ const Landing = () => {
             </Button>
           </motion.div>
 
-          {/* Trust badges */}
+          {/* Trust badges with actual logos */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
             className="flex items-center justify-center gap-4 pt-4"
           >
-            {["GQA Approved", "Ofqual Regulated", "CSCS Partner"].map((badge) => (
-              <div
-                key={badge}
-                className="flex items-center justify-center h-10 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5"
-              >
-                <span className="text-[10px] sm:text-xs font-semibold text-secondary-foreground/60 tracking-wide uppercase">
-                  {badge}
-                </span>
-              </div>
-            ))}
+            <div className="flex items-center justify-center h-10 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5 gap-2">
+              <img src={gqaLogo} alt="GQA" className="h-6 w-auto" />
+              <span className="text-[10px] sm:text-xs font-semibold text-secondary-foreground/60 tracking-wide uppercase">Approved</span>
+            </div>
+            <div className="flex items-center justify-center h-10 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5">
+              <span className="text-[10px] sm:text-xs font-semibold text-secondary-foreground/60 tracking-wide uppercase">Ofqual Regulated</span>
+            </div>
+            <div className="flex items-center justify-center h-10 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5 gap-2">
+              <img src={cscsLogo} alt="CSCS" className="h-6 w-auto rounded" />
+              <span className="text-[10px] sm:text-xs font-semibold text-secondary-foreground/60 tracking-wide uppercase">Partner</span>
+            </div>
           </motion.div>
 
           <motion.p
@@ -280,6 +285,29 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══ CREDIBILITY — Office Photo ═══ */}
+      <section className="px-4 py-12 sm:py-16">
+        <div className="max-w-2xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="rounded-2xl overflow-hidden border border-border shadow-sm"
+          >
+            <img
+              src={officePhoto}
+              alt="SkillCertify office at Zeus House, London"
+              className="w-full aspect-[2/1] object-cover"
+              loading="lazy"
+            />
+            <div className="bg-card p-4 text-center space-y-1">
+              <p className="text-sm font-semibold text-foreground">Zeus House, London, N1 7NG</p>
+              <p className="text-xs text-muted-foreground">Our London headquarters — here to support you every step of the way</p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ═══ FAQ ═══ */}
       <section className="px-4 py-12 sm:py-16 bg-muted/50">
         <div className="max-w-2xl mx-auto">
@@ -310,6 +338,9 @@ const Landing = () => {
 
           <div className="text-center space-y-1.5">
             <p className="text-xs text-secondary-foreground/60">
+              Zeus House, London, N1 7NG
+            </p>
+            <p className="text-xs text-secondary-foreground/60">
               GQA Centre Number: XXXXXX &nbsp;|&nbsp; Ofqual Recognition: XXXXXX
             </p>
             <p className="text-xs text-secondary-foreground/60">
@@ -322,15 +353,15 @@ const Landing = () => {
           </div>
 
           <div className="flex items-center justify-center gap-4 text-xs text-secondary-foreground/50">
-            <a href="#" className="hover:text-secondary-foreground/70 transition-colors">Privacy Policy</a>
+            <Link to="/privacy" className="hover:text-secondary-foreground/70 transition-colors">Privacy Policy</Link>
             <span>·</span>
-            <a href="#" className="hover:text-secondary-foreground/70 transition-colors">Terms</a>
+            <Link to="/terms" className="hover:text-secondary-foreground/70 transition-colors">Terms & Conditions</Link>
             <span>·</span>
             <a href="#" className="hover:text-secondary-foreground/70 transition-colors">Accessibility</a>
           </div>
 
           <p className="text-[10px] text-secondary-foreground/40 text-center">
-            © {new Date().getFullYear()} SkillCertify. All rights reserved.
+            © {new Date().getFullYear()} SkillCertify Ltd. All rights reserved. Registered in England & Wales.
           </p>
         </div>
       </footer>

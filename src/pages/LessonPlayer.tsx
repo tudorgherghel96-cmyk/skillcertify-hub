@@ -17,8 +17,10 @@ import LessonFlow from "@/components/lesson/LessonFlow";
 
 const LessonPlayer = () => {
   const { moduleId: mIdStr, lessonId: lIdStr } = useParams();
-  const moduleId = Number(mIdStr);
-  const lessonId = Number(lIdStr);
+  const location = window.location.pathname;
+  // Handle both parameterized routes and the static /lesson/1/1 play-first route
+  const moduleId = Number(mIdStr) || (location === "/lesson/1/1" ? 1 : NaN);
+  const lessonId = Number(lIdStr) || (location === "/lesson/1/1" ? 1 : NaN);
   const navigate = useNavigate();
   const { progress, completeLesson } = useProgress();
   const { addStudyMinutes, recordStudySession, addXp, refreshLessonStrength } = useGamification();

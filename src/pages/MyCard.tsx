@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Circle, CheckCircle, XCircle, Minus, CreditCard, ExternalLink, HelpCircle, Mail, Clock, Share2 } from "lucide-react";
+import { Check, Circle, CheckCircle, XCircle, Minus, CreditCard, HelpCircle, Mail, Clock, Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -69,7 +69,7 @@ export default function MyCard() {
       status: getStatus(allGqa, allGqa),
     },
     {
-      label: "Pass the CSCS test",
+      label: "Pass the Health & Safety CSCS Test",
       status: getStatus(cscsPassed, allGqa),
     },
     {
@@ -134,17 +134,6 @@ export default function MyCard() {
                   {step.detail && step.status !== "done" && (
                     <p className="text-[11px] text-muted-foreground mt-0.5">{step.detail}</p>
                   )}
-                  {/* Book your test link */}
-                  {i === 3 && step.status === "current" && (
-                    <a
-                      href="https://www.citb.co.uk/courses-and-qualifications/health-safety-and-environment-test/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
-                    >
-                      Book at citb.co.uk <ExternalLink className="h-3 w-3" />
-                    </a>
-                  )}
                 </div>
               </div>
             ))}
@@ -207,7 +196,11 @@ export default function MyCard() {
       {/* Your card */}
       <motion.div variants={fadeUp}>
         <CardWallet currentTarget="green" />
-        <div className="flex flex-col items-center gap-2 mt-3 px-2">
+      </motion.div>
+
+      {/* Card status message + share */}
+      <motion.div variants={fadeUp}>
+        <div className="flex flex-col items-center gap-2 px-2">
           <p className="text-xs text-muted-foreground text-center leading-relaxed">
             {cscsPassed
               ? "Your Green Card is on its way."

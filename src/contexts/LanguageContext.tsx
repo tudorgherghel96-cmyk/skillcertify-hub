@@ -10,16 +10,17 @@ export interface Language {
 }
 
 export const LANGUAGES: Language[] = [
-  { code: "en", flag: "🇬🇧", english: "English", native: "English" },
-  { code: "ro", flag: "🇷🇴", english: "Romanian", native: "Română" },
-  { code: "lt", flag: "🇱🇹", english: "Lithuanian", native: "Lietuvių" },
-  { code: "bg", flag: "🇧🇬", english: "Bulgarian", native: "Български" },
-  { code: "ar", flag: "🇸🇦", english: "Arabic", native: "العربية", rtl: true },
-  { code: "ti", flag: "🇪🇷", english: "Tigrinya", native: "ትግርኛ" },
-  { code: "yo", flag: "🇳🇬", english: "Yoruba", native: "Yorùbá" },
-  { code: "ig", flag: "🇳🇬", english: "Igbo", native: "Igbo" },
-  { code: "so", flag: "🇸🇴", english: "Somali", native: "Soomaali" },
-  { code: "am", flag: "🇪🇹", english: "Amharic", native: "አማርኛ" },
+  { code: "en", flag: "", english: "English", native: "English" },
+  { code: "ro", flag: "", english: "Romanian", native: "Română" },
+  { code: "pl", flag: "", english: "Polish", native: "Polski" },
+  { code: "lt", flag: "", english: "Lithuanian", native: "Lietuvių" },
+  { code: "bg", flag: "", english: "Bulgarian", native: "Български" },
+  { code: "ar", flag: "", english: "Arabic", native: "العربية", rtl: true },
+  { code: "ti", flag: "", english: "Tigrinya", native: "ትግርኛ" },
+  { code: "yo", flag: "", english: "Yoruba", native: "Yorùbá" },
+  { code: "ig", flag: "", english: "Igbo", native: "Igbo" },
+  { code: "so", flag: "", english: "Somali", native: "Soomaali" },
+  { code: "am", flag: "", english: "Amharic", native: "አማርኛ" },
 ];
 
 interface LanguageContextValue {

@@ -1,54 +1,75 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Target, Award, CreditCard, ChevronDown, MessageCircle } from "lucide-react";
+import { ArrowRight, BookOpen, Target, Award, CreditCard, Globe, Check } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useLanguage, LANGUAGES, type Language } from "@/contexts/LanguageContext";
+import { landingText } from "@/i18n/landingTranslations";
 import skillcertifyLogo from "@/assets/skillcertify-logo.png";
 import greenCard from "@/assets/cscs-green-card.webp";
 import blueCard from "@/assets/cscs-blue-card.webp";
 import goldCard from "@/assets/cscs-gold-card.webp";
 import blackCard from "@/assets/cscs-black-card.webp";
 
-/* ─── data ─── */
-
-const socialProofItems = [
-  "98% pass rate",
-  "Available in 11 languages",
-  "Complete in as little as 6 hours",
-  "Certificate in 24 hours",
-];
-
-const steps = [
-  { icon: BookOpen, title: "Learn", desc: "Bite-sized lessons with videos in your language" },
-  { icon: Target, title: "Practice", desc: "Unlimited practice tests until you're confident" },
-  { icon: Award, title: "Pass", desc: "Take the official GQA assessment from your phone" },
-  { icon: CreditCard, title: "Get Your Card", desc: "Receive your CSCS Green Labourer card" },
-];
-
-const careerCards = [
-  { img: greenCard, name: "Green", role: "Labourer", qual: "Level 1 H&S", salary: "£21,500/yr" },
-  { img: blueCard, name: "Blue", role: "Skilled Worker", qual: "NVQ Level 2", salary: "£35,000/yr" },
-  { img: goldCard, name: "Gold", role: "Supervisor", qual: "NVQ Level 3", salary: "£42,000/yr" },
-  { img: blackCard, name: "Black", role: "Manager", qual: "NVQ Level 6", salary: "£55,000/yr" },
-];
-
-const faqs = [
-  { q: "Do I need a CSCS test?", a: "Yes, you need the CSCS test to get the CSCS card. Luckily, we can do it here." },
-  { q: "How long does it take?", a: "It can take as little as 6 hours to complete. The certificate can be available digitally as fast as one day, and the CSCS Smart Checker app can digitally have your card as fast as the next day. The physical card can take up to 5 working days to reach home." },
-  { q: "What if I fail?", a: "If you fail an assessment topic, you can retake as many times as you need. If you fail the CSCS test, you can also retake as many times as you need." },
-  { q: "Do I need to visit a centre?", a: "You don't need to. It's all done here with us, in one place. No centre visit needed." },
-  { q: "Is this an official qualification?", a: "Yes. SkillCertify delivers the GQA Level 1 Award in Construction Health and Safety (601/2322/9), regulated by Ofqual." },
-  { q: "What languages is it available in?", a: "English, Romanian, Bulgarian, Lithuanian, Polish, Portuguese, Hungarian, Ukrainian, Arabic, Amharic, and Kurdish Sorani." },
-  { q: "How much does it cost?", a: "Course: £XX + CSCS Test: £21 + Card Application: £36. See the pricing section above for the full breakdown." },
-];
-
 /* ─── component ─── */
 
 const Landing = () => {
+  const { language, setLanguage } = useLanguage();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const t = (key: Parameters<typeof landingText>[0]) => landingText(key, language.code);
+
+  const socialProofItems = [
+    t("social_pass_rate"),
+    t("social_languages"),
+    t("social_hours"),
+    t("social_cert"),
+  ];
+
+  const steps = [
+    { icon: BookOpen, title: t("step_learn"), desc: t("step_learn_desc") },
+    { icon: Target, title: t("step_practice"), desc: t("step_practice_desc") },
+    { icon: Award, title: t("step_pass"), desc: t("step_pass_desc") },
+    { icon: CreditCard, title: t("step_card"), desc: t("step_card_desc") },
+  ];
+
+  const careerCards = [
+    { img: greenCard, name: "Green", role: t("labourer"), qual: "Level 1 H&S", salary: "£21,500/yr" },
+    { img: blueCard, name: "Blue", role: t("skilled_worker"), qual: "NVQ Level 2", salary: "£35,000/yr" },
+    { img: goldCard, name: "Gold", role: t("supervisor"), qual: "NVQ Level 3", salary: "£42,000/yr" },
+    { img: blackCard, name: "Black", role: t("manager"), qual: "NVQ Level 6", salary: "£55,000/yr" },
+  ];
+
+  const faqs = [
+    { q: "Do I need a CSCS test?", a: "Yes, you need the CSCS test to get the CSCS card. Luckily, we can do it here." },
+    { q: "How long does it take?", a: "It can take as little as 6 hours to complete. The certificate can be available digitally as fast as one day, and the CSCS Smart Checker app can digitally have your card as fast as the next day. The physical card can take up to 5 working days to reach home." },
+    { q: "What if I fail?", a: "If you fail an assessment topic, you can retake as many times as you need. If you fail the CSCS test, you can also retake as many times as you need." },
+    { q: "Do I need to visit a centre?", a: "You don't need to. It's all done here with us, in one place. No centre visit needed." },
+    { q: "Is this an official qualification?", a: "Yes. SkillCertify delivers the GQA Level 1 Award in Construction Health and Safety (601/2322/9), regulated by Ofqual." },
+    { q: "What languages is it available in?", a: "English, Romanian, Polish, Bulgarian, Lithuanian, Arabic, Tigrinya, Yoruba, Igbo, Somali, and Amharic." },
+    { q: "How much does it cost?", a: "Course: £XX + CSCS Test: £21 + Card Application: £36. See the pricing section above for the full breakdown." },
+  ];
+
+  const handleSelectLang = (lang: Language) => {
+    setLanguage(lang);
+    setSheetOpen(false);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* ═══ HERO ═══ */}
       <section className="relative px-4 pt-10 pb-8 sm:pt-16 sm:pb-12 bg-secondary">
+        {/* Language globe — top right, always visible */}
+        <button
+          onClick={() => setSheetOpen(true)}
+          className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary-foreground/10 hover:bg-secondary-foreground/20 transition-colors"
+          aria-label="Select language"
+        >
+          <Globe className="h-4 w-4 text-secondary-foreground/70" />
+          <span className="text-xs font-semibold text-secondary-foreground/80">{language.native}</span>
+        </button>
+
         <div className="max-w-2xl mx-auto text-center space-y-5">
           <motion.img
             src={skillcertifyLogo}
@@ -65,8 +86,8 @@ const Landing = () => {
             transition={{ duration: 0.5, delay: 0.05 }}
             className="text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-secondary-foreground font-[Poppins]"
           >
-            Get your CSCS Green Card.{" "}
-            <span className="text-primary">Start to finish, from your phone.</span>
+            {t("hero_title_1")}{" "}
+            <span className="text-primary">{t("hero_title_2")}</span>
           </motion.h1>
 
           <motion.p
@@ -75,7 +96,7 @@ const Landing = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-sm sm:text-base text-secondary-foreground/70 max-w-md mx-auto"
           >
-            Used by 2,000+ construction workers across the UK
+            {t("hero_subtitle")}
           </motion.p>
 
           <motion.div
@@ -90,7 +111,7 @@ const Landing = () => {
               className="text-base px-8 h-12 font-semibold w-full max-w-xs bg-primary hover:bg-primary/90 text-primary-foreground active:scale-[0.97] transition-transform"
             >
               <Link to="/select-language">
-                Start Learning Free
+                {t("cta_start")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -99,7 +120,7 @@ const Landing = () => {
               variant="link"
               className="text-secondary-foreground/50 text-xs font-medium h-auto min-h-0 p-0"
             >
-              <Link to="/auth">Already have an account? Sign in</Link>
+              <Link to="/auth">{t("cta_signin")}</Link>
             </Button>
           </motion.div>
 
@@ -128,7 +149,7 @@ const Landing = () => {
             transition={{ delay: 0.35 }}
             className="text-xs text-secondary-foreground/50 pt-1"
           >
-            No laptop needed. No centre visit. Everything on your phone.
+            {t("no_laptop")}
           </motion.p>
         </div>
       </section>
@@ -148,12 +169,12 @@ const Landing = () => {
       <section className="px-4 py-12 sm:py-16">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-xl sm:text-2xl font-bold text-foreground text-center mb-8 font-[Poppins]">
-            How It Works
+            {t("how_it_works")}
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {steps.map(({ icon: Icon, title, desc }, i) => (
               <motion.div
-                key={title}
+                key={i}
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -164,7 +185,7 @@ const Landing = () => {
                   <Icon className="h-6 w-6 text-primary" />
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-primary">Step {i + 1}</span>
+                  <span className="text-xs font-bold text-primary">{t("step_prefix")} {i + 1}</span>
                 </div>
                 <p className="text-sm font-semibold text-foreground">{title}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
@@ -178,7 +199,7 @@ const Landing = () => {
       <section className="px-4 py-12 sm:py-16 bg-muted/50">
         <div className="max-w-md mx-auto">
           <h2 className="text-xl sm:text-2xl font-bold text-foreground text-center mb-6 font-[Poppins]">
-            Simple, Transparent Pricing
+            {t("pricing_title")}
           </h2>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -188,9 +209,9 @@ const Landing = () => {
           >
             <div className="space-y-2">
               {[
-                { label: "Course & Certificate", price: "£XX" },
-                { label: "CSCS Test", price: "£21" },
-                { label: "Card Application", price: "£36" },
+                { label: t("course_cert"), price: "£XX" },
+                { label: t("cscs_test"), price: "£21" },
+                { label: t("card_app"), price: "£36" },
               ].map(({ label, price }) => (
                 <div key={label} className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{label}</span>
@@ -199,14 +220,13 @@ const Landing = () => {
               ))}
             </div>
             <div className="border-t border-border pt-3 flex justify-between">
-              <span className="font-bold text-foreground">Total</span>
+              <span className="font-bold text-foreground">{t("total")}</span>
               <span className="font-bold text-foreground text-lg">£XX</span>
             </div>
 
-            {/* Klarna badge */}
             <div className="rounded-lg bg-muted p-2.5 text-center">
               <span className="text-xs font-semibold text-muted-foreground">
-                Pay in 3 with Klarna — interest-free
+                {t("klarna")}
               </span>
             </div>
 
@@ -216,7 +236,7 @@ const Landing = () => {
               className="w-full text-base h-12 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <Link to="/select-language">
-                Start Now
+                {t("start_now")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -228,10 +248,10 @@ const Landing = () => {
       <section className="px-4 py-12 sm:py-16">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-xl sm:text-2xl font-bold text-foreground text-center mb-2 font-[Poppins]">
-            Your Career Ladder
+            {t("career_title")}
           </h2>
           <p className="text-sm text-muted-foreground text-center mb-8">
-            Start with Green. We'll help you go further.
+            {t("career_subtitle")}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {careerCards.map((card, i) => (
@@ -264,7 +284,7 @@ const Landing = () => {
       <section className="px-4 py-12 sm:py-16 bg-muted/50">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-xl sm:text-2xl font-bold text-foreground text-center mb-6 font-[Poppins]">
-            Frequently Asked Questions
+            {t("faq_title")}
           </h2>
           <Accordion type="single" collapsible className="space-y-2">
             {faqs.map((faq, i) => (
@@ -314,6 +334,45 @@ const Landing = () => {
           </p>
         </div>
       </footer>
+
+      {/* ═══ LANGUAGE BOTTOM SHEET ═══ */}
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="text-lg font-bold text-foreground">
+              Choose Your Language
+            </SheetTitle>
+          </SheetHeader>
+          <div className="grid grid-cols-2 gap-2 pb-6">
+            {LANGUAGES.map((lang) => {
+              const isActive = lang.code === language.code;
+              return (
+                <button
+                  key={lang.code}
+                  onClick={() => handleSelectLang(lang)}
+                  className={`relative flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-colors ${
+                    isActive
+                      ? "border-primary bg-primary/5"
+                      : "border-border bg-card hover:border-primary/30"
+                  }`}
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground truncate">{lang.native}</p>
+                    {lang.code !== "en" && (
+                      <p className="text-xs text-muted-foreground truncate">{lang.english}</p>
+                    )}
+                  </div>
+                  {isActive && (
+                    <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center shrink-0">
+                      <Check className="h-3 w-3 text-primary-foreground" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };

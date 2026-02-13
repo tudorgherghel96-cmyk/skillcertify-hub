@@ -13,17 +13,14 @@ import {
   Trophy,
   Repeat,
   Unlock,
+  Share2,
 } from "lucide-react";
 import { MODULES } from "@/data/courseData";
-import { useProgress } from "@/contexts/ProgressContext";
-import {
-  getModuleProgress,
-  isModuleComplete,
-  allGqaPassed,
-} from "@/contexts/ProgressContext";
+import { useProgress, getModuleProgress, isModuleComplete, allGqaPassed } from "@/contexts/ProgressContext";
 import { useSuperUser } from "@/contexts/SuperUserContext";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
+import { shareContent } from "@/lib/sharing";
 
 /* ─── Simple confetti effect ─── */
 const ConfettiPiece = ({ delay, x }: { delay: number; x: number }) => {
@@ -230,6 +227,18 @@ const Results = () => {
 
           {/* Action Buttons */}
           <div className="space-y-3 pb-4">
+            <Button
+              className="w-full h-12 bg-green-600 hover:bg-green-700 text-white"
+              onClick={() =>
+                shareContent({
+                  title: "I passed the CSCS test!",
+                  text: `I just passed the CSCS Health & Safety Test on SkillCertify! 🎉 Working toward my CSCS Green Card. Try it:`,
+                  url: "https://skillcert-buddy.lovable.app",
+                })
+              }
+            >
+              <Share2 className="mr-2 h-4 w-4" /> Share on WhatsApp
+            </Button>
             <Button variant="outline" className="w-full h-12" disabled>
               <Download className="mr-2 h-4 w-4" /> Download Qualification
               Summary (PDF)

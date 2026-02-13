@@ -21,7 +21,7 @@ const LessonPlayer = () => {
   const lessonId = Number(lIdStr);
   const navigate = useNavigate();
   const { progress, completeLesson } = useProgress();
-  const { addStudyMinutes, recordStudySession } = useGamification();
+  const { addStudyMinutes, recordStudySession, addXp, refreshLessonStrength } = useGamification();
   const { language } = useLanguage();
   const { trackLessonComplete } = useTelemetry();
   const lang = language.code;
@@ -78,6 +78,7 @@ const LessonPlayer = () => {
   const handleMarkComplete = () => {
     completeLesson(moduleId, lessonId);
     trackLessonComplete(moduleId, lessonId);
+    refreshLessonStrength(moduleId, lessonId);
   };
 
   const handleFinish = () => {

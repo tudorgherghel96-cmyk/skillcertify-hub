@@ -179,8 +179,17 @@ function ImageSlide({ slide }: { slide: Extract<Slide, { type: "image" }> }) {
   );
 }
 
-/* ─── Key Term Slide ─── */
+/* ─── Key Term Slide — with sound wave animation ─── */
 function KeyTermSlide({ slide }: { slide: Extract<Slide, { type: "keyterm" }> }) {
+  const [playing, setPlaying] = useState(false);
+
+  const handleSpeak = () => {
+    setPlaying(true);
+    speakWord(slide.term);
+    triggerHaptic("tap");
+    setTimeout(() => setPlaying(false), 1500);
+  };
+
   return (
     <SlideShell>
       <motion.div variants={pop} initial="hidden" animate="show" className="max-w-sm text-center space-y-5">
@@ -190,11 +199,24 @@ function KeyTermSlide({ slide }: { slide: Extract<Slide, { type: "keyterm" }> })
         <div className="flex items-center gap-3 justify-center">
           <h2 className="text-2xl font-bold text-primary tracking-tight">{slide.term}</h2>
           <button
-            onClick={() => { speakWord(slide.term); triggerHaptic("tap"); }}
-            className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 active:scale-90 transition-all"
+            onClick={handleSpeak}
+            className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 active:scale-90 transition-all relative"
             aria-label={`Pronounce ${slide.term}`}
           >
-            <Volume2 className="h-5 w-5 text-primary" />
+            {playing ? (
+              <motion.div className="flex items-center gap-[2px]">
+                {[0, 1, 2, 3].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="w-[3px] rounded-full bg-primary"
+                    animate={{ height: [4, 14, 6, 12, 4] }}
+                    transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.1 }}
+                  />
+                ))}
+              </motion.div>
+            ) : (
+              <Volume2 className="h-5 w-5 text-primary" />
+            )}
           </button>
         </div>
         <p className="text-base text-foreground/75 leading-relaxed">{slide.explanation}</p>
@@ -224,14 +246,14 @@ function RememberSlide({ slide }: { slide: Extract<Slide, { type: "remember" }> 
   );
 }
 
-/* ─── Test Tip Slide ─── */
+/* ─── Test Tip Slide — with amber glow ─── */
 function TipSlide({ slide }: { slide: Extract<Slide, { type: "tip" }> }) {
   const reducedMotion = useReducedMotion();
   return (
     <SlideShell>
       <motion.div variants={pop} initial="hidden" animate="show" className="max-w-md text-center space-y-5">
         <motion.div
-          animate={reducedMotion ? undefined : { rotate: [0, 8, -8, 0] }}
+          animate={reducedMotion ? undefined : { rotate: [0, 8, -8, 0], boxShadow: ["0 0 0 0 rgba(245,158,11,0.2)", "0 0 20px 4px rgba(245,158,11,0.15)", "0 0 0 0 rgba(245,158,11,0.2)"] }}
           transition={reducedMotion ? undefined : { duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
           className="h-16 w-16 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto ring-2 ring-amber-500/20"
         >
@@ -245,7 +267,7 @@ function TipSlide({ slide }: { slide: Extract<Slide, { type: "tip" }> }) {
   );
 }
 
-/* ─── Quiz Slide ─── */
+/* ─── Quiz Slide — with shake entry + ripple effects ─── */
 function QuizSlide({
   slide,
   onQuizAnswered,
@@ -255,6 +277,7 @@ function QuizSlide({
 }) {
   const reducedMotion = useReducedMotion();
   const [selected, setSelected] = useState<number | null>(null);
+  const [rippleIdx, setRippleIdx] = useState<number | null>(null);
   const startTime = useRef(Date.now());
   const isAnswered = selected !== null;
   const isCorrect = selected === slide.correct;
@@ -262,6 +285,7 @@ function QuizSlide({
   const handleSelect = (i: number) => {
     if (isAnswered) return;
     setSelected(i);
+    setRippleIdx(i);
     const responseTime = Date.now() - startTime.current;
     const correct = i === slide.correct;
     if (!reducedMotion) triggerHaptic(correct ? "success" : "error");
@@ -271,24 +295,19 @@ function QuizSlide({
   return (
     <SlideShell>
       <motion.div
-        variants={pop}
-        initial="hidden"
-        animate={
-          isAnswered
-            ? reducedMotion
-              ? "show"
-              : isCorrect
-              ? { scale: [1, 1.05, 1] }
-              : { x: [-5, 5, -5, 5, 0] }
-            : "show"
-        }
-        transition={isAnswered && !reducedMotion ? { duration: 0.3 } : undefined}
+        initial={reducedMotion ? { opacity: 0 } : { opacity: 0, x: [-4, 4, -4, 4, 0] }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={reducedMotion ? { duration: 0.2 } : { duration: 0.4 }}
         className="max-w-md w-full space-y-6"
       >
         <div className="text-center space-y-3">
-          <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+          <motion.div
+            animate={reducedMotion ? undefined : { rotate: [0, -5, 5, -5, 0] }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto"
+          >
             <HelpCircle className="h-6 w-6 text-primary" />
-          </div>
+          </motion.div>
           <p className="text-xs font-bold uppercase tracking-widest text-primary">Quick Check</p>
           <p className="text-lg font-semibold text-foreground">{slide.question}</p>
           {slide.questionEn && (
@@ -306,7 +325,7 @@ function QuizSlide({
                 whileTap={!isAnswered ? { scale: 0.97 } : undefined}
                 onClick={() => handleSelect(i)}
                 disabled={isAnswered}
-                className={`w-full text-left px-4 py-4 rounded-2xl text-sm font-medium transition-all border-2 ${
+                className={`relative w-full text-left px-4 py-4 rounded-2xl text-sm font-medium transition-all border-2 overflow-hidden ${
                   isAnswered
                     ? showCorrect
                       ? "border-primary bg-primary/10 text-foreground"
@@ -315,8 +334,23 @@ function QuizSlide({
                       : "border-transparent bg-muted/30 text-muted-foreground"
                     : "border-border bg-card active:bg-primary/5 text-foreground"
                 }`}
+                animate={
+                  isAnswered && isThis && !isCorrect
+                    ? { x: [-3, 3, -3, 3, 0] }
+                    : undefined
+                }
+                transition={{ duration: 0.3 }}
               >
-                <span className="flex items-center gap-3">
+                {/* Ripple effect on correct answer */}
+                {isAnswered && showCorrect && !reducedMotion && (
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl bg-primary/10"
+                    initial={{ scale: 0, opacity: 0.5 }}
+                    animate={{ scale: 2.5, opacity: 0 }}
+                    transition={{ duration: 0.6 }}
+                  />
+                )}
+                <span className="flex items-center gap-3 relative z-10">
                   {!isAnswered && (
                     <span className="h-6 w-6 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center text-[10px] font-bold text-muted-foreground shrink-0">
                       {String.fromCharCode(65 + i)}

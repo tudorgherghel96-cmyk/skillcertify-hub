@@ -291,7 +291,7 @@ function QuizSlide({
                 whileTap={!isAnswered ? { scale: 0.97 } : undefined}
                 onClick={() => handleSelect(i)}
                 disabled={isAnswered}
-                className={`relative w-full text-left px-4 py-4 rounded-2xl text-sm font-medium transition-all border-2 overflow-hidden ${
+                className={`relative w-full text-left px-4 py-4 rounded-2xl text-sm font-medium transition-all border-2 overflow-hidden min-h-[56px] ${
                   isAnswered
                     ? showCorrect
                       ? "border-primary bg-primary/10 text-foreground"
@@ -334,6 +334,8 @@ function QuizSlide({
         <AnimatePresence>
           {isAnswered && (
             <motion.div
+              role="status"
+              aria-live="polite"
               initial={{ opacity: 0, y: 12, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}

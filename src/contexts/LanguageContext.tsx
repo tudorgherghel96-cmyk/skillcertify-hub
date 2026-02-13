@@ -43,6 +43,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
 
   useEffect(() => {
     document.documentElement.dir = language.rtl ? "rtl" : "ltr";
+    document.documentElement.lang = language.code;
     document.body.style.fontFamily = getFontFamily(language.code);
   }, [language]);
 

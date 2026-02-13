@@ -383,7 +383,7 @@ export default function LessonFlow({
       style={{ touchAction: "none" }}
     >
       {/* ─── Story-style progress bar ─── */}
-      <div className="relative z-30 flex gap-[2px] px-2 pt-2 pb-0">
+      <div className="relative z-30 flex gap-[2px] px-2 pt-2 pb-0" role="progressbar" aria-valuenow={index + 1} aria-valuemin={1} aria-valuemax={total} aria-label={`Card ${index + 1} of ${total}`}>
         {slides.map((slide, i) => {
           const isCompleted = i < index;
           const isCurrent = i === index;
@@ -392,7 +392,7 @@ export default function LessonFlow({
               key={i}
               onClick={() => jumpTo(i)}
               className="flex-1 h-[3px] rounded-full overflow-hidden bg-muted/40 transition-colors"
-              aria-label={`Go to card ${i + 1}`}
+              aria-label={`Go to card ${i + 1} of ${total}`}
             >
               <motion.div
                 className={`h-full rounded-full ${
@@ -423,6 +423,7 @@ export default function LessonFlow({
         <Link
           to={`/module/${moduleId}`}
           className="p-1.5 -ml-1 rounded-full hover:bg-muted/60 transition-colors"
+          aria-label="Back to topic"
         >
           <ArrowLeft className="h-4 w-4 text-muted-foreground" />
         </Link>
@@ -434,6 +435,7 @@ export default function LessonFlow({
             <button
               onClick={() => setShowGlossary(true)}
               className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-muted/60 transition-colors"
+              aria-label="Open glossary"
             >
               <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
@@ -441,6 +443,7 @@ export default function LessonFlow({
           <button
             onClick={toggleBookmark}
             className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-muted/60 transition-colors"
+            aria-label={bookmarked.has(index) ? "Remove bookmark" : "Bookmark this card"}
           >
             {bookmarked.has(index) ? (
               <BookmarkCheck className="h-3.5 w-3.5 text-primary" />
@@ -474,6 +477,8 @@ export default function LessonFlow({
             onAnimationStart={() => { isAnimating.current = true; }}
             onAnimationComplete={() => { isAnimating.current = false; }}
             className="absolute inset-0"
+            aria-roledescription="slide"
+            aria-label={`Card ${index + 1} of ${total}`}
             style={{
               // Subtle drag feedback
               y: quizLocked && dragY < 0 ? 0 : undefined,

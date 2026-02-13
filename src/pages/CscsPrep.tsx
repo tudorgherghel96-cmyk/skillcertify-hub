@@ -39,7 +39,7 @@ const CscsPrep = () => {
   const mockQuestions = useMemo(() => {
     const all = getAllQuestions();
     const shuffled = [...all].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, Math.min(25, shuffled.length));
+    return shuffled.slice(0, Math.min(50, shuffled.length));
   }, [mockStarted]);
 
   const handleMockComplete = useCallback(
@@ -214,7 +214,7 @@ const CscsPrep = () => {
             <div>
               <h2 className="font-bold text-foreground">CSCS Mock Test</h2>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Practice test with 25 questions from all 5 topics. Timed, no notes — just like the real thing.
+                Practice test with 50 questions from all 5 topics. Timed, no notes — just like the real thing.
               </p>
             </div>
           </div>

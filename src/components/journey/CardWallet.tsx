@@ -82,6 +82,7 @@ export default function CardWallet({ currentTarget = "green" }: CardWalletProps)
               </div>
             </motion.div>
           ))}
+        <p className="text-xs text-muted-foreground text-center mt-2 font-medium">Progress your career with us</p>
 
         {/* Locked future cards */}
         <div className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
@@ -111,6 +112,7 @@ export default function CardWallet({ currentTarget = "green" }: CardWalletProps)
               </motion.button>
             ))}
         </div>
+        <p className="text-xs text-muted-foreground text-center mt-2 font-medium">Progress your career with us</p>
       </div>
 
       {/* Unlock info dialog */}

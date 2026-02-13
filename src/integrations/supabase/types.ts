@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessment_attempts: {
+        Row: {
+          attempted_at: string
+          can_retry_at: string
+          id: string
+          passed: boolean
+          score: number | null
+          topic_id: number
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          can_retry_at?: string
+          id?: string
+          passed?: boolean
+          score?: number | null
+          topic_id: number
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          can_retry_at?: string
+          id?: string
+          passed?: boolean
+          score?: number | null
+          topic_id?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           badge_id: string

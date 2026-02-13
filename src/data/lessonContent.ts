@@ -307,7 +307,7 @@ const createPlaceholderLesson = (
     },
     {
       type: "remember",
-      text: `Key facts about ${title} will appear here — designed to stick in your memory for the closed-book test.`,
+      text: `Key facts about ${title} will appear here — designed to stick in your memory. GQA is open book (own notes allowed), CSCS is closed book.`,
     },
     {
       type: "testTip",
@@ -328,7 +328,7 @@ const createPlaceholderLesson = (
   keyFacts: [
     `${title} — content coming soon`,
     "Focus on understanding key terms in English",
-    "Both GQA and CSCS tests are closed book",
+    "GQA tests are open book (own handwritten notes). CSCS test is closed book.",
     "Review this lesson multiple times for best retention",
   ],
 });

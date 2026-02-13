@@ -1,13 +1,17 @@
 import { motion } from "framer-motion";
-import { Check, Circle, CreditCard, ExternalLink, HelpCircle, Mail } from "lucide-react";
+import { Check, Circle, CheckCircle, XCircle, Minus, CreditCard, ExternalLink, HelpCircle, Mail, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   useProgress,
   getModuleProgress,
   areAllLessonsComplete,
   allGqaPassed,
   getLessonsCompleted,
+  canResitGqa,
+  hoursUntilResit,
 } from "@/contexts/ProgressContext";
 import { useSuperUser } from "@/contexts/SuperUserContext";
 import { MODULES } from "@/data/courseData";
@@ -145,6 +149,58 @@ export default function MyCard() {
         </Card>
       </motion.div>
 
+      {/* Per-module assessment status */}
+      <motion.div variants={fadeUp}>
+        <Card>
+          <CardContent className="py-4 space-y-2">
+            <h3 className="text-sm font-bold text-foreground mb-3">Assessment topics</h3>
+            {MODULES.map((m) => {
+              const mp = getModuleProgress(progress, m.id);
+              const passed = mp.gqa.passed === true;
+              const failed = mp.gqa.passed === false;
+              const canRetry = canResitGqa(mp, isSuperUser);
+              const retryHours = hoursUntilResit(mp);
+
+              return (
+                <div key={m.id} className="flex items-center gap-3 py-1.5">
+                  <div className="shrink-0">
+                    {passed ? (
+                      <CheckCircle className="h-5 w-5 text-primary" />
+                    ) : failed ? (
+                      <XCircle className="h-5 w-5 text-destructive" />
+                    ) : (
+                      <Minus className="h-5 w-5 text-muted-foreground/40" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-foreground">Topic {m.id}: {m.title}</p>
+                    {failed && !canRetry && (
+                      <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <Clock className="h-3 w-3" /> Retake in {retryHours}h
+                      </p>
+                    )}
+                  </div>
+                  <div className="shrink-0">
+                    {passed ? (
+                      <Badge variant="secondary" className="bg-primary/10 text-primary text-[10px]">
+                        {mp.gqa.score}% ✓
+                      </Badge>
+                    ) : failed ? (
+                      canRetry ? (
+                        <Badge variant="destructive" className="text-[10px]">Retry now</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] text-destructive border-destructive/30">Failed</Badge>
+                      )
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] text-muted-foreground">Not taken</Badge>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      </motion.div>
       {/* Your card */}
       <motion.div variants={fadeUp}>
         <CardWallet currentTarget="green" />

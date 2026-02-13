@@ -53,7 +53,7 @@ function useTimelineSteps(): TimelineStep[] {
       status: st(allGqa, allGqa),
     },
     {
-      id: 4, title: "Pass the CSCS Test", description: "Final closed-book test covering all 5 modules. This is what earns your card.",
+      id: 4, title: "Pass the CSCS Test", description: "Final closed-book test covering all 5 modules. No notes allowed — this is what earns your card.",
       timeEstimate: "~90 mins", requirements: "Level 1 Certificate", icon: ShieldCheck,
       status: st(cscsPassed, allGqa), ctaLabel: "Prepare for CSCS", ctaTo: "/cscs-prep",
     },

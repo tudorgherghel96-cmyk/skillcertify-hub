@@ -120,7 +120,7 @@ const ModuleOverview = () => {
             <div className="flex items-start gap-2 p-3">
               <Brain className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <p className="text-xs leading-snug">
-                You'll be tested on this without notes — but don't worry, we'll make sure you're ready.
+                Open book — you can use your own handwritten notes. No textbooks or course materials.
               </p>
             </div>
           </GlassCard>
@@ -282,7 +282,7 @@ const ModuleOverview = () => {
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {gqaReady
-                        ? "No notes · 80% to pass · 90 minutes"
+                        ? "Open book · 80% to pass · 90 minutes"
                         : "Score 80%+ in practice to unlock the test"}
                     </p>
                   </div>

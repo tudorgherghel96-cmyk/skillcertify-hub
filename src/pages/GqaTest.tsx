@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,51 @@ import {
   canResitGqa,
   hoursUntilResit,
 } from "@/contexts/ProgressContext";
+
+/** Real-time countdown for 24-hour resit lockout */
+const ResitCountdown = ({ failedAt, moduleId }: { failedAt: string | null; moduleId: number }) => {
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (!failedAt) return null;
+
+  const unlockAt = new Date(failedAt).getTime() + 24 * 60 * 60 * 1000;
+  const diff = Math.max(0, unlockAt - now);
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+  if (diff <= 0) {
+    return (
+      <div className="text-center">
+        <p className="text-sm text-primary font-medium">You can retake it now.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="text-center space-y-2">
+      <div className="inline-flex items-center gap-2 bg-muted px-4 py-2 rounded-xl">
+        <Clock className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-semibold text-foreground font-mono">
+          {String(hours).padStart(2, "0")}:{String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
+        </span>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        You can retake this test in {hours}h {minutes}m
+      </p>
+      <Button asChild variant="outline" size="sm">
+        <Link to={`/practice/${moduleId}`}>
+          <Repeat className="mr-1.5 h-4 w-4" /> Practice while you wait
+        </Link>
+      </Button>
+    </div>
+  );
+};
 
 const GqaTest = () => {
   const { moduleId: mIdStr } = useParams();
@@ -166,23 +212,7 @@ const GqaTest = () => {
               </Button>
             </div>
           ) : (
-            <div className="text-center space-y-2">
-              <div className="inline-flex items-center gap-2 bg-muted px-4 py-2 rounded-xl">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-semibold text-foreground">
-                  Retake available in {resitHours} hour
-                  {resitHours !== 1 ? "s" : ""}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Use this time to review your lessons and practice.
-              </p>
-              <Button asChild variant="outline" size="sm">
-                <Link to={`/practice/${moduleId}`}>
-                  <Repeat className="mr-1.5 h-4 w-4" /> Practice now
-                </Link>
-              </Button>
-            </div>
+            <ResitCountdown failedAt={mp.gqa.failedAt} moduleId={moduleId} />
           )}
         </div>
       )}
@@ -252,33 +282,33 @@ const GqaTest = () => {
           </div>
           <ul className="space-y-2 text-sm text-foreground">
             <li className="flex items-start gap-2">
-              <Brain className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+              <Brain className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <span>
-                You'll be tested without notes — but don't worry, we'll make sure you're ready.
+                <strong>Open book</strong> — use your own handwritten notes
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-destructive shrink-0 mt-0.5">🎯</span>
+              <span className="text-primary shrink-0 mt-0.5">🎯</span>
               <span>
                 <strong>80% needed</strong> to pass
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-destructive shrink-0 mt-0.5">⏱</span>
+              <span className="text-primary shrink-0 mt-0.5">⏱</span>
               <span>
-                Time limit applies — answer at a steady pace
+                90 minutes total
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-destructive shrink-0 mt-0.5">🔁</span>
+              <span className="text-primary shrink-0 mt-0.5">🔁</span>
               <span>
-                If you don't pass, you can retake after 24 hours
+                24-hour wait before resit if you don't pass
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-destructive shrink-0 mt-0.5">✅</span>
+              <span className="text-primary shrink-0 mt-0.5">✅</span>
               <span>
-                Don't worry — if you fail, you only retake this one topic. Your other passes are safe.
+                You only retake topics you didn't pass
               </span>
             </li>
           </ul>

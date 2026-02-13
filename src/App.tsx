@@ -28,6 +28,8 @@ import CscsTest from "@/pages/CscsTest";
 import Results from "@/pages/Results";
 import NotFound from "@/pages/NotFound";
 import BoostDrill from "@/pages/BoostDrill";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -48,9 +50,11 @@ const App = () => (
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/select-language" element={<SelectLanguage />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
               {/* Play-first: Lesson 1.1 accessible without auth */}
-              <Route path="/lesson/1/1" element={<AppLayout />}>
-                <Route index element={<LessonPlayer />} />
+              <Route element={<AppLayout />}>
+                <Route path="/lesson/1/1" element={<LessonPlayer />} />
               </Route>
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                 <Route path="/dashboard" element={<JourneyDashboard />} />

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Noto+Sans+Ethiopic:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Noto+Sans+Ethiopic:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -103,17 +103,48 @@
     @apply border-border;
   }
 
+  :root {
+    --base-font-size: 18px;
+  }
+
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', 'Helvetica Neue', sans-serif;
+    font-family: 'Noto Sans', 'Helvetica Neue', sans-serif;
+    font-size: var(--base-font-size);
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Mobile-first touch targets */
+  /* Noto Sans Arabic */
+  [lang="ar"] body, [dir="rtl"] body {
+    font-family: 'Noto Sans Arabic', 'Noto Sans', sans-serif;
+    font-size: calc(var(--base-font-size) + 2px);
+    line-height: 1.7;
+  }
+
+  /* Noto Sans Ethiopic (Tigrinya & Amharic) */
+  [lang="ti"] body, [lang="am"] body {
+    font-family: 'Noto Sans Ethiopic', 'Noto Sans', sans-serif;
+    font-size: calc(var(--base-font-size) + 2px);
+    line-height: 1.6;
+  }
+
+  /* Cyrillic (Bulgarian) */
+  [lang="bg"] body {
+    font-family: 'Noto Sans', sans-serif;
+  }
+
+  /* Dynamic html lang is set by LanguageContext */
+
+  /* Mobile-first touch targets — 48x48px minimum */
   button, a, [role="button"] {
     min-height: 48px;
     min-width: 48px;
+  }
+
+  /* 12px gap between adjacent tappable elements */
+  button + button, a + a, [role="button"] + [role="button"] {
+    margin-left: 12px;
   }
 
   /* Prevent horizontal scroll */
@@ -133,17 +164,50 @@
   .large-text .text-lg { font-size: 1.375rem; }
   .large-text .text-xl { font-size: 1.625rem; }
   .large-text .text-2xl { font-size: 1.875rem; }
-  .large-text .text-\\[10px\\] { font-size: 0.875rem; }
-  .large-text .text-\\[9px\\] { font-size: 0.8125rem; }
+  .large-text .text-\[10px\] { font-size: 0.875rem; }
+  .large-text .text-\[9px\] { font-size: 0.8125rem; }
 
-  /* High contrast mode */
+  /* High contrast mode — WCAG AAA (7:1) */
   .high-contrast {
     --foreground: 0 0% 0%;
     --background: 0 0% 100%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
     --muted-foreground: 0 0% 20%;
+    --primary: 210 100% 30%;
+    --primary-foreground: 0 0% 100%;
     --border: 0 0% 0%;
+    --destructive: 0 100% 40%;
+  }
+
+  .high-contrast * {
+    border-width: 2px !important;
+    border-color: hsl(0 0% 0%) !important;
+  }
+
+  .high-contrast button, .high-contrast a {
+    border-width: 2px !important;
+  }
+
+  /* Reduced motion — manual toggle + system preference */
+  .reduced-motion *,
+  .reduced-motion *::before,
+  .reduced-motion *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 

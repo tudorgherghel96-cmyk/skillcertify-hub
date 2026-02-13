@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { User, Globe, LogOut, Mail, Award, ChevronRight, Unlock, Download, Snowflake, Flame, Star } from "lucide-react";
+import { User, Globe, LogOut, Mail, Award, ChevronRight, Unlock, Download, Snowflake, Flame, Star, Eye, Type, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -8,6 +8,7 @@ import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
 import { useSuperUser } from "@/contexts/SuperUserContext";
 import { allGqaPassed, useProgress } from "@/contexts/ProgressContext";
 import { useGamification } from "@/contexts/GamificationContext";
+import { useAccessibility, type TextSize } from "@/contexts/AccessibilityContext";
 import { useState, useRef } from "react";
 import {
   DropdownMenu,
@@ -32,7 +33,7 @@ export default function Profile() {
   const { isSuperUser, isAdmin, toggleSuperUser } = useSuperUser();
   const { progress } = useProgress();
   const { gamification } = useGamification();
-  // Hidden admin access via long-press
+  const { highContrast, reducedMotion, textSize, toggleHighContrast, toggleReducedMotion, setTextSize } = useAccessibility();
   const [showSuperUser, setShowSuperUser] = useState(false);
   const [passcodeInput, setPasscodeInput] = useState("");
   const [showPasscode, setShowPasscode] = useState(false);
@@ -189,6 +190,64 @@ export default function Profile() {
                 </p>
               </div>
               {hasQualification && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Accessibility */}
+      <motion.div variants={fadeUp}>
+        <Card>
+          <CardContent className="py-4 space-y-4">
+            <h3 className="text-sm font-bold flex items-center gap-2">
+              <Eye className="h-4 w-4 text-primary" /> Accessibility
+            </h3>
+
+            {/* Text Size */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <Type className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Text Size</span>
+              </div>
+              <div className="flex gap-2">
+                {(["small", "medium", "large"] as TextSize[]).map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setTextSize(size)}
+                    className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors ${
+                      textSize === size
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    }`}
+                  >
+                    {size === "small" ? "Small (16)" : size === "medium" ? "Medium (18)" : "Large (20)"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* High Contrast */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Eye className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">High Contrast</p>
+                  <p className="text-[10px] text-muted-foreground">WCAG AAA · 7:1 ratio</p>
+                </div>
+              </div>
+              <Switch checked={highContrast} onCheckedChange={toggleHighContrast} />
+            </div>
+
+            {/* Reduced Motion */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Zap className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Reduce Motion</p>
+                  <p className="text-[10px] text-muted-foreground">Disable animations</p>
+                </div>
+              </div>
+              <Switch checked={reducedMotion} onCheckedChange={toggleReducedMotion} />
             </div>
           </CardContent>
         </Card>

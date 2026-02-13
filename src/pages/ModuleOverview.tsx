@@ -17,6 +17,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { MODULES } from "@/data/courseData";
+import DownloadTopicButton from "@/components/offline/DownloadTopicButton";
 import {
   useProgress,
   getModuleProgress,
@@ -126,7 +127,10 @@ const ModuleOverview = () => {
           </GlassCard>
         </motion.div>
 
-        {/* 📖 LESSONS */}
+        {/* 📥 DOWNLOAD FOR OFFLINE */}
+        <motion.div variants={fadeUp}>
+          <DownloadTopicButton moduleId={moduleId} />
+        </motion.div>
         <motion.div variants={fadeUp}>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-base">📖</span>

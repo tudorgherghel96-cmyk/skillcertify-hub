@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 const headings = [
   "Choose Your Language",
   "Alegeți limba dvs.",
+  "Wybierz swój język",
   "Pasirinkite savo kalbą",
   "Изберете вашия език",
   "اختر لغتك",
@@ -88,10 +89,9 @@ const SelectLanguage = () => {
                     : "border-border bg-card hover:border-primary/30"
                 }`}
               >
-                <span className="text-2xl sm:text-3xl shrink-0">{lang.flag}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold truncate">{lang.english}</p>
-                  <p className="text-xs text-muted-foreground truncate">{lang.native}</p>
+                  <p className="text-sm font-semibold truncate">{lang.native}</p>
+                  {lang.code !== "en" && <p className="text-xs text-muted-foreground truncate">{lang.english}</p>}
                 </div>
 
                 <AnimatePresence>

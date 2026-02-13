@@ -29,20 +29,19 @@ const TopNav = ({ currentModule, currentLesson, overallProgress = 0 }: TopNavPro
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors p-2">
-                <span className="text-base">{language.flag}</span>
                 <Globe className="h-4 w-4" />
+                <span className="text-xs font-medium">{language.native}</span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuContent align="end" className="w-48">
               {LANGUAGES.map((lang) => (
                 <DropdownMenuItem
                   key={lang.code}
                   onClick={() => setLanguage(lang)}
                   className={`gap-2 ${lang.code === language.code ? "bg-primary/10 font-medium" : ""}`}
                 >
-                  <span className="text-lg">{lang.flag}</span>
-                  <span className="text-sm">{lang.english}</span>
-                  <span className="text-xs text-muted-foreground ml-auto">{lang.native}</span>
+                  <span className="text-sm">{lang.native}</span>
+                  {lang.code !== "en" && <span className="text-xs text-muted-foreground ml-auto">{lang.english}</span>}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>

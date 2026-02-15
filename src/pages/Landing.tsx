@@ -27,28 +27,28 @@ const Landing = () => {
   const t = (key: Parameters<typeof landingText>[0]) => landingText(key, language.code);
 
   const steps = [
-    { icon: BookOpen, title: t("step_learn"), desc: t("step_learn_desc") },
-    { icon: Target, title: t("step_practice"), desc: t("step_practice_desc") },
-    { icon: Award, title: t("step_pass"), desc: t("step_pass_desc") },
-    { icon: CreditCard, title: t("step_card"), desc: t("step_card_desc") },
-  ];
+  { icon: BookOpen, title: t("step_learn"), desc: t("step_learn_desc") },
+  { icon: Target, title: t("step_practice"), desc: t("step_practice_desc") },
+  { icon: Award, title: t("step_pass"), desc: t("step_pass_desc") },
+  { icon: CreditCard, title: t("step_card"), desc: t("step_card_desc") }];
+
 
   const careerCards = [
-    { img: greenCard, name: "Green", role: t("labourer"), qual: "Level 1 H&S", salary: "£21,500/yr" },
-    { img: blueCard, name: "Blue", role: t("skilled_worker"), qual: "NVQ Level 2", salary: "£35,000/yr" },
-    { img: goldCard, name: "Gold", role: t("supervisor"), qual: "NVQ Level 3", salary: "£42,000/yr" },
-    { img: blackCard, name: "Black", role: t("manager"), qual: "NVQ Level 6", salary: "£55,000/yr" },
-  ];
+  { img: greenCard, name: "Green", role: t("labourer"), qual: "Level 1 H&S", salary: "£21,500/yr" },
+  { img: blueCard, name: "Blue", role: t("skilled_worker"), qual: "NVQ Level 2", salary: "£35,000/yr" },
+  { img: goldCard, name: "Gold", role: t("supervisor"), qual: "NVQ Level 3", salary: "£42,000/yr" },
+  { img: blackCard, name: "Black", role: t("manager"), qual: "NVQ Level 6", salary: "£55,000/yr" }];
+
 
   const faqs = [
-    { q: "Do I need a CSCS test?", a: "Yes, you need the CSCS test to get the CSCS card. Luckily, we can do it here." },
-    { q: "How long does it take?", a: "It can take as little as 6 hours to complete. The certificate can be available digitally as fast as one day, and the CSCS Smart Checker app can digitally have your card as fast as the next day. The physical card can take up to 5 working days to reach home." },
-    { q: "What if I fail?", a: "If you fail an assessment topic, you can retake as many times as you need. If you fail the CSCS test, you can also retake as many times as you need." },
-    { q: "Do I need to visit a centre?", a: "You don't need to. It's all done here with us, in one place. No centre visit needed." },
-    { q: "Is this an official qualification?", a: "Yes. SkillCertify delivers the GQA Level 1 Award in Construction Health and Safety (601/2322/9), regulated by Ofqual." },
-    { q: "What languages is it available in?", a: "English, Romanian, Polish, Bulgarian, Lithuanian, Arabic, Tigrinya, Yoruba, Igbo, Somali, and Amharic." },
-    { q: "How much does it cost?", a: "Course: £XX + CSCS Test: £21 + Card Application: £36. See the pricing section above for the full breakdown." },
-  ];
+  { q: "Do I need a CSCS test?", a: "Yes, you need the CSCS test to get the CSCS card. Luckily, we can do it here." },
+  { q: "How long does it take?", a: "It can take as little as 6 hours to complete. The certificate can be available digitally as fast as one day, and the CSCS Smart Checker app can digitally have your card as fast as the next day. The physical card can take up to 5 working days to reach home." },
+  { q: "What if I fail?", a: "If you fail an assessment topic, you can retake as many times as you need. If you fail the CSCS test, you can also retake as many times as you need." },
+  { q: "Do I need to visit a centre?", a: "You don't need to. It's all done here with us, in one place. No centre visit needed." },
+  { q: "Is this an official qualification?", a: "Yes. SkillCertify delivers the GQA Level 1 Award in Construction Health and Safety (601/2322/9), regulated by Ofqual." },
+  { q: "What languages is it available in?", a: "English, Romanian, Polish, Bulgarian, Lithuanian, Arabic, Tigrinya, Yoruba, Igbo, Somali, and Amharic." },
+  { q: "How much does it cost?", a: "Course: £XX + CSCS Test: £21 + Card Application: £36. See the pricing section above for the full breakdown." }];
+
 
   const handleSelectLang = (lang: Language) => {
     setLanguage(lang);
@@ -63,8 +63,8 @@ const Landing = () => {
         <button
           onClick={() => setSheetOpen(true)}
           className="absolute top-4 right-4 z-10 flex items-center gap-1 px-2 py-1.5 rounded-md hover:bg-secondary-foreground/10 transition-colors"
-          aria-label="Select language"
-        >
+          aria-label="Select language">
+
           <Globe className="h-3.5 w-3.5 text-secondary-foreground/50" />
           <span className="text-xs font-medium text-secondary-foreground/50 uppercase">{language.code}</span>
           <ChevronDown className="h-3 w-3 text-secondary-foreground/40" />
@@ -81,16 +81,16 @@ const Landing = () => {
             className="h-8 w-auto mx-auto mb-6"
             loading="eager"
             decoding="sync"
-            fetchPriority="high"
-          />
+            fetchPriority="high" />
+
 
           {/* H1 — single clear headline */}
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.05 }}
-            className="text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-secondary-foreground font-[Poppins]"
-          >
+            className="text-2xl sm:text-4xl font-bold leading-tight tracking-tight text-secondary-foreground font-[Poppins]">
+
             {t("hero_title_1")}
           </motion.h1>
 
@@ -99,8 +99,8 @@ const Landing = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mt-3 text-sm sm:text-base text-secondary-foreground/70 max-w-md mx-auto"
-          >
+            className="mt-3 text-sm sm:text-base text-secondary-foreground/70 max-w-md mx-auto">
+
             {t("hero_title_2")}
           </motion.p>
 
@@ -109,13 +109,13 @@ const Landing = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.18 }}
-            className="mt-5 flex flex-col items-center"
-          >
+            className="mt-5 flex flex-col items-center">
+
             <Button
               asChild
               size="lg"
-              className="text-base px-8 h-12 font-semibold w-full max-w-xs bg-primary hover:bg-primary/90 text-primary-foreground active:scale-[0.97] transition-transform"
-            >
+              className="text-base px-8 h-12 font-semibold w-full max-w-xs bg-primary hover:bg-primary/90 text-primary-foreground active:scale-[0.97] transition-transform">
+
               <Link to="/select-language">
                 {t("cta_start")}
               </Link>
@@ -123,8 +123,8 @@ const Landing = () => {
             <Button
               asChild
               variant="link"
-              className="mt-3 text-secondary-foreground/50 text-xs font-medium h-auto min-h-0 p-0"
-            >
+              className="mt-3 text-secondary-foreground/50 text-xs font-medium h-auto min-h-0 p-0">
+
               <Link to="/auth">{t("cta_signin")}</Link>
             </Button>
           </motion.div>
@@ -134,10 +134,10 @@ const Landing = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="mt-6 flex items-center justify-center gap-3"
-          >
+            className="mt-6 flex items-center justify-center gap-3">
+
             <div className="flex items-center gap-2 h-9 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5">
-              <img src={gqaLogo} alt="GQA" className="h-5 w-auto" />
+              <img alt="GQA" className="h-5 w-auto" src="/lovable-uploads/510b8c6a-93fa-4ca9-93a6-1586b34e49d7.png" />
               <span className="text-[10px] sm:text-xs font-medium text-secondary-foreground/60">GQA Approved Centre</span>
             </div>
             <div className="flex items-center gap-2 h-9 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5">
@@ -151,14 +151,14 @@ const Landing = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.35 }}
-            className="mt-4 flex items-center justify-center gap-4 flex-wrap"
-          >
-            {[t("social_pass_rate"), t("social_languages"), t("social_cert")].map((item, i) => (
-              <span key={i} className="text-[10px] sm:text-xs text-secondary-foreground/50 flex items-center gap-1">
+            className="mt-4 flex items-center justify-center gap-4 flex-wrap">
+
+            {[t("social_pass_rate"), t("social_languages"), t("social_cert")].map((item, i) =>
+            <span key={i} className="text-[10px] sm:text-xs text-secondary-foreground/50 flex items-center gap-1">
                 <Check className="h-3 w-3 text-primary" />
                 {item}
               </span>
-            ))}
+            )}
           </motion.div>
 
           {/* Reassurance line */}
@@ -166,8 +166,8 @@ const Landing = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="mt-4 text-xs text-secondary-foreground/45"
-          >
+            className="mt-4 text-xs text-secondary-foreground/45">
+
             {t("no_laptop")}
           </motion.p>
         </div>
@@ -180,15 +180,15 @@ const Landing = () => {
             {t("how_it_works")}
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {steps.map(({ icon: Icon, title, desc }, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="flex flex-col items-center text-center gap-3 p-4 rounded-2xl bg-card border border-border"
-              >
+            {steps.map(({ icon: Icon, title, desc }, i) =>
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="flex flex-col items-center text-center gap-3 p-4 rounded-2xl bg-card border border-border">
+
                 <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Icon className="h-6 w-6 text-primary" />
                 </div>
@@ -198,7 +198,7 @@ const Landing = () => {
                 <p className="text-sm font-semibold text-foreground">{title}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
               </motion.div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -213,19 +213,19 @@ const Landing = () => {
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-card rounded-2xl border border-border p-6 shadow-sm space-y-4"
-          >
+            className="bg-card rounded-2xl border border-border p-6 shadow-sm space-y-4">
+
             <div className="space-y-2">
               {[
-                { label: t("course_cert"), price: "£XX" },
-                { label: t("cscs_test"), price: "£21" },
-                { label: t("card_app"), price: "£36" },
-              ].map(({ label, price }) => (
-                <div key={label} className="flex justify-between text-sm">
+              { label: t("course_cert"), price: "£XX" },
+              { label: t("cscs_test"), price: "£21" },
+              { label: t("card_app"), price: "£36" }].
+              map(({ label, price }) =>
+              <div key={label} className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{label}</span>
                   <span className="font-semibold text-foreground">{price}</span>
                 </div>
-              ))}
+              )}
             </div>
             <div className="border-t border-border pt-3 flex justify-between">
               <span className="font-bold text-foreground">{t("total")}</span>
@@ -241,8 +241,8 @@ const Landing = () => {
             <Button
               asChild
               size="lg"
-              className="w-full text-base h-12 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
+              className="w-full text-base h-12 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground">
+
               <Link to="/select-language">
                 {t("start_now")}
               </Link>
@@ -261,28 +261,28 @@ const Landing = () => {
             {t("career_subtitle")}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {careerCards.map((card, i) => (
-              <motion.div
-                key={card.name}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className={`rounded-2xl overflow-hidden border bg-card ${i === 0 ? "border-primary shadow-md shadow-primary/10" : "border-border"}`}
-              >
+            {careerCards.map((card, i) =>
+            <motion.div
+              key={card.name}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08 }}
+              className={`rounded-2xl overflow-hidden border bg-card ${i === 0 ? "border-primary shadow-md shadow-primary/10" : "border-border"}`}>
+
                 <img
-                  src={card.img}
-                  alt={`${card.name} CSCS Card`}
-                  className="w-full aspect-[1.586/1] object-cover"
-                  loading="lazy"
-                />
+                src={card.img}
+                alt={`${card.name} CSCS Card`}
+                className="w-full aspect-[1.586/1] object-cover"
+                loading="lazy" />
+
                 <div className="p-3 space-y-0.5">
                   <p className="text-xs font-bold text-foreground">{card.role}</p>
                   <p className="text-[10px] text-muted-foreground">{card.qual}</p>
                   <p className="text-xs font-semibold text-primary">{card.salary}</p>
                 </div>
               </motion.div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -294,14 +294,14 @@ const Landing = () => {
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-2xl overflow-hidden border border-border shadow-sm"
-          >
+            className="rounded-2xl overflow-hidden border border-border shadow-sm">
+
             <img
               src={officePhoto}
               alt="SkillCertify office at Zeus House, London"
               className="w-full aspect-[2/1] object-cover"
-              loading="lazy"
-            />
+              loading="lazy" />
+
             <div className="bg-card p-4 text-center space-y-1">
               <p className="text-sm font-semibold text-foreground">Zeus House, London, N1 7NG</p>
               <p className="text-xs text-muted-foreground">Our London headquarters — here to support you every step of the way</p>
@@ -317,8 +317,8 @@ const Landing = () => {
             {t("faq_title")}
           </h2>
           <Accordion type="single" collapsible className="space-y-2">
-            {faqs.map((faq, i) => (
-              <AccordionItem key={i} value={`faq-${i}`} className="bg-card rounded-xl border border-border px-4">
+            {faqs.map((faq, i) =>
+            <AccordionItem key={i} value={`faq-${i}`} className="bg-card rounded-xl border border-border px-4">
                 <AccordionTrigger className="text-sm font-semibold text-foreground text-left py-4">
                   {faq.q}
                 </AccordionTrigger>
@@ -326,7 +326,7 @@ const Landing = () => {
                   {faq.a}
                 </AccordionContent>
               </AccordionItem>
-            ))}
+            )}
           </Accordion>
         </div>
       </section>
@@ -352,8 +352,8 @@ const Landing = () => {
           <div className="flex items-center justify-center gap-6">
             <a
               href="mailto:support@skillcertify.co.uk"
-              className="flex items-center gap-1.5 text-xs text-secondary-foreground/60 hover:text-secondary-foreground/80 transition-colors"
-            >
+              className="flex items-center gap-1.5 text-xs text-secondary-foreground/60 hover:text-secondary-foreground/80 transition-colors">
+
               <Mail className="h-3.5 w-3.5" />
               Email support
             </a>
@@ -361,8 +361,8 @@ const Landing = () => {
               href="https://wa.me/44XXXXXXXXXX"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-secondary-foreground/60 hover:text-secondary-foreground/80 transition-colors"
-            >
+              className="flex items-center gap-1.5 text-xs text-secondary-foreground/60 hover:text-secondary-foreground/80 transition-colors">
+
               <MessageCircle className="h-3.5 w-3.5" />
               WhatsApp support
             </a>
@@ -400,30 +400,30 @@ const Landing = () => {
                   key={lang.code}
                   onClick={() => handleSelectLang(lang)}
                   className={`relative flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-colors ${
-                    isActive
-                      ? "border-primary bg-primary/5"
-                      : "border-border bg-card hover:border-primary/30"
-                  }`}
-                >
+                  isActive ?
+                  "border-primary bg-primary/5" :
+                  "border-border bg-card hover:border-primary/30"}`
+                  }>
+
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-foreground truncate">{lang.native}</p>
-                    {lang.code !== "en" && (
-                      <p className="text-xs text-muted-foreground truncate">{lang.english}</p>
-                    )}
+                    {lang.code !== "en" &&
+                    <p className="text-xs text-muted-foreground truncate">{lang.english}</p>
+                    }
                   </div>
-                  {isActive && (
-                    <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center shrink-0">
+                  {isActive &&
+                  <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center shrink-0">
                       <Check className="h-3 w-3 text-primary-foreground" />
                     </div>
-                  )}
-                </button>
-              );
+                  }
+                </button>);
+
             })}
           </div>
         </SheetContent>
       </Sheet>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Landing;

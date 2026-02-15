@@ -284,7 +284,7 @@ const GqaTest = () => {
             <li className="flex items-start gap-2">
               <Brain className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <span>
-                <strong>Open book</strong> — use your own handwritten notes
+                <strong>Closed book</strong> — no notes or materials allowed
               </span>
             </li>
             <li className="flex items-start gap-2">

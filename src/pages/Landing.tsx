@@ -9,6 +9,7 @@ import { useLanguage, LANGUAGES, type Language } from "@/contexts/LanguageContex
 import { landingText } from "@/i18n/landingTranslations";
 import skillcertifyLogo from "@/assets/skillcertify-logo.png";
 import skillcertifyIcon from "@/assets/skillcertify-icon.png";
+import skillcertifyFullLogo from "@/assets/skillcertify-full-logo.jpg";
 import cscsLogo from "@/assets/cscs-logo.png";
 import gqaLogo from "@/assets/gqa-logo.png";
 import myCscsLogo from "@/assets/my-cscs-logo.png";
@@ -73,12 +74,12 @@ const Landing = () => {
         <div className="max-w-2xl mx-auto text-center">
           {/* Logo — transparent icon only */}
           <motion.img
-            src={skillcertifyIcon}
+            src={skillcertifyFullLogo}
             alt="SkillCertify"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="h-8 w-auto mx-auto mb-6"
+            className="h-10 w-auto mx-auto mb-6"
             loading="eager"
             decoding="sync"
             fetchPriority="high" />

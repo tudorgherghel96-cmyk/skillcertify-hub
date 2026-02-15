@@ -14,7 +14,7 @@ import type { Slide } from "@/data/slidesSchema";
 /* ─── Shared wrapper ─── */
 function SlideShell({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`h-full w-full flex flex-col items-center justify-center px-6 py-8 overflow-y-auto ${className}`}>
+    <div className={`h-full w-full flex flex-col items-center justify-center px-6 py-8 overflow-y-auto overscroll-none ${className}`} style={{ touchAction: "pan-y" }}>
       {children}
     </div>
   );

@@ -36,6 +36,17 @@ export default function VideoPlayer({
   const [watched, setWatched] = useState(false);
   const watchedRef = useRef(false);
 
+  // Timeout: if video doesn't load in 5s, show placeholder
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loading && !playing) {
+        setError(true);
+        setLoading(false);
+      }
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [loading, playing]);
+
   // Resolve the correct video URL
   const resolvedUrl = (() => {
     if (videos) {

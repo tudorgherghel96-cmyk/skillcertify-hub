@@ -157,6 +157,9 @@ export default function LessonFlow({
     };
   }, [autoPlay, index, currentSlide, go, showEndScreen]);
 
+  // Track last tap time for manual tap detection
+  const lastPointerDown = useRef<{ y: number; time: number } | null>(null);
+
   const bind = useDrag(
     ({ active, last, swipe: [, sy], movement: [, my], velocity: [, vy], direction: [, dy] }) => {
       if (active) {
@@ -178,6 +181,32 @@ export default function LessonFlow({
       swipe: { distance: 80, velocity: 0.3 },
     }
   );
+
+  // Manual tap detection via pointer events (works on all mobile browsers)
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    lastPointerDown.current = { y: e.clientY, time: Date.now() };
+  }, []);
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    if (!lastPointerDown.current) return;
+    const dt = Date.now() - lastPointerDown.current.time;
+    const dy = Math.abs(e.clientY - lastPointerDown.current.y);
+    lastPointerDown.current = null;
+
+    // Only count as tap if < 300ms and < 15px movement
+    if (dt > 300 || dy > 15) return;
+
+    const target = e.target as HTMLElement;
+    if (["BUTTON", "A", "INPUT"].includes(target.tagName) || target.closest("button, a, input")) return;
+
+    const container = containerRef.current?.querySelector("[data-slide-area]") as HTMLElement | null;
+    if (!container) { go(1); return; }
+
+    const rect = container.getBoundingClientRect();
+    const pct = (e.clientY - rect.top) / rect.height;
+    if (pct > 0.4) go(1);
+    else if (pct < 0.25) go(-1);
+  }, [go]);
 
   const handleQuizAnswered = useCallback(
     async (correct: boolean, conceptSlug?: string, responseTimeMs?: number) => {
@@ -465,20 +494,11 @@ export default function LessonFlow({
       {/* ─── Slide area ─── */}
       <div
         {...bind()}
+        data-slide-area
         className="flex-1 relative overflow-hidden"
         style={{ touchAction: "none", cursor: "grab" }}
-        onClick={(e) => {
-          // Tap-to-advance: tap bottom 60% = forward, top 25% = back
-          // Ignore if target is a button/link/input
-          const tag = (e.target as HTMLElement).tagName;
-          if (["BUTTON", "A", "INPUT"].includes(tag)) return;
-          if ((e.target as HTMLElement).closest("button, a, input")) return;
-          const rect = e.currentTarget.getBoundingClientRect();
-          const y = e.clientY - rect.top;
-          const pct = y / rect.height;
-          if (pct > 0.4) go(1);
-          else if (pct < 0.25) go(-1);
-        }}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
       >
         <AnimatePresence
           initial={false}

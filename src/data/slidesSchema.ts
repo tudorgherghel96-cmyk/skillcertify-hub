@@ -107,8 +107,11 @@ export function buildSlidesFromI18n(
     imageAlt: heroImage?.alt,
   });
 
-  // 2. Video slide
-  slides.push({ type: "video", lessonId: key });
+  // 2. Video slide — only include if videos are known to exist
+  // Videos are added to the media map; skip if none configured
+  if (media?.video) {
+    slides.push({ type: "video", lessonId: key });
+  }
 
   // 3. Key terms — one slide per term (always English term + translated explanation)
   for (const kt of i18n.keyTerms) {

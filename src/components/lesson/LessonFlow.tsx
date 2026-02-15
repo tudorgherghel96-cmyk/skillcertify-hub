@@ -83,6 +83,13 @@ export default function LessonFlow({
     }
   }, [index, addXp]);
 
+  // Safety: clear animation lock after 600ms to prevent stuck state
+  useEffect(() => {
+    if (!isAnimating.current) return;
+    const safety = setTimeout(() => { isAnimating.current = false; }, 600);
+    return () => clearTimeout(safety);
+  });
+
   const go = useCallback(
     (dir: 1 | -1) => {
       if (isAnimating.current) return;
@@ -93,6 +100,7 @@ export default function LessonFlow({
         setShowEndScreen(true);
         return;
       }
+      isAnimating.current = true;
       setDirection(dir);
       setIndex(next);
       triggerHaptic("tap");
@@ -459,6 +467,18 @@ export default function LessonFlow({
         {...bind()}
         className="flex-1 relative overflow-hidden"
         style={{ touchAction: "none", cursor: "grab" }}
+        onClick={(e) => {
+          // Tap-to-advance: tap bottom 60% = forward, top 25% = back
+          // Ignore if target is a button/link/input
+          const tag = (e.target as HTMLElement).tagName;
+          if (["BUTTON", "A", "INPUT"].includes(tag)) return;
+          if ((e.target as HTMLElement).closest("button, a, input")) return;
+          const rect = e.currentTarget.getBoundingClientRect();
+          const y = e.clientY - rect.top;
+          const pct = y / rect.height;
+          if (pct > 0.4) go(1);
+          else if (pct < 0.25) go(-1);
+        }}
       >
         <AnimatePresence
           initial={false}
@@ -570,7 +590,7 @@ export default function LessonFlow({
         )}
       </AnimatePresence>
 
-      {/* ─── Swipe hint — first slide only ─── */}
+      {/* ─── Swipe/tap hint — first slide only ─── */}
       <AnimatePresence>
         {isFirst && !autoPlay && (
           <motion.div
@@ -592,7 +612,7 @@ export default function LessonFlow({
                   className="w-1 h-1.5 rounded-full bg-muted-foreground/50"
                 />
               </div>
-              <p className="text-[10px] text-muted-foreground/50">Swipe up</p>
+              <p className="text-[10px] text-muted-foreground/50">Tap or swipe up</p>
             </motion.div>
           </motion.div>
         )}

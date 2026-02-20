@@ -8,6 +8,7 @@ import { useDrag } from "@use-gesture/react";
 import { supabase } from "@/integrations/supabase/client";
 import { getLessonMediaUrl } from "@/lib/media";
 import { useAuth } from "@/contexts/AuthContext";
+import { useXpProgress } from "@/hooks/useXpProgress";
 
 import VideoCard from "@/components/cards/VideoCard";
 import HeroImageCard from "@/components/cards/HeroImageCard";
@@ -25,6 +26,7 @@ import MultiSelectCard from "@/components/cards/MultiSelectCard";
 import SpeedDrillCard from "@/components/cards/SpeedDrillCard";
 import PatternCard from "@/components/cards/PatternCard";
 import LessonCompleteCard from "@/components/cards/LessonCompleteCard";
+import LevelUpToast from "@/components/gamification/LevelUpToast";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -109,6 +111,7 @@ function RenderCard({
   showEffect,
   onXp,
   onWrong,
+  onRecordQuizAnswer,
   sessionXp,
   sessionCards,
   sessionCorrect,
@@ -126,6 +129,7 @@ function RenderCard({
   showEffect: boolean;
   onXp: (xp: number) => void;
   onWrong: () => void;
+  onRecordQuizAnswer?: (pos: number, selected: number, correct: boolean) => void;
   sessionXp: number;
   sessionCards: number;
   sessionCorrect: number;
@@ -258,6 +262,7 @@ function RenderCard({
         onAnswered={(correct) => {
           onXp(card.xp_value || 10);
           if (!correct) onWrong();
+          onRecordQuizAnswer?.(card.card_position, -1, correct);
         }}
       />
     );
@@ -451,6 +456,8 @@ export default function LessonSwipeView({
   onExitRequest,
 }: LessonSwipeViewProps) {
   const { user } = useAuth();
+  const { saveCardProgress, addXpToDb, onLessonCompleteStreak, recordQuizAnswer, resetQuizAnswers } =
+    useXpProgress(user?.id);
 
   // ── Data ──
   const [cards, setCards] = useState<LessonCard[]>([]);
@@ -503,12 +510,24 @@ export default function LessonSwipeView({
   const [sessionXp, setSessionXp] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
+  const [levelUpPending, setLevelUpPending] = useState<number | null>(null);
 
-  const handleXp = useCallback((xp: number) => setSessionXp((p) => p + xp), []);
+  const handleXp = useCallback(
+    (xp: number) => {
+      setSessionXp((p) => p + xp);
+      // Fire-and-forget: update DB totals and check for level-up
+      addXpToDb(xp).then(({ newLevel }) => {
+        if (newLevel) setLevelUpPending(newLevel);
+      });
+    },
+    [addXpToDb],
+  );
+
   const handleWrong = useCallback(() => {
     setWrongCount((p) => p + 1);
     setTotalQuestions((p) => p + 1);
   }, []);
+
 
   // ── Video timing (for effects) ──
   const [videoTime, setVideoTime] = useState<{ t: number; d: number } | null>(null);
@@ -551,33 +570,12 @@ export default function LessonSwipeView({
     }
   }, [videoTime, currentCard, showEffect, peekPx]);
 
-  // ── Save progress per card ──
-  const saveCardProgress = useCallback(
-    async (cardIndex: number) => {
-      if (!user || !cards.length) return;
-      const card = cards[cardIndex];
-      if (!card) return;
-      await supabase.from("progress").upsert(
-        {
-          user_id: user.id,
-          lesson_id: lessonId,
-          module_id: moduleId ?? card.module_id,
-          completed: card.card_type === "lesson_complete",
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id,lesson_id" },
-      );
-    },
-    [user, cards, lessonId, moduleId],
-  );
-
   // ── Navigation ──
   const go = useCallback(
     (direction: 1 | -1) => {
       if (isAnimating) return;
       const newIdx = idx + direction;
       if (newIdx < 0) {
-        // Swipe back from first card → exit request
         if (direction === -1 && idx === 0) {
           animate(yOffset, 0, { type: "spring", stiffness: 400, damping: 35 });
           onExitRequest?.();
@@ -599,6 +597,7 @@ export default function LessonSwipeView({
         nextCard?.card_type === "split_screen";
 
       const duration = isSplitTransition ? 0.4 : 0.6;
+      const isCompleting = newIdx === cards.length - 1;
 
       animate(yOffset, -direction * containerH.current, {
         type: "spring",
@@ -610,27 +609,49 @@ export default function LessonSwipeView({
           yOffset.set(0);
           peekPx.set(0);
           setIsAnimating(false);
-          // Save progress
-          saveCardProgress(newIdx);
+          // Persist progress to user_lesson_progress and legacy progress table
+          const card = cards[newIdx];
+          if (card) {
+            saveCardProgress(lessonId, newIdx, cards.length, sessionXp, isCompleting);
+            // Legacy progress table sync
+            if (user) {
+              supabase.from("progress").upsert(
+                {
+                  user_id: user.id,
+                  lesson_id: lessonId,
+                  module_id: moduleId ?? card.module_id,
+                  completed: isCompleting,
+                  updated_at: new Date().toISOString(),
+                },
+                { onConflict: "user_id,lesson_id" },
+              );
+            }
+          }
         },
       });
 
-      // Fire lesson complete callback when arriving at last card
-      if (newIdx === cards.length - 1) {
+      // Fire lesson complete callback + streak when arriving at last card
+      if (isCompleting) {
         const completeCard = cards[cards.length - 1];
         const nextLessonId =
           completeCard?.content_json?.next_lesson != null
             ? String(completeCard.content_json.next_lesson)
             : null;
         onLessonComplete?.(sessionXp, nextLessonId);
+        // Update streak in DB
+        onLessonCompleteStreak();
+        resetQuizAnswers();
       }
     },
     [
       isAnimating, idx, cards, yOffset, peekPx,
       currentCard, nextCard, sessionXp,
-      onLessonComplete, onExitRequest, saveCardProgress,
+      onLessonComplete, onExitRequest,
+      saveCardProgress, onLessonCompleteStreak, resetQuizAnswers,
+      lessonId, moduleId, user,
     ],
   );
+
 
   const jumpTo = useCallback(
     (i: number) => {
@@ -766,6 +787,7 @@ export default function LessonSwipeView({
                 showEffect={showEffect}
                 onXp={handleXp}
                 onWrong={handleWrong}
+                onRecordQuizAnswer={recordQuizAnswer}
                 sessionXp={sessionXp}
                 sessionCards={idx + 1}
                 sessionCorrect={idx + 1 - wrongCount}
@@ -828,6 +850,9 @@ export default function LessonSwipeView({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Level-up toast */}
+      <LevelUpToast level={levelUpPending} onDone={() => setLevelUpPending(null)} />
     </div>
   );
 }

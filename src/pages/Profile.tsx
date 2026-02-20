@@ -17,6 +17,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { DailyXpChart, AccuracyByModuleChart } from "@/components/profile/XpCharts";
+
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },

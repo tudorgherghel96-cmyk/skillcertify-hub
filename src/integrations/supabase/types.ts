@@ -157,6 +157,33 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_xp_log: {
+        Row: {
+          created_at: string
+          id: string
+          log_date: string
+          updated_at: string
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          log_date?: string
+          updated_at?: string
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          log_date?: string
+          updated_at?: string
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: []
+      }
       gqa_results: {
         Row: {
           attempted_at: string | null
@@ -493,6 +520,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_lesson_progress: {
+        Row: {
+          cards_completed: number
+          completed_at: string | null
+          created_at: string
+          id: string
+          lesson_id: string
+          quiz_answers: Json
+          total_cards: number
+          updated_at: string
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          cards_completed?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lesson_id: string
+          quiz_answers?: Json
+          total_cards?: number
+          updated_at?: string
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          cards_completed?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          quiz_answers?: Json
+          total_cards?: number
+          updated_at?: string
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -507,6 +573,27 @@ export type Database = {
         Update: {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_xp: {
+        Row: {
+          level: number
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          level?: number
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          level?: number
+          total_xp?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

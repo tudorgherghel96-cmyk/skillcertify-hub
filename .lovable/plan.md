@@ -1,196 +1,192 @@
 
-# Complete Lesson Player Rebuild — TikTok-Style Vertical Snap Scroll
+# Fix All 9 Bugs — Lesson Player
 
-## What's Being Deleted
+## Confirmed Root Causes
 
-All existing lesson player files will be replaced:
-- `src/pages/LessonPlayer.tsx` — rewritten from scratch
-- `src/components/LessonSwipeView.tsx` — deleted, replaced by new architecture
-- All `src/components/cards/*.tsx` — deleted, replaced with new `src/components/lesson/` hierarchy
+### BUG 1: All interactive card text invisible
+The database `content_json` field names don't match what `SwipeContainer.tsx` passes as props:
 
-## New File Structure
+- `test_tip` DB has `{ text: "..." }` but `SwipeContainer` passes `content.content` → prop `content` is `undefined`
+- `remember_this` DB has `{ text: "..." }` but `SwipeContainer` passes `content.content` → same issue
+- `quick_check` DB has `{ options: ["A risk", "A hazard", ...], correct: 1, feedback_wrong: { "0": "...", "2": "..." } }` but the component expects `options: {text: string}[]`, `correct_index: number`, and `feedback_wrong: string[]`
 
-```text
-src/pages/LessonPlayer.tsx                          (main page, data loading, exit modal)
+Fix location: `SwipeContainer.tsx` — the `CardRenderer` function, specifically the `remember_this`, `test_tip`, and `quick_check` switch cases. Also fix `Scenario.tsx` and any other cards that may have field name mismatches.
 
-src/components/lesson/
-  SwipeContainer.tsx                                (CSS scroll-snap engine, IntersectionObserver)
-  VideoSlide.tsx                                    (video cards with mute/fourth-wall overlays)
-  HeroSlide.tsx                                     (first card, cover image)
-  ImageSlide.tsx                                    (supplementary image cards)
-  BRollSlide.tsx                                    (auto-advance b-roll)
-  InteractiveSlide.tsx                              (dark wrapper for all interactive cards)
-  cards/
-    QuickCheck.tsx
-    DragDrop.tsx
-    TapToReveal.tsx
-    SplitScreen.tsx
-    MultiSelect.tsx
-    SpeedDrill.tsx
-    Scenario.tsx
-    PatternCard.tsx
-    RememberThis.tsx
-    TestTip.tsx
-    KeyTerm.tsx
-    LessonComplete.tsx
-  overlays/
-    LeanInCallout.tsx
-    HoldUpCard.tsx
-  ui/
-    ProgressBar.tsx
-    NavHeader.tsx
-    MuteToggle.tsx
+### BUG 3: XP always 0
+`sessionXp` in `LessonPlayer.tsx` only increments via `handleAnswer` (called on quiz correct answers). Knowledge cards (`remember_this`, `test_tip`, `key_term`) never call any XP accumulation when they become active. The `SwipeContainer` passes `sessionXp` to `LessonComplete` but it's always 0 unless quizzes are answered correctly.
+
+Fix: In `LessonPlayer.tsx`, the `handleIndexChange` callback already computes `xpSoFar` for DB writes but doesn't update `sessionXp` state. We need to also call `setSessionXp(xpSoFar)` on every card advance, and accumulate it from all viewed cards (not just correct answers). The simplest fix: update `handleIndexChange` to also call `setSessionXp`.
+
+### BUG 4: Next lesson name shows "Continue"
+`LessonPlayer.tsx` line 197 reads `nextLessonContent?.next_lesson_title` but the DB stores `next_title`. One character name difference destroys the feature.
+
+Fix: Change `next_lesson_title` → `next_title` in LessonPlayer.tsx line 197.
+
+### BUG 5: Videos not loading
+The `VideoSlide.tsx` implementation looks correct (proper `<video>` element, error handling, spinner). The most likely cause is the `VITE_SUPABASE_URL` environment variable being undefined, making all media URLs malformed. This needs to be verified by adding the URL to the error display. Additionally, the `VideoSlide` shows a loading spinner on `loading=true` initial state but the video may be paused (not active) so `onCanPlay` never fires. When `isActive` is false the video won't load.
+
+Fix: In `VideoSlide.tsx`, set `loading` to `false` initially for non-active cards, and only show spinner when the card is active and buffering. Also log the video URL in the error state so we can diagnose 404 vs CORS. Also ensure `preload="metadata"` on inactive cards to not block the page.
+
+### BUG 6: Learn page uses wrong thumbnail paths
+`moduleThumbnails` in `mediaMap.ts` uses paths like `module1_1/1.1_photo_1.webp` (with subfolder), but the `lesson-images` Supabase bucket stores files as flat names: `1.1_photo_1.webp` (no subfolder — confirmed from the DB query which shows `media_file: "1.1_photo_1.webp"` for image cards). 
+
+Fix: Update `mediaMap.ts` to use the correct Supabase bucket paths. The `moduleThumbnails` should use the hero images from `lesson_cards` DB. The correct `moduleThumbnails` should point to `hero-M1-L1-construction-site-hazards.jpeg` etc from the `lesson-images` bucket (no subfolder).
+
+### BUG 7: Resume modal broken background
+All cards render simultaneously in `SwipeContainer`. When the resume modal shows, all slides are in the DOM stacked behind it. The blur shows them all.
+
+Fix: In `LessonPlayer.tsx`, when `showResume` is true, render only the hero image as a static blurred background instead of the full `SwipeContainer`. The `SwipeContainer` only mounts after resume decision is made.
+
+### BUG 8: Hallucinated hotspots on image card
+`ImageSlide.tsx` is clean — no hotspot code. The yellow circles with labels are in the actual image file `1.1_photo_2.webp` itself (the image was uploaded with annotations burned in). This is a content/asset issue, not a code issue. The fix is to note that ImageSlide is already correct — no code change needed. We should add a note that `1.1_photo_2.webp` needs to be replaced with a clean unannotated image.
+
+Actually, on reflection — since the user says this is "hallucinated by Lovable" not by the content, there may also be a possibility that an old `ImageSlide` component with annotation logic still exists somewhere. We should verify the current `ImageSlide.tsx` is the one being used (it is — it's imported directly). No code fix needed for this bug.
+
+### BUG 9: Card count inconsistency
+The Supabase query confirms 1.1=15 cards exactly. No duplicates. The "16" count may have been from a previous preview before the last rebuild. No fix needed.
+
+## Files to Change
+
+### 1. `src/components/lesson/SwipeContainer.tsx`
+The `CardRenderer` function needs these fixes in the switch statement:
+
+**`remember_this` case**: Change `content.content` → `content.text`
+```tsx
+// FROM:
+<RememberThis content={content.content as string} />
+// TO:
+<RememberThis content={(content.text as string) || ""} />
 ```
 
-## The Core Engine: SwipeContainer.tsx
-
-The fundamental change is replacing the framer-motion/use-gesture drag system with **native CSS scroll-snap**. This is the exact same mechanism TikTok uses and is fully GPU-accelerated on iOS/Android.
-
-```text
-Container styles (critical):
-  height: 100dvh
-  overflow-y: scroll
-  overflow-x: hidden
-  scroll-snap-type: y mandatory
-  -webkit-overflow-scrolling: touch
-  overscroll-behavior: none
-
-Each slide:
-  height: 100dvh
-  scroll-snap-align: start
-  scroll-snap-stop: always
-  overflow: hidden
+**`test_tip` case**: Change `content.content` → `content.text`
+```tsx
+// FROM:
+<TestTip content={content.content as string} />
+// TO:
+<TestTip content={(content.text as string) || ""} />
 ```
 
-**Active card detection**: An `IntersectionObserver` with `threshold: 0.5` watches each slide. When a slide is >50% visible, it becomes "active" — its video plays. When it scrolls away, the video pauses. This is the correct approach (no polling, no scroll events).
+**`quick_check` case**: The DB options are strings, not objects. `correct` not `correct_index`. `feedback_wrong` is an object keyed by string index, not array.
 
-**Resume**: On load, if `cards_completed > 0`, the container uses `scrollTo({ top: savedIndex * window.innerHeight, behavior: 'instant' })` after the DOM renders.
+The fix is to normalize the data in CardRenderer before passing to the component:
+```tsx
+case "quick_check": {
+  const rawOptions = (content.options as string[] | {text:string}[] | undefined) || [];
+  const normalizedOptions = rawOptions.map(o => typeof o === 'string' ? {text: o} : o);
+  const correctIndex = (content.correct_index as number) ?? (content.correct as number) ?? 0;
+  const rawFeedbackWrong = content.feedback_wrong;
+  const normalizedFeedbackWrong = Array.isArray(rawFeedbackWrong) 
+    ? rawFeedbackWrong 
+    : Object.values(rawFeedbackWrong as Record<string, string> || {});
+  return (
+    <InteractiveSlide>
+      <QuickCheck
+        question={content.question as string}
+        options={normalizedOptions}
+        correct_index={correctIndex}
+        feedback_correct={(content.feedback_correct as string) || "Correct!"}
+        feedback_wrong={normalizedFeedbackWrong}
+        xp_value={card.xp_value}
+        onAnswer={(correct, sel) => onAnswer(correct, sel)}
+      />
+    </InteractiveSlide>
+  );
+}
+```
 
-**Progress saving**: On every `IntersectionObserver` callback (card becomes active), upsert `user_lesson_progress` with the new `cards_completed` value.
+**`scenario` case**: Apply same normalization for options/correct/feedback_wrong.
 
-## Data Flow
+**`lesson_complete` case**: Pass the correct next lesson title from the card's own `content_json` rather than relying on the parent:
+```tsx
+case "lesson_complete":
+  return (
+    <LessonComplete
+      totalXp={sessionXp}
+      streak={streak}
+      nextLessonTitle={(content.next_title as string) || nextLessonTitle}
+      onNext={onNextLesson}
+      isLastLesson={!content.next_lesson}
+    />
+  );
+```
 
-`LessonPlayer.tsx` owns:
-- Fetching `lesson_cards` from Supabase
-- Fetching saved progress from `user_lesson_progress`
-- Mute state (single `useState` shared down via props)
-- Session XP total
-- Streak data
-- Exit modal (leave lesson confirmation)
-- Calling `useXpProgress` hooks (unchanged — this hook works perfectly)
-- Calling `useProgress`, `useGamification`, `useTelemetry` on lesson completion
+### 2. `src/pages/LessonPlayer.tsx`
+**BUG 3 + 4 fix:**
 
-`SwipeContainer.tsx` owns:
-- The scroll DOM element
-- IntersectionObserver lifecycle
-- Notifying parent of current index changes
-- Triggering progress save on index change
+Line 197 — fix field name:
+```tsx
+// FROM:
+const nextLessonTitle = nextLessonContent?.next_lesson_title as string | undefined;
+// TO:
+const nextLessonTitle = nextLessonContent?.next_title as string | undefined;
+```
 
-## What Stays Untouched
+`handleIndexChange` — also update `sessionXp` from cumulative card XP so knowledge cards contribute:
+```tsx
+const handleIndexChange = useCallback(
+  async (index: number) => {
+    setCurrentIndex(index);
+    // Always update session XP from all cards viewed so far
+    const xpSoFar = cards.slice(0, index + 1).reduce((sum, c) => sum + (c.xp_value || 0), 0);
+    setSessionXp(xpSoFar); // ADD THIS LINE
+    if (!user || cards.length === 0) return;
+    const isComplete = cards[index]?.card_type === "lesson_complete";
+    await saveCardProgress(lessonDbId, index, cards.length, xpSoFar, isComplete);
+  },
+  [user, cards, lessonDbId, saveCardProgress],
+);
+```
 
-- `src/hooks/useXpProgress.ts` — all DB write logic is preserved exactly
-- `src/contexts/` — all contexts unchanged  
-- `src/integrations/supabase/` — unchanged
-- `src/lib/media.ts` — `getLessonMediaUrl()` still used for URL construction
-- `App.tsx` — routes unchanged, still renders `<LessonPlayer />`
-- `src/components/layout/BottomNav.tsx` — already has the `/lesson/` hide logic from the previous fix
+**BUG 7 fix — Resume modal background:**
+Wrap the `SwipeContainer` render with a condition: only render it when `showResume` is false. While `showResume` is true, show only the hero image blurred:
+```tsx
+{showResume ? (
+  <div style={{ position: 'absolute', inset: 0, background: '#000' }}>
+    {cards[0]?.mediaUrl && (
+      <img src={cards[0].mediaUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(20px) brightness(0.3)' }} />
+    )}
+  </div>
+) : (
+  <SwipeContainer ... />
+)}
+```
 
-## Interactive Cards — Key Decisions
+### 3. `src/components/lesson/VideoSlide.tsx`
+**BUG 5 fix:**
+- Set initial `loading` state to `false` for non-active cards (don't show spinner on cards not being watched)
+- Show the video URL in the error state for debugging: `<p style={{fontSize: '10px', opacity: 0.4, wordBreak: 'break-all'}}>{mediaUrl}</p>`
+- Add `onLoadStart={() => setLoading(true)}` so spinner shows when video starts buffering
+- The card already has the right video attributes. The URL construction is correct. The main issue is likely that videos on inactive slides are preloading unnecessarily and hitting rate limits, or the browser is blocking autoplay on multiple elements
 
-All interactive cards are rebuilt in `src/components/lesson/cards/` with the exact styling from the spec:
+### 4. `src/data/mediaMap.ts`
+**BUG 6 fix:**
+The `moduleThumbnails` currently points to `mediaUrl('module1_1/1.1_photo_1.webp')`. The Supabase `lesson-images` bucket stores the hero images as `hero-M1-L1-construction-site-hazards.jpeg` (confirmed from DB). Update `moduleThumbnails` to use the actual hero image filenames from the DB:
 
-- **QuickCheck**: Dark glassmorphism options (`rgba(255,255,255,0.06)`), min-height 60px, green/red feedback with XP badge float animation using CSS keyframes (not framer-motion)
-- **DragDrop**: Touch-based drag using `touchstart/touchmove/touchend`, `touch-action: none`, floating copy follows finger. NOT the HTML5 drag API.
-- **TapToReveal**: 2x2 grid, CSS 3D flip with `perspective: 1000px`, `backface-visibility: hidden`
-- **SpeedDrill**: SVG circular countdown, 2×2 grid of answer buttons
-- **LessonComplete**: CSS confetti particles (keyframe animation, ~60 coloured divs positioned randomly), animated XP counter using `requestAnimationFrame`
+```tsx
+import { getLessonMediaUrl } from '@/lib/media';
 
-## Fourth-Wall Effects
+export const moduleThumbnails: Record<number, string> = {
+  1: getLessonMediaUrl('hero-M1-L1-construction-site-hazards.jpeg', 'lesson-images'),
+  2: getLessonMediaUrl('hero-M2-L2-safe-lifting.jpeg', 'lesson-images'),
+  3: getLessonMediaUrl('hero-M3-L1-working-at-height.jpeg', 'lesson-images'),
+  4: getLessonMediaUrl('hero-M4-L1-coshh.jpeg', 'lesson-images'),
+  5: getLessonMediaUrl('hero-M5-L1-banksman.jpeg', 'lesson-images'),
+};
+```
 
-These are implemented as overlay components rendered inside `VideoSlide.tsx`:
+## Summary of Changes (in priority order)
 
-- **lean_in**: `LeanInCallout.tsx` — listens to `onTimeUpdate` prop, fades in at `currentTime >= 2`
-- **hold_up**: `HoldUpCard.tsx` — fades in at `currentTime >= 1.5`
-- **point_down**: Implemented differently with scroll-snap — when `currentTime > duration - 2`, a sticky overlay div at the bottom of the video slide shows "80px peek" of the next card's top visually. This is simpler than trying to override scroll-snap.
-
-## Video Rules (Strict)
-
-- `playsInline`, `muted` (initially), `preload="auto"` on all `<video>` elements
-- `controls` attribute omitted (no browser chrome)
-- `objectFit: 'contain'` (not cover) — shows full 9:16 frame with black bars
-- Videos **do not auto-advance** when ended — user must swipe (except BRoll which auto-advances after 1 second)
-- Mute state is a single boolean lifted to `LessonPlayer.tsx`, passed down to all `VideoSlide`/`BRollSlide`
-
-## Styling Baseline
-
-Every card lives on a `#000` or `#0a0a0f` background. Colours:
-- Gold `#f59e0b` — XP, primary accents
-- Green `#10b981` — correct answers
-- Red `#ef4444` — wrong answers  
-- Blue `#3b82f6` — info/remember-this
-- Purple `#a855f7` — test tips
-
-Font: system stack (`-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`)
-
-All touch targets minimum 44×44px.
-
-## Files to Delete
-
-- `src/components/LessonSwipeView.tsx`
-- `src/components/cards/VideoCard.tsx`
-- `src/components/cards/BRollCard.tsx`
-- `src/components/cards/HeroImageCard.tsx`
-- `src/components/cards/ImageCard.tsx`
-- `src/components/cards/QuickCheckCard.tsx`
-- `src/components/cards/RememberThisCard.tsx`
-- `src/components/cards/TestTipCard.tsx`
-- `src/components/cards/KeyTermCard.tsx`
-- `src/components/cards/DragDropCard.tsx`
-- `src/components/cards/TapToRevealCard.tsx`
-- `src/components/cards/SplitScreenCard.tsx`
-- `src/components/cards/ScenarioCard.tsx`
-- `src/components/cards/MultiSelectCard.tsx`
-- `src/components/cards/SpeedDrillCard.tsx`
-- `src/components/cards/PatternCard.tsx`
-- `src/components/cards/LessonCompleteCard.tsx`
-- `src/components/cards/shared/XpBadge.tsx`
-- `src/components/cards/shared/SwipeHint.tsx`
-
-## Files to Create (24 new files)
-
-1. `src/pages/LessonPlayer.tsx`
-2. `src/components/lesson/SwipeContainer.tsx`
-3. `src/components/lesson/VideoSlide.tsx`
-4. `src/components/lesson/HeroSlide.tsx`
-5. `src/components/lesson/ImageSlide.tsx`
-6. `src/components/lesson/BRollSlide.tsx`
-7. `src/components/lesson/InteractiveSlide.tsx`
-8. `src/components/lesson/cards/QuickCheck.tsx`
-9. `src/components/lesson/cards/DragDrop.tsx`
-10. `src/components/lesson/cards/TapToReveal.tsx`
-11. `src/components/lesson/cards/SplitScreen.tsx`
-12. `src/components/lesson/cards/MultiSelect.tsx`
-13. `src/components/lesson/cards/SpeedDrill.tsx`
-14. `src/components/lesson/cards/Scenario.tsx`
-15. `src/components/lesson/cards/PatternCard.tsx`
-16. `src/components/lesson/cards/RememberThis.tsx`
-17. `src/components/lesson/cards/TestTip.tsx`
-18. `src/components/lesson/cards/KeyTerm.tsx`
-19. `src/components/lesson/cards/LessonComplete.tsx`
-20. `src/components/lesson/overlays/LeanInCallout.tsx`
-21. `src/components/lesson/overlays/HoldUpCard.tsx`
-22. `src/components/lesson/ui/ProgressBar.tsx`
-23. `src/components/lesson/ui/NavHeader.tsx`
-24. `src/components/lesson/ui/MuteToggle.tsx`
-
-## Preserved Integrations (nothing changes in these)
-
-- `useXpProgress` hook — called identically from the new `LessonPlayer.tsx`
-- Supabase queries — same tables, same upsert patterns
-- Route `/lesson/:moduleId/:lessonId` — unchanged in `App.tsx`
-- `BottomNav` hide-on-lesson logic — already works
-- `useProgress`, `useGamification`, `useTelemetry` contexts — called on lesson complete exactly as before
+| Priority | Bug | File | Change |
+|---|---|---|---|
+| 1 | BUG 1 — text invisible | `SwipeContainer.tsx` | Fix `content.content` → `content.text` for RememberThis/TestTip; normalize options/correct/feedback_wrong for QuickCheck/Scenario |
+| 2 | BUG 3 — XP = 0 | `LessonPlayer.tsx` | Call `setSessionXp(xpSoFar)` in `handleIndexChange` |
+| 3 | BUG 4 — next title missing | `LessonPlayer.tsx` | Fix `next_lesson_title` → `next_title` (line 197) |
+| 4 | BUG 4 (also) | `SwipeContainer.tsx` | Pass `content.next_title` directly in `lesson_complete` case |
+| 5 | BUG 7 — resume modal | `LessonPlayer.tsx` | Conditionally render blurred hero instead of SwipeContainer during resume modal |
+| 6 | BUG 5 — videos | `VideoSlide.tsx` | Better loading state management, show URL in error for debugging |
+| 7 | BUG 6 — thumbnails | `mediaMap.ts` | Fix `moduleThumbnails` to use real hero image filenames |
+| 8 | BUG 8 — hotspots | None | `ImageSlide.tsx` is clean; yellow circles are burned into the image asset itself |
+| 9 | BUG 9 — card count | None | Confirmed 1.1=15, counts are correct |
 
 ## No Database Changes Required
-
-All existing tables (`lesson_cards`, `user_lesson_progress`, `progress`, `streaks`) are used exactly as-is. No migrations needed.
+All fixes are in frontend code. The DB schema and data are correct — the bugs are all field name mismatches between the seed data and the component props.

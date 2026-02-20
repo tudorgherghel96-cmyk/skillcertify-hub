@@ -189,7 +189,8 @@ export default function LessonPlayer() {
   const [showResume, setShowResume] = useState(false);
   const [resumeCardIndex, setResumeCardIndex] = useState(0);
 
-  const lessonTitle = (cards[0]?.content_json as Record<string, unknown>)?.lesson_title as string || "Lesson";
+  const heroContent = cards[0]?.content_json as Record<string, unknown> | undefined;
+  const lessonTitle = (heroContent?.lesson_title ?? heroContent?.title) as string || "Lesson";
   const nextLessonContent = cards
     .find((c) => c.card_type === "lesson_complete")
     ?.content_json as Record<string, unknown> | undefined;
@@ -198,26 +199,34 @@ export default function LessonPlayer() {
 
   // Load cards + progress
   useEffect(() => {
-    if (!user) return;
     (async () => {
-      const [{ data: cardData }, { data: progressData }, { data: streakData }] = await Promise.all([
-        supabase
-          .from("lesson_cards")
-          .select("*")
-          .eq("lesson_id", lessonDbId)
-          .order("card_position", { ascending: true }),
-        supabase
-          .from("user_lesson_progress")
-          .select("cards_completed")
-          .eq("lesson_id", lessonDbId)
-          .eq("user_id", user.id)
-          .maybeSingle(),
-        supabase
-          .from("streaks")
-          .select("current_streak")
-          .eq("user_id", user.id)
-          .maybeSingle(),
-      ]);
+      // Always fetch cards — lesson 1/1 is public (no auth required)
+      const cardsPromise = supabase
+        .from("lesson_cards")
+        .select("*")
+        .eq("lesson_id", lessonDbId)
+        .order("card_position", { ascending: true });
+
+      // Only fetch user-specific data if logged in
+      const progressPromise = user
+        ? supabase
+            .from("user_lesson_progress")
+            .select("cards_completed")
+            .eq("lesson_id", lessonDbId)
+            .eq("user_id", user.id)
+            .maybeSingle()
+        : Promise.resolve({ data: null });
+
+      const streakPromise = user
+        ? supabase
+            .from("streaks")
+            .select("current_streak")
+            .eq("user_id", user.id)
+            .maybeSingle()
+        : Promise.resolve({ data: null });
+
+      const [{ data: cardData }, { data: progressData }, { data: streakData }] =
+        await Promise.all([cardsPromise, progressPromise, streakPromise]);
 
       if (cardData) {
         const enriched: LessonCard[] = cardData.map((c) => ({
@@ -227,9 +236,9 @@ export default function LessonPlayer() {
         setCards(enriched);
       }
 
-      if (streakData) setStreak(streakData.current_streak ?? 0);
+      if (streakData) setStreak((streakData as { current_streak: number | null }).current_streak ?? 0);
 
-      const savedIdx = progressData?.cards_completed ?? 0;
+      const savedIdx = (progressData as { cards_completed?: number } | null)?.cards_completed ?? 0;
       if (savedIdx > 0 && savedIdx < (cardData?.length ?? 0)) {
         setResumeCardIndex(savedIdx);
         setShowResume(true);
@@ -245,7 +254,7 @@ export default function LessonPlayer() {
   const handleIndexChange = useCallback(
     async (index: number) => {
       setCurrentIndex(index);
-      if (!user || cards.length === 0) return;
+      if (!user || cards.length === 0) return; // skip DB writes for unauthenticated
       const isComplete = cards[index]?.card_type === "lesson_complete";
       const xpSoFar = cards.slice(0, index + 1).reduce((sum, c) => sum + c.xp_value, 0);
       await saveCardProgress(lessonDbId, index, cards.length, xpSoFar, isComplete);
@@ -255,13 +264,13 @@ export default function LessonPlayer() {
 
   const handleAnswer = useCallback(
     (cardPosition: number, correct: boolean, selected: number) => {
-      recordQuizAnswer(cardPosition, selected, correct);
+      if (user) recordQuizAnswer(cardPosition, selected, correct);
       const card = cards.find((c) => c.card_position === cardPosition);
       if (card && correct) {
         setSessionXp((prev) => prev + card.xp_value);
       }
     },
-    [cards, recordQuizAnswer],
+    [user, cards, recordQuizAnswer],
   );
 
   const handleLessonComplete = useCallback(

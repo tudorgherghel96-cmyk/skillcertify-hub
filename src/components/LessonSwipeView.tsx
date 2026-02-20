@@ -462,22 +462,55 @@ export default function LessonSwipeView({
   // ── Data ──
   const [cards, setCards] = useState<LessonCard[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(true);
-    supabase
-      .from("lesson_cards")
-      .select("*")
-      .eq("lesson_id", lessonId)
-      .order("card_position")
-      .then(({ data }) => {
-        if (data) setCards(data as LessonCard[]);
-        setLoading(false);
-      });
-  }, [lessonId]);
+  const [resuming, setResuming] = useState(false);
 
   // ── Navigation state ──
   const [idx, setIdx] = useState(initialCardIndex ?? 0);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    const load = async () => {
+      // Fetch cards and saved progress in parallel
+      const [cardsRes, progressRes] = await Promise.all([
+        supabase
+          .from("lesson_cards")
+          .select("*")
+          .eq("lesson_id", lessonId)
+          .order("card_position"),
+        user
+          ? supabase
+              .from("user_lesson_progress")
+              .select("cards_completed, completed_at")
+              .eq("user_id", user.id)
+              .eq("lesson_id", lessonId)
+              .maybeSingle()
+          : Promise.resolve({ data: null, error: null }),
+      ]);
+
+      if (cancelled) return;
+
+      const fetchedCards = (cardsRes.data ?? []) as LessonCard[];
+      setCards(fetchedCards);
+
+      // Resume from saved position if lesson is not already completed
+      const saved = progressRes.data;
+      if (saved && !saved.completed_at && saved.cards_completed > 0) {
+        const resumeIdx = Math.min(saved.cards_completed, fetchedCards.length - 1);
+        setIdx(resumeIdx);
+        setResuming(true);
+        setTimeout(() => setResuming(false), 2000);
+      } else if (initialCardIndex !== undefined) {
+        setIdx(initialCardIndex);
+      }
+
+      setLoading(false);
+    };
+
+    load();
+    return () => { cancelled = true; };
+  }, [lessonId, user?.id]);
   const [isAnimating, setIsAnimating] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const containerH = useRef(0);
@@ -735,6 +768,22 @@ export default function LessonSwipeView({
       {/* Progress bar */}
       <div className="absolute top-0 left-0 right-0 z-30 bg-transparent">
         <ProgressBar total={cards.length} current={idx} onJump={jumpTo} />
+
+        {/* Resume toast */}
+        <AnimatePresence>
+          {resuming && (
+            <motion.div
+              key="resume-toast"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-12 left-1/2 -translate-x-1/2 z-50 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5"
+            >
+              ↩ Resuming where you left off
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Swipeable card stack */}

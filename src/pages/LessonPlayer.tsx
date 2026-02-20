@@ -194,7 +194,7 @@ export default function LessonPlayer() {
   const nextLessonContent = cards
     .find((c) => c.card_type === "lesson_complete")
     ?.content_json as Record<string, unknown> | undefined;
-  const nextLessonTitle = nextLessonContent?.next_lesson_title as string | undefined;
+  const nextLessonTitle = nextLessonContent?.next_title as string | undefined;
   const nextLessonId = nextLessonContent?.next_lesson as string | null | undefined;
 
   // Load cards + progress
@@ -254,9 +254,11 @@ export default function LessonPlayer() {
   const handleIndexChange = useCallback(
     async (index: number) => {
       setCurrentIndex(index);
+      // Accumulate XP from all viewed cards (knowledge cards + quizzes)
+      const xpSoFar = cards.slice(0, index + 1).reduce((sum, c) => sum + (c.xp_value || 0), 0);
+      setSessionXp(xpSoFar);
       if (!user || cards.length === 0) return; // skip DB writes for unauthenticated
       const isComplete = cards[index]?.card_type === "lesson_complete";
-      const xpSoFar = cards.slice(0, index + 1).reduce((sum, c) => sum + c.xp_value, 0);
       await saveCardProgress(lessonDbId, index, cards.length, xpSoFar, isComplete);
     },
     [user, cards, lessonDbId, saveCardProgress],
@@ -357,21 +359,34 @@ export default function LessonPlayer() {
           overflow: "hidden",
         }}
       >
-        <SwipeContainer
-          cards={cards}
-          currentIndex={currentIndex}
-          initialIndex={initialIndex}
-          muted={muted}
-          onMuteToggle={() => setMuted((m) => !m)}
-          lessonTitle={lessonTitle}
-          streak={streak}
-          nextLessonTitle={nextLessonTitle}
-          sessionXp={sessionXp}
-          onIndexChange={handleIndexChange}
-          onAnswer={handleAnswer}
-          onLessonComplete={handleLessonComplete}
-          onNextLesson={handleNextLesson}
-        />
+        {showResume ? (
+          // BUG 7: Show only blurred hero during resume modal, not all cards
+          <div style={{ position: "absolute", inset: 0, background: "#000" }}>
+            {cards[0]?.mediaUrl && (
+              <img
+                src={cards[0].mediaUrl}
+                alt=""
+                style={{ width: "100%", height: "100%", objectFit: "cover", filter: "blur(20px) brightness(0.3)" }}
+              />
+            )}
+          </div>
+        ) : (
+          <SwipeContainer
+            cards={cards}
+            currentIndex={currentIndex}
+            initialIndex={initialIndex}
+            muted={muted}
+            onMuteToggle={() => setMuted((m) => !m)}
+            lessonTitle={lessonTitle}
+            streak={streak}
+            nextLessonTitle={nextLessonTitle}
+            sessionXp={sessionXp}
+            onIndexChange={handleIndexChange}
+            onAnswer={handleAnswer}
+            onLessonComplete={handleLessonComplete}
+            onNextLesson={handleNextLesson}
+          />
+        )}
       </div>
 
       <ExitModal open={showExit} onStay={() => setShowExit(false)} onLeave={() => navigate(-1)} />

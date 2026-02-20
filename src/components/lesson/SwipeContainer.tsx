@@ -107,36 +107,52 @@ function CardRenderer({
         />
       );
 
-    case "quick_check":
+    case "quick_check": {
+      const rawOpts = (content.options as string[] | { text: string }[] | undefined) || [];
+      const normOpts = rawOpts.map((o) => (typeof o === "string" ? { text: o } : o));
+      const correctIdx = (content.correct_index as number) ?? (content.correct as number) ?? 0;
+      const rawFbWrong = content.feedback_wrong;
+      const normFbWrong: string[] = Array.isArray(rawFbWrong)
+        ? (rawFbWrong as string[])
+        : Object.values((rawFbWrong as Record<string, string>) || {});
       return (
         <InteractiveSlide>
           <QuickCheck
-            question={content.question as string}
-            options={(content.options as { text: string }[]) || []}
-            correct_index={content.correct_index as number}
+            question={(content.question as string) || ""}
+            options={normOpts}
+            correct_index={correctIdx}
             feedback_correct={(content.feedback_correct as string) || "Correct!"}
-            feedback_wrong={(content.feedback_wrong as string[]) || []}
+            feedback_wrong={normFbWrong}
             xp_value={card.xp_value}
             onAnswer={(correct, sel) => onAnswer(correct, sel)}
           />
         </InteractiveSlide>
       );
+    }
 
-    case "scenario":
+    case "scenario": {
+      const rawSOpts = (content.options as string[] | { text: string }[] | undefined) || [];
+      const normSOpts = rawSOpts.map((o) => (typeof o === "string" ? { text: o } : o));
+      const correctSIdx = (content.correct_index as number) ?? (content.correct as number) ?? 0;
+      const rawSFbWrong = content.feedback_wrong;
+      const normSFbWrong: string[] = Array.isArray(rawSFbWrong)
+        ? (rawSFbWrong as string[])
+        : Object.values((rawSFbWrong as Record<string, string>) || {});
       return (
         <InteractiveSlide>
           <Scenario
-            scenario={content.scenario as string}
-            question={content.question as string}
-            options={(content.options as { text: string }[]) || []}
-            correct_index={content.correct_index as number}
+            scenario={(content.scenario as string) || ""}
+            question={(content.question as string) || ""}
+            options={normSOpts}
+            correct_index={correctSIdx}
             feedback_correct={(content.feedback_correct as string) || "Correct!"}
-            feedback_wrong={(content.feedback_wrong as string[]) || []}
+            feedback_wrong={normSFbWrong}
             xp_value={card.xp_value}
             onAnswer={(correct, sel) => onAnswer(correct, sel)}
           />
         </InteractiveSlide>
       );
+    }
 
     case "drag_drop":
       return (
@@ -209,14 +225,14 @@ function CardRenderer({
     case "remember_this":
       return (
         <InteractiveSlide>
-          <RememberThis content={content.content as string} />
+          <RememberThis content={(content.text as string) || (content.content as string) || ""} />
         </InteractiveSlide>
       );
 
     case "test_tip":
       return (
         <InteractiveSlide>
-          <TestTip content={content.content as string} />
+          <TestTip content={(content.text as string) || (content.content as string) || ""} />
         </InteractiveSlide>
       );
 
@@ -237,9 +253,9 @@ function CardRenderer({
         <LessonComplete
           totalXp={sessionXp}
           streak={streak}
-          nextLessonTitle={nextLessonTitle}
+          nextLessonTitle={(content.next_title as string) || nextLessonTitle}
           onNext={onNextLesson}
-          isLastLesson={isLastLesson}
+          isLastLesson={!content.next_lesson}
         />
       );
 

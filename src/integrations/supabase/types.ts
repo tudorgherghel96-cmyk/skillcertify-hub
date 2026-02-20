@@ -184,6 +184,54 @@ export type Database = {
         }
         Relationships: []
       }
+      lesson_cards: {
+        Row: {
+          card_position: number
+          card_type: string
+          content_json: Json
+          created_at: string
+          effect_overlay_text: string | null
+          fourth_wall_effect: string | null
+          id: string
+          lesson_id: string
+          media_bucket: string | null
+          media_file: string | null
+          module_id: number
+          updated_at: string
+          xp_value: number
+        }
+        Insert: {
+          card_position: number
+          card_type: string
+          content_json?: Json
+          created_at?: string
+          effect_overlay_text?: string | null
+          fourth_wall_effect?: string | null
+          id?: string
+          lesson_id: string
+          media_bucket?: string | null
+          media_file?: string | null
+          module_id: number
+          updated_at?: string
+          xp_value?: number
+        }
+        Update: {
+          card_position?: number
+          card_type?: string
+          content_json?: Json
+          created_at?: string
+          effect_overlay_text?: string | null
+          fourth_wall_effect?: string | null
+          id?: string
+          lesson_id?: string
+          media_bucket?: string | null
+          media_file?: string | null
+          module_id?: number
+          updated_at?: string
+          xp_value?: number
+        }
+        Relationships: []
+      }
       lesson_strength: {
         Row: {
           created_at: string

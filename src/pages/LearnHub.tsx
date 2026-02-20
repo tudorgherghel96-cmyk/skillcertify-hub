@@ -1,21 +1,18 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronRight, CheckCircle, Lock, Target, ArrowRight, ShieldCheck } from "lucide-react";
+import { ChevronRight, CheckCircle, Lock, Target, ShieldCheck } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MODULES } from "@/data/courseData";
 import { moduleThumbnails } from "@/data/mediaMap";
 import {
   useProgress,
-  getModuleProgress,
-  getLessonsCompleted,
-  isModuleComplete,
   isModuleUnlocked,
   allGqaPassed,
 } from "@/contexts/ProgressContext";
 import { useSuperUser } from "@/contexts/SuperUserContext";
+import { useDbLessonProgress } from "@/hooks/useDbLessonProgress";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
@@ -30,13 +27,25 @@ const stagger = {
 export default function LearnHub() {
   const { progress } = useProgress();
   const { isSuperUser } = useSuperUser();
+  const { progressMap } = useDbLessonProgress();
   const showCscs = allGqaPassed(progress, isSuperUser);
 
-  // Find first incomplete topic
+  // Compute DB-backed stats per module
+  const getModuleStats = (moduleId: number, totalLessons: number) => {
+    let completedCount = 0;
+    for (let lessonNum = 1; lessonNum <= totalLessons; lessonNum++) {
+      const key = `${moduleId}.${lessonNum}`;
+      if (progressMap[key]?.completed) completedCount++;
+    }
+    const percent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+    return { completedCount, percent, isComplete: completedCount === totalLessons };
+  };
+
+  // Find first incomplete unlocked module using DB data
   const firstIncompleteMod = MODULES.find((mod) => {
-    const mp = getModuleProgress(progress, mod.id);
     const unlocked = isModuleUnlocked(progress, mod.id, isSuperUser);
-    return unlocked && !isModuleComplete(mp);
+    const { isComplete } = getModuleStats(mod.id, mod.lessons.length);
+    return unlocked && !isComplete;
   });
 
   return (
@@ -56,11 +65,8 @@ export default function LearnHub() {
 
       <div className="space-y-3">
         {MODULES.map((mod) => {
-          const mp = getModuleProgress(progress, mod.id);
           const unlocked = isModuleUnlocked(progress, mod.id, isSuperUser);
-          const lessonsComplete = getLessonsCompleted(mp, mod.lessons.length);
-          const complete = isModuleComplete(mp);
-          const percent = Math.round((lessonsComplete / mod.lessons.length) * 100);
+          const { completedCount, percent, isComplete: complete } = getModuleStats(mod.id, mod.lessons.length);
           const Icon = mod.icon;
           const isNext = firstIncompleteMod?.id === mod.id;
 
@@ -117,7 +123,7 @@ export default function LearnHub() {
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {lessonsComplete} of {mod.lessons.length} done
+                          {completedCount} of {mod.lessons.length} done
                         </p>
                       </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />

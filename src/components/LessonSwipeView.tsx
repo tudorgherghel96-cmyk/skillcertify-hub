@@ -120,6 +120,8 @@ function RenderCard({
   nextCard,
   dir,
   onNextLesson,
+  muted,
+  onMuteChange,
 }: {
   card: LessonCard;
   isActive: boolean;
@@ -138,6 +140,8 @@ function RenderCard({
   nextCard?: LessonCard;
   dir: "ltr" | "rtl";
   onNextLesson: (nextId: string | null) => void;
+  muted?: boolean;
+  onMuteChange?: (m: boolean) => void;
 }) {
   const c = card.content_json as Record<string, unknown>;
   const mediaUrl = getLessonMediaUrl(card.media_file, card.media_bucket);
@@ -154,6 +158,8 @@ function RenderCard({
         showEffect={showEffect}
         effectOverlayText={card.effect_overlay_text ?? undefined}
         fourthWallEffect={card.fourth_wall_effect}
+        muted={muted}
+        onMuteChange={onMuteChange}
       />
     );
   }
@@ -545,6 +551,9 @@ export default function LessonSwipeView({
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [levelUpPending, setLevelUpPending] = useState<number | null>(null);
 
+  // ── Mute state persists across cards within lesson ──
+  const [lessonMuted, setLessonMuted] = useState(true);
+
   const handleXp = useCallback(
     (xp: number) => {
       setSessionXp((p) => p + xp);
@@ -763,43 +772,104 @@ export default function LessonSwipeView({
   const prevCard = cards[idx - 1] ?? null;
   const isPointDownActive = currentCard?.fourth_wall_effect === "point_down";
 
-  return (
-    <div className="relative w-full h-full flex flex-col bg-background overflow-hidden select-none">
-      {/* Progress bar */}
-      <div className="absolute top-0 left-0 right-0 z-30 bg-transparent">
-        <ProgressBar total={cards.length} current={idx} onJump={jumpTo} />
 
-        {/* Resume toast */}
-        <AnimatePresence>
-          {resuming && (
-            <motion.div
-              key="resume-toast"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3 }}
-              className="absolute top-12 left-1/2 -translate-x-1/2 z-50 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5"
-            >
-              ↩ Resuming where you left off
-            </motion.div>
-          )}
-        </AnimatePresence>
+  // Truncate lesson title for header
+  const lessonTitle = currentCard
+    ? String(currentCard.content_json?.title ?? `Lesson ${lessonId}`)
+    : `Lesson ${lessonId}`;
+
+  return (
+    <div
+      className="relative w-full flex flex-col select-none overflow-hidden"
+      style={{
+        height: "100dvh",
+        background: "#0a0a0a",
+        overscrollBehavior: "none",
+      }}
+    >
+      {/* ── Navigation header ── */}
+      <div
+        className="shrink-0 flex items-center justify-between px-4 z-40"
+        style={{
+          height: 48,
+          paddingTop: "env(safe-area-inset-top)",
+          background: "rgba(10,10,10,0.9)",
+          backdropFilter: "blur(8px)",
+        }}
+      >
+        {/* Back button placeholder (actual button is in LessonPlayer) */}
+        <div className="w-9" />
+
+        {/* Lesson title */}
+        <p
+          className="flex-1 text-center font-semibold text-white truncate px-2"
+          style={{ fontSize: 14 }}
+        >
+          {lessonTitle}
+        </p>
+
+        {/* Card counter */}
+        <p
+          className="shrink-0 font-semibold"
+          style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}
+        >
+          {idx + 1}/{cards.length}
+        </p>
       </div>
 
-      {/* Swipeable card stack */}
+      {/* ── Thin linear progress bar ── */}
+      <div className="shrink-0 h-[2px] bg-white/10 z-40">
+        <motion.div
+          className="h-full"
+          style={{
+            width: `${((idx + 1) / cards.length) * 100}%`,
+            background: "linear-gradient(90deg, #f59e0b, #10b981)",
+          }}
+          animate={{ width: `${((idx + 1) / cards.length) * 100}%` }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+        />
+      </div>
+
+      {/* ── Segmented segment bar ── */}
+      <div className="shrink-0 z-30">
+        <ProgressBar total={cards.length} current={idx} onJump={jumpTo} />
+      </div>
+
+      {/* Resume toast */}
+      <AnimatePresence>
+        {resuming && (
+          <motion.div
+            key="resume-toast"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3 }}
+            className="absolute top-24 left-1/2 -translate-x-1/2 z-50 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5"
+          >
+            ↩ Resuming where you left off
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Swipeable card stack ── */}
       <div
         ref={containerRef}
         {...bind()}
-        className="flex-1 relative overflow-hidden"
-        style={{ touchAction: "none" }}
+        className="flex-1 relative"
+        style={{
+          touchAction: "none",
+          overscrollBehavior: "none",
+          willChange: "transform",
+          overflow: "hidden",
+        }}
       >
         {/* Previous card */}
         {prevCard && (
           <motion.div
             style={{ y: prevY }}
-            className="absolute inset-0 flex items-start justify-center pt-8 px-4 overflow-y-auto"
+            className="absolute inset-0 flex items-start justify-center px-4 overflow-y-auto"
           >
-            <div className="w-full max-w-lg py-4">
+            <div className="w-full max-w-[430px] py-4">
               <RenderCard
                 card={prevCard}
                 isActive={false}
@@ -823,9 +893,9 @@ export default function LessonSwipeView({
         {/* Current card */}
         <motion.div
           style={{ y: currY }}
-          className="absolute inset-0 flex items-start justify-center pt-8 px-4 overflow-y-auto"
+          className="absolute inset-0 flex items-start justify-center px-4 overflow-y-auto"
         >
-          <div className="w-full max-w-lg py-4">
+          <div className="w-full max-w-[430px] py-4">
             {currentCard && (
               <RenderCard
                 card={currentCard}
@@ -845,6 +915,8 @@ export default function LessonSwipeView({
                 nextCard={nextCard ?? undefined}
                 dir={dir}
                 onNextLesson={onNextLesson ?? (() => {})}
+                muted={lessonMuted}
+                onMuteChange={setLessonMuted}
               />
             )}
           </div>
@@ -859,9 +931,9 @@ export default function LessonSwipeView({
               filter: isPointDownActive ? nextBlurFilter : undefined,
               marginTop: isPointDownActive ? -8 : 0,
             }}
-            className="absolute inset-0 flex items-start justify-center pt-8 px-4 overflow-y-auto"
+            className="absolute inset-0 flex items-start justify-center px-4 overflow-y-auto"
           >
-            <div className="w-full max-w-lg py-4">
+            <div className="w-full max-w-[430px] py-4">
               <RenderCard
                 card={nextCard}
                 isActive={false}
@@ -885,20 +957,6 @@ export default function LessonSwipeView({
           </motion.div>
         )}
       </div>
-
-      {/* Card counter pill */}
-      <AnimatePresence>
-        {idx < cards.length - 1 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute bottom-4 right-4 z-30 bg-black/40 text-white text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm pointer-events-none"
-          >
-            {idx + 1} / {cards.length}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Level-up toast */}
       <LevelUpToast level={levelUpPending} onDone={() => setLevelUpPending(null)} />

@@ -44,25 +44,21 @@ export default function QuickCheckCard({
     }
 
     onAnswered?.(isCorrect);
-
     hintTimer.current = setTimeout(() => setShowHint(true), 1500);
   };
 
   useEffect(() => () => { if (hintTimer.current) clearTimeout(hintTimer.current); }, []);
 
   return (
-    <div dir={dir} className="relative w-full rounded-2xl bg-card shadow-sm border border-border overflow-hidden">
-      {/* Blue accent top */}
+    <div dir={dir} className="relative w-full rounded-2xl overflow-hidden shadow-sm border border-border" style={{ background: "hsl(var(--card))" }}>
       <div className="h-1 w-full" style={{ background: "#1565C0" }} />
 
       <div className="p-5 space-y-4">
         <XpBadge xp={xpValue} show={showXp} position={dir === "rtl" ? "top-left" : "top-right"} />
 
-        {/* Question */}
         <p className="text-[18px] font-bold text-foreground leading-snug">{question}</p>
 
-        {/* Options */}
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {options.map((opt, i) => {
             const isThis = selected === i;
             const isCorrectOpt = i === correct;
@@ -76,35 +72,36 @@ export default function QuickCheckCard({
                 onClick={() => handleSelect(i)}
                 animate={
                   showCorrect && isAnswered
-                    ? { scale: [1, 1.05, 1] }
+                    ? { scale: [1, 1.02, 1] }
                     : showWrong
-                    ? { x: [-5, 5, -3, 3, 0] }
+                    ? { x: [-4, 4, -4, 4, 0] }
                     : {}
                 }
                 transition={{ duration: 0.35 }}
-                className="w-full text-start px-4 py-3 rounded-xl border-2 text-sm font-medium transition-colors min-h-[48px] flex items-center gap-3"
+                className="w-full text-start px-4 rounded-xl border-2 text-sm font-medium transition-colors flex items-center gap-3"
                 style={{
+                  minHeight: 56,
+                  paddingTop: 16,
+                  paddingBottom: 16,
                   borderColor: showCorrect
-                    ? "#4CAF50"
+                    ? "#10b981"
                     : showWrong
-                    ? "#F44336"
+                    ? "#ef4444"
                     : "hsl(var(--border))",
                   background: showCorrect
-                    ? "#E8F5E9"
+                    ? "#065f46"
                     : showWrong
-                    ? "#FFEBEE"
-                    : "white",
-                  color: showCorrect
-                    ? "#1B5E20"
-                    : showWrong
-                    ? "#B71C1C"
+                    ? "#7f1d1d"
+                    : "hsl(var(--card))",
+                  color: showCorrect || showWrong
+                    ? "white"
                     : "hsl(var(--foreground))",
                 }}
               >
-                {isAnswered && showCorrect && <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: "#4CAF50" }} />}
-                {isAnswered && showWrong && <XCircle className="h-4 w-4 shrink-0" style={{ color: "#F44336" }} />}
+                {isAnswered && showCorrect && <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-300" />}
+                {isAnswered && showWrong && <XCircle className="h-4 w-4 shrink-0 text-red-300" />}
                 {!isAnswered && (
-                  <span className="h-6 w-6 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center text-[10px] font-bold text-muted-foreground shrink-0">
+                  <span className="h-6 w-6 rounded-full border-2 border-muted-foreground/30 flex items-center justify-center text-[10px] font-bold text-muted-foreground shrink-0">
                     {String.fromCharCode(65 + i)}
                   </span>
                 )}
@@ -114,15 +111,13 @@ export default function QuickCheckCard({
           })}
         </div>
 
-        {/* Explanation on wrong */}
         <AnimatePresence>
           {isAnswered && selected !== correct && explanation && (
             <motion.p
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="text-sm italic leading-relaxed"
-              style={{ color: "#C62828" }}
+              className="text-sm italic leading-relaxed text-red-400"
             >
               {explanation}
             </motion.p>

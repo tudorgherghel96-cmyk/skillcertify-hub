@@ -8,7 +8,6 @@ import { triggerHaptic } from "@/lib/haptics";
 interface MultiSelectCardProps {
   question: string;
   options: string[];
-  /** Indices of all correct answers */
   correctIndices: number[];
   xpPerCorrect?: number;
   dir?: "ltr" | "rtl";
@@ -62,9 +61,10 @@ export default function MultiSelectCard({
 
   useEffect(() => () => { if (hintTimer.current) clearTimeout(hintTimer.current); }, []);
 
+  const correctCount = Array.from(toggled).filter(i => correctIndices.includes(i)).length;
+
   return (
-    <div dir={dir} className="relative w-full rounded-2xl bg-card shadow-sm border border-border overflow-hidden">
-      {/* Blue accent (same family as QuickCheck) */}
+    <div dir={dir} className="relative w-full rounded-2xl overflow-hidden shadow-sm border border-border" style={{ background: "hsl(var(--card))" }}>
       <div className="h-1 w-full" style={{ background: "#1565C0" }} />
 
       <div className="p-5 space-y-4">
@@ -77,7 +77,7 @@ export default function MultiSelectCard({
           <p className="text-[18px] font-bold text-foreground leading-snug">{question}</p>
         </div>
 
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {options.map((opt, i) => {
             const isToggled = toggled.has(i);
             const isCorrect = correctIndices.includes(i);
@@ -90,50 +90,41 @@ export default function MultiSelectCard({
                 key={i}
                 disabled={submitted}
                 onClick={() => toggle(i)}
-                className="w-full text-start px-4 py-3 rounded-xl border-2 text-sm font-medium transition-colors min-h-[48px] flex items-center gap-3"
+                className="w-full text-start px-4 rounded-xl border-2 text-sm font-medium transition-colors flex items-center gap-3"
                 style={{
+                  minHeight: 56,
+                  paddingTop: 16,
+                  paddingBottom: 16,
                   borderColor: showCorrect || showMissed
-                    ? "#4CAF50"
+                    ? "#10b981"
                     : showWrong
-                    ? "#F44336"
+                    ? "#ef4444"
                     : isToggled
                     ? "#1565C0"
                     : "hsl(var(--border))",
                   background: showCorrect
-                    ? "#E8F5E9"
+                    ? "#065f46"
                     : showWrong
-                    ? "#FFEBEE"
+                    ? "#7f1d1d"
                     : showMissed
-                    ? "#F1F8E9"
+                    ? "#064e3b"
                     : isToggled
-                    ? "rgba(21,101,192,0.07)"
-                    : "white",
+                    ? "rgba(21,101,192,0.15)"
+                    : "hsl(var(--card))",
+                  color: showCorrect || showWrong || showMissed ? "white" : "hsl(var(--foreground))",
                 }}
               >
-                {/* Checkbox */}
                 <span
                   className="h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors"
                   style={{
-                    borderColor: showCorrect || showMissed
-                      ? "#4CAF50"
-                      : showWrong
-                      ? "#F44336"
-                      : isToggled
-                      ? "#1565C0"
-                      : "hsl(var(--border))",
-                    background: isToggled && !submitted
-                      ? "#1565C0"
-                      : showCorrect
-                      ? "#4CAF50"
-                      : "transparent",
+                    borderColor: showCorrect || showMissed ? "#10b981" : showWrong ? "#ef4444" : isToggled ? "#1565C0" : "hsl(var(--border))",
+                    background: (isToggled && !submitted) ? "#1565C0" : showCorrect || showMissed ? "#10b981" : "transparent",
                   }}
                 >
-                  {(isToggled || showCorrect) && (
-                    <CheckCircle2 className="h-3 w-3 text-white" />
-                  )}
-                  {showWrong && <XCircle className="h-3 w-3" style={{ color: "#F44336" }} />}
+                  {(isToggled || showCorrect || showMissed) && <CheckCircle2 className="h-3 w-3 text-white" />}
+                  {showWrong && <XCircle className="h-3 w-3 text-red-300" />}
                 </span>
-                <span style={{ color: showWrong ? "#B71C1C" : showMissed ? "#2E7D32" : "hsl(var(--foreground))" }}>
+                <span>
                   {opt}
                   {showMissed && <span className="text-xs ml-1 font-normal opacity-70">(missed)</span>}
                 </span>
@@ -141,6 +132,20 @@ export default function MultiSelectCard({
             );
           })}
         </div>
+
+        {/* Score after submission */}
+        <AnimatePresence>
+          {submitted && (
+            <motion.p
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center text-sm font-bold"
+              style={{ color: correctCount === correctIndices.length ? "#10b981" : "#f59e0b" }}
+            >
+              {correctCount}/{correctIndices.length} correct
+            </motion.p>
+          )}
+        </AnimatePresence>
 
         {/* Submit button */}
         <AnimatePresence>
@@ -153,7 +158,7 @@ export default function MultiSelectCard({
               className="w-full py-3 rounded-xl text-white font-bold text-sm transition-transform active:scale-[0.98]"
               style={{ background: "#1565C0" }}
             >
-              Submit Answers
+              Check Answer
             </motion.button>
           )}
         </AnimatePresence>

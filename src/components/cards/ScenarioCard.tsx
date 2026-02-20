@@ -48,8 +48,7 @@ export default function ScenarioCard({
   useEffect(() => () => { if (hintTimer.current) clearTimeout(hintTimer.current); }, []);
 
   return (
-    <div dir={dir} className="relative w-full rounded-2xl bg-card shadow-sm border border-border overflow-hidden">
-      {/* Orange accent top */}
+    <div dir={dir} className="relative w-full rounded-2xl overflow-hidden shadow-sm border border-border" style={{ background: "hsl(var(--card))" }}>
       <div className="h-1 w-full" style={{ background: "#EF6C00" }} />
 
       <div className="p-5 space-y-4">
@@ -62,13 +61,16 @@ export default function ScenarioCard({
         {/* Scenario block */}
         <div
           className="rounded-xl px-4 py-3"
-          style={{ background: "rgba(239,108,0,0.08)", border: "1px solid rgba(239,108,0,0.2)" }}
+          style={{
+            background: "#1e293b",
+            borderLeft: "4px solid #f59e0b",
+          }}
         >
-          <p className="text-[16px] italic leading-relaxed text-foreground">{scenario}</p>
+          <p className="text-[15px] italic leading-relaxed text-white">{scenario}</p>
         </div>
 
         {/* Options */}
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {options.map((opt, i) => {
             const isThis = selected === i;
             const isCorrectOpt = i === correct;
@@ -81,22 +83,25 @@ export default function ScenarioCard({
                 disabled={isAnswered}
                 onClick={() => handleSelect(i)}
                 animate={
-                  showCorrect ? { scale: [1, 1.05, 1] }
-                  : showWrong ? { x: [-5, 5, -3, 3, 0] }
+                  showCorrect ? { scale: [1, 1.02, 1] }
+                  : showWrong ? { x: [-4, 4, -4, 4, 0] }
                   : {}
                 }
                 transition={{ duration: 0.35 }}
-                className="w-full text-start px-4 py-3 rounded-xl border-2 text-sm font-medium transition-colors min-h-[48px] flex items-center gap-3"
+                className="w-full text-start px-4 rounded-xl border-2 text-sm font-medium transition-colors flex items-center gap-3"
                 style={{
-                  borderColor: showCorrect ? "#4CAF50" : showWrong ? "#F44336" : "hsl(var(--border))",
-                  background: showCorrect ? "#E8F5E9" : showWrong ? "#FFEBEE" : "white",
-                  color: showCorrect ? "#1B5E20" : showWrong ? "#B71C1C" : "hsl(var(--foreground))",
+                  minHeight: 56,
+                  paddingTop: 16,
+                  paddingBottom: 16,
+                  borderColor: showCorrect ? "#10b981" : showWrong ? "#ef4444" : "hsl(var(--border))",
+                  background: showCorrect ? "#065f46" : showWrong ? "#7f1d1d" : "hsl(var(--card))",
+                  color: showCorrect || showWrong ? "white" : "hsl(var(--foreground))",
                 }}
               >
-                {isAnswered && showCorrect && <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: "#4CAF50" }} />}
-                {isAnswered && showWrong && <XCircle className="h-4 w-4 shrink-0" style={{ color: "#F44336" }} />}
+                {isAnswered && showCorrect && <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-300" />}
+                {isAnswered && showWrong && <XCircle className="h-4 w-4 shrink-0 text-red-300" />}
                 {!isAnswered && (
-                  <span className="h-6 w-6 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center text-[10px] font-bold text-muted-foreground shrink-0">
+                  <span className="h-6 w-6 rounded-full border-2 border-muted-foreground/30 flex items-center justify-center text-[10px] font-bold text-muted-foreground shrink-0">
                     {String.fromCharCode(65 + i)}
                   </span>
                 )}
@@ -111,8 +116,7 @@ export default function ScenarioCard({
             <motion.p
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
-              className="text-sm italic leading-relaxed"
-              style={{ color: "#C62828" }}
+              className="text-sm italic leading-relaxed text-red-400"
             >
               {explanation}
             </motion.p>

@@ -1,23 +1,33 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const BUCKET = 'course-media';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
 /**
- * Returns the public URL for a file in the course-media bucket.
+ * Returns the public URL for a lesson card media file.
+ * Only two buckets: "lesson-videos" (mp4) and "lesson-images" (jpeg/webp).
  */
-export function mediaUrl(path: string): string {
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+export function getLessonMediaUrl(
+  file: string | null,
+  bucket: string | null,
+): string {
+  if (!file || !bucket) return "";
+  // Direct URL construction — avoids a round-trip SDK call
+  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${file}`;
 }
 
 /**
- * Auto-resolve video URL based on lessonId (e.g. "2.1" → videos/2.1_video_web.mp4)
+ * Legacy helper — kept for backward compat. Points at lesson-images bucket.
+ */
+export function mediaUrl(path: string): string {
+  return `${SUPABASE_URL}/storage/v1/object/public/lesson-images/${path}`;
+}
+
+/**
+ * Legacy video helper — kept for backward compat.
  */
 export function getLessonVideoUrl(lessonId: string): string {
   const filename = lessonId === "welcome"
     ? "welcome_video_1_web.mp4"
     : `${lessonId}_video_web.mp4`;
-
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(`videos/${filename}`);
-  return data.publicUrl;
+  return `${SUPABASE_URL}/storage/v1/object/public/lesson-videos/${filename}`;
 }

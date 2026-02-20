@@ -1,11 +1,13 @@
 import {
-  useState, useEffect, useRef, useCallback, useMemo,
+  useState, useEffect, useRef, useCallback,
 } from "react";
 import {
   motion, useMotionValue, useTransform, animate, AnimatePresence,
 } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
 import { supabase } from "@/integrations/supabase/client";
+import { getLessonMediaUrl } from "@/lib/media";
+import { useAuth } from "@/contexts/AuthContext";
 
 import VideoCard from "@/components/cards/VideoCard";
 import HeroImageCard from "@/components/cards/HeroImageCard";
@@ -47,23 +49,7 @@ export interface LessonCard {
   xp_value: number;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function getMediaUrl(file: string | null, bucket: string | null): string {
-  if (!file || !bucket) return "";
-  const { data } = supabase.storage.from(bucket).getPublicUrl(file);
-  return data.publicUrl;
-}
-
-/** Cards that auto-advance — parent fires onAdvance */
-const AUTO_ADVANCE_TYPES = new Set(["video", "broll", "image"]);
-/** Cards that never auto-advance (user must complete/swipe) */
-const INTERACTIVE_TYPES = new Set([
-  "quick_check", "drag_drop", "multi_select", "speed_drill",
-  "lesson_complete",
-]);
-
-// ─── Segmented Progress Bar ───────────────────────────────────────────────────
+// ─── Segmented Progress Bar ────────────────────────────────────────────────
 
 function ProgressBar({
   total,
@@ -89,7 +75,6 @@ function ProgressBar({
                 : i === current
                 ? "#3b82f6"
                 : "rgba(255,255,255,0.3)",
-            opacity: i === current ? 1 : 0.85,
           }}
         />
       ))}
@@ -98,6 +83,22 @@ function ProgressBar({
 }
 
 // ─── Card Renderer ────────────────────────────────────────────────────────────
+//
+// content_json field names come directly from the SQL seed. Map exactly:
+//   hero          → title, subtitle, duration
+//   image         → caption
+//   remember_this → text
+//   test_tip      → text
+//   key_term      → term, definition, term2, definition2, audio
+//   quick_check   → question, options[], correct, feedback_correct, feedback_wrong{}
+//   scenario      → scenario, options[], correct, feedback_correct, feedback_wrong{}
+//   multi_select  → question, options[], correct[] (array of indices)
+//   drag_drop     → items[], targets[]
+//   tap_to_reveal → panels[{label,content}]
+//   split_screen  → left, right
+//   speed_drill   → questions[{image,answer}], time_per_question
+//   pattern_card  → pairs[{hazard,disease}]
+//   lesson_complete → next_lesson, next_title
 
 function RenderCard({
   card,
@@ -115,6 +116,7 @@ function RenderCard({
   streak,
   nextCard,
   dir,
+  onNextLesson,
 }: {
   card: LessonCard;
   isActive: boolean;
@@ -131,26 +133,29 @@ function RenderCard({
   streak?: number;
   nextCard?: LessonCard;
   dir: "ltr" | "rtl";
+  onNextLesson: (nextId: string | null) => void;
 }) {
   const c = card.content_json as Record<string, unknown>;
-  const mediaUrl = getMediaUrl(card.media_file, card.media_bucket);
+  const mediaUrl = getLessonMediaUrl(card.media_file, card.media_bucket);
   const type = card.card_type;
 
-  if (type === "video" || type === "broll") {
-    const CardComp = type === "video" ? VideoCard : BRollCard;
-    if (type === "video") {
-      return (
-        <VideoCard
-          mediaUrl={mediaUrl}
-          isActive={isActive}
-          onEnded={onAdvance}
-          onTimeUpdate={onTimeUpdate}
-          showEffect={showEffect}
-          effectOverlayText={card.effect_overlay_text ?? undefined}
-          fourthWallEffect={card.fourth_wall_effect}
-        />
-      );
-    }
+  // ── Video ──
+  if (type === "video") {
+    return (
+      <VideoCard
+        mediaUrl={mediaUrl}
+        isActive={isActive}
+        onEnded={onAdvance}
+        onTimeUpdate={onTimeUpdate}
+        showEffect={showEffect}
+        effectOverlayText={card.effect_overlay_text ?? undefined}
+        fourthWallEffect={card.fourth_wall_effect}
+      />
+    );
+  }
+
+  // ── B-roll ──
+  if (type === "broll") {
     return (
       <BRollCard
         mediaUrl={mediaUrl}
@@ -160,22 +165,24 @@ function RenderCard({
     );
   }
 
+  // ── Hero image ──
   if (type === "hero") {
     return (
       <HeroImageCard
         src={mediaUrl}
         lessonTitle={String(c.title ?? "")}
         moduleNumber={card.module_id}
-        durationLabel={c.durationLabel ? String(c.durationLabel) : undefined}
+        durationLabel={c.duration ? String(c.duration) : undefined}
       />
     );
   }
 
+  // ── Image (old-content / supplementary) ──
   if (type === "image") {
     return (
       <ImageCard
         src={mediaUrl}
-        alt={String(c.alt ?? "")}
+        alt={String(c.caption ?? "")}
         caption={c.caption ? String(c.caption) : undefined}
         isActive={isActive}
         onAutoAdvance={onAdvance}
@@ -183,47 +190,69 @@ function RenderCard({
     );
   }
 
+  // ── Remember This ──
   if (type === "remember_this") {
     return (
       <RememberThisCard
-        content={String(c.content ?? "")}
+        content={String(c.text ?? "")}
         xpValue={card.xp_value || 5}
         dir={dir}
       />
     );
   }
 
+  // ── Test Tip ──
   if (type === "test_tip") {
     return (
       <TestTipCard
-        tipText={String(c.tipText ?? "")}
-        trapWarnings={Array.isArray(c.trapWarnings) ? (c.trapWarnings as string[]) : []}
+        tipText={String(c.text ?? "")}
+        trapWarnings={[]}
         xpValue={card.xp_value || 5}
         dir={dir}
       />
     );
   }
 
+  // ── Key Term ──
   if (type === "key_term") {
+    // Supports single term or dual-term (term + term2)
+    const termDisplay = c.term2
+      ? `${String(c.term ?? "")} / ${String(c.term2 ?? "")}`
+      : String(c.term ?? "");
+    const defDisplay = c.definition2
+      ? `${String(c.definition ?? "")} | ${String(c.definition2 ?? "")}`
+      : String(c.definition ?? "");
     return (
       <KeyTermCard
-        term={String(c.term ?? "")}
-        definition={String(c.definition ?? "")}
-        translation={c.translation ? String(c.translation) : undefined}
-        translationLanguage={c.translationLanguage ? String(c.translationLanguage) : undefined}
+        term={termDisplay}
+        definition={defDisplay}
         xpValue={card.xp_value || 3}
         dir={dir}
       />
     );
   }
 
+  // ── Quick Check ──
   if (type === "quick_check") {
+    const feedbackWrong = c.feedback_wrong as Record<string, string> | undefined;
+    // Build per-option explanations from feedback_wrong object
+    const options = Array.isArray(c.options) ? (c.options as string[]) : [];
+    const explanation = feedbackWrong
+      ? options
+          .map((_, i) =>
+            i !== Number(c.correct ?? 0) ? feedbackWrong[String(i)] ?? "" : "",
+          )
+          .find(Boolean) ?? (c.feedback_correct ? String(c.feedback_correct) : undefined)
+      : c.feedback_correct
+      ? String(c.feedback_correct)
+      : undefined;
+
     return (
       <QuickCheckCard
         question={String(c.question ?? "")}
-        options={Array.isArray(c.options) ? (c.options as string[]) : []}
+        options={options}
         correct={Number(c.correct ?? 0)}
-        explanation={c.explanation ? String(c.explanation) : undefined}
+        explanation={explanation}
         xpValue={card.xp_value || 10}
         dir={dir}
         onAnswered={(correct) => {
@@ -234,13 +263,14 @@ function RenderCard({
     );
   }
 
+  // ── Scenario ──
   if (type === "scenario") {
     return (
       <ScenarioCard
         scenario={String(c.scenario ?? "")}
         options={Array.isArray(c.options) ? (c.options as string[]) : []}
         correct={Number(c.correct ?? 0)}
-        explanation={c.explanation ? String(c.explanation) : undefined}
+        explanation={c.feedback_correct ? String(c.feedback_correct) : undefined}
         xpValue={card.xp_value || 10}
         dir={dir}
         onAnswered={(correct) => {
@@ -251,12 +281,16 @@ function RenderCard({
     );
   }
 
+  // ── Multi-select ──
   if (type === "multi_select") {
+    const correctIndices = Array.isArray(c.correct)
+      ? (c.correct as number[])
+      : [];
     return (
       <MultiSelectCard
         question={String(c.question ?? "")}
         options={Array.isArray(c.options) ? (c.options as string[]) : []}
-        correctIndices={Array.isArray(c.correctIndices) ? (c.correctIndices as number[]) : []}
+        correctIndices={correctIndices}
         xpPerCorrect={5}
         dir={dir}
         onAnswered={(score) => {
@@ -267,37 +301,59 @@ function RenderCard({
     );
   }
 
+  // ── Drag & Drop ──
+  // DB schema: items[] (strings), targets[] (strings) — parallel arrays
   if (type === "drag_drop") {
+    const rawItems = Array.isArray(c.items) ? (c.items as string[]) : [];
+    const rawTargets = Array.isArray(c.targets) ? (c.targets as string[]) : [];
+    const items = rawItems.map((label, i) => ({ id: String(i), label }));
+    const targets = rawTargets.map((label, i) => ({
+      id: String(i),
+      label,
+      acceptsItemId: String(i),
+    }));
     return (
       <DragDropCard
-        items={Array.isArray(c.items) ? (c.items as { id: string; label: string }[]) : []}
-        targets={Array.isArray(c.targets) ? (c.targets as { id: string; label: string; acceptsItemId: string }[]) : []}
-        xpValue={card.xp_value || 5}
+        items={items}
+        targets={targets}
+        xpValue={card.xp_value || 20}
         dir={dir}
         onComplete={(bonus) => onXp(bonus)}
       />
     );
   }
 
+  // ── Tap to Reveal ──
+  // DB schema: panels[{label, content}]
   if (type === "tap_to_reveal") {
+    const rawPanels = Array.isArray(c.panels)
+      ? (c.panels as { label: string; content: string }[])
+      : [];
+    const panels = rawPanels.map((p, i) => ({
+      id: String(i),
+      front: p.label,
+      back: p.content,
+    }));
     return (
       <TapToRevealCard
-        panels={Array.isArray(c.panels) ? (c.panels as { id: string; front: string; back: string }[]) : []}
-        layout={(c.layout as "2x2" | "1x4") ?? "2x2"}
-        xpValue={card.xp_value || 3}
+        panels={panels}
+        layout="2x2"
+        xpValue={card.xp_value || 12}
         dir={dir}
         onComplete={(xp) => onXp(xp)}
       />
     );
   }
 
+  // ── Split Screen ──
+  // DB schema: left, right (plain strings)
   if (type === "split_screen") {
     return (
       <SplitScreenCard
-        wrongLabel={String(c.wrongLabel ?? "Wrong")}
-        correctLabel={String(c.correctLabel ?? "Correct")}
-        wrongDescription={String(c.wrongDescription ?? "")}
-        correctDescription={String(c.correctDescription ?? "")}
+        wrongLabel="Without protection"
+        correctLabel="With protection"
+        wrongDescription={String(c.left ?? "")}
+        correctDescription={String(c.right ?? "")}
         xpValue={card.xp_value || 5}
         dir={dir}
         splitEntrance={isSplitEntranceNext}
@@ -306,10 +362,21 @@ function RenderCard({
     );
   }
 
+  // ── Speed Drill ──
+  // DB schema: questions[{image, answer}], time_per_question
   if (type === "speed_drill") {
+    const rawQ = Array.isArray(c.questions)
+      ? (c.questions as { image: string; answer: string }[])
+      : [];
+    // Convert to QuickCheck-style questions for SpeedDrillCard
+    const questions = rawQ.map((q) => ({
+      question: q.image,
+      options: [q.answer, "Wrong A", "Wrong B", "Wrong C"],
+      correct: 0,
+    }));
     return (
       <SpeedDrillCard
-        questions={Array.isArray(c.questions) ? (c.questions as { question: string; options: string[]; correct: number }[]) : []}
+        questions={questions}
         xpValue={card.xp_value || 20}
         dir={dir}
         onComplete={(score, total, xp) => {
@@ -320,10 +387,16 @@ function RenderCard({
     );
   }
 
+  // ── Pattern Card ──
+  // DB schema: pairs[{hazard, disease}]
   if (type === "pattern_card") {
+    const rawPairs = Array.isArray(c.pairs)
+      ? (c.pairs as { hazard: string; disease: string }[])
+      : [];
+    const pairs = rawPairs.map((p, i) => ({ id: String(i), ...p }));
     return (
       <PatternCard
-        pairs={Array.isArray(c.pairs) ? (c.pairs as { id: string; hazard: string; disease: string }[]) : []}
+        pairs={pairs}
         xpValue={card.xp_value || 10}
         dir={dir}
         onComplete={() => onXp(card.xp_value || 10)}
@@ -331,6 +404,8 @@ function RenderCard({
     );
   }
 
+  // ── Lesson Complete ──
+  // DB schema: next_lesson (string | null), next_title (string)
   if (type === "lesson_complete") {
     return (
       <LessonCompleteCard
@@ -339,9 +414,12 @@ function RenderCard({
         correctAnswers={sessionCorrect}
         totalQuestions={sessionTotal}
         streak={streak}
-        nextLessonId={c.nextLessonId ? String(c.nextLessonId) : undefined}
-        nextLessonTitle={c.nextLessonTitle ? String(c.nextLessonTitle) : undefined}
+        nextLessonId={c.next_lesson ? String(c.next_lesson) : undefined}
+        nextLessonTitle={c.next_title ? String(c.next_title) : undefined}
         dir={dir}
+        onNextLesson={() =>
+          onNextLesson(c.next_lesson ? String(c.next_lesson) : null)
+        }
       />
     );
   }
@@ -356,7 +434,10 @@ interface LessonSwipeViewProps {
   moduleId?: number;
   streak?: number;
   dir?: "ltr" | "rtl";
-  onLessonComplete?: (totalXp: number) => void;
+  initialCardIndex?: number;
+  onLessonComplete?: (totalXp: number, nextLesson: string | null) => void;
+  onNextLesson?: (nextId: string | null) => void;
+  onExitRequest?: () => void;
 }
 
 export default function LessonSwipeView({
@@ -364,13 +445,19 @@ export default function LessonSwipeView({
   moduleId,
   streak,
   dir = "ltr",
+  initialCardIndex,
   onLessonComplete,
+  onNextLesson,
+  onExitRequest,
 }: LessonSwipeViewProps) {
+  const { user } = useAuth();
+
   // ── Data ──
   const [cards, setCards] = useState<LessonCard[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     supabase
       .from("lesson_cards")
       .select("*")
@@ -383,7 +470,7 @@ export default function LessonSwipeView({
   }, [lessonId]);
 
   // ── Navigation state ──
-  const [idx, setIdx] = useState(0);
+  const [idx, setIdx] = useState(initialCardIndex ?? 0);
   const [isAnimating, setIsAnimating] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const containerH = useRef(0);
@@ -399,26 +486,23 @@ export default function LessonSwipeView({
   }, []);
 
   // ── Motion values ──
-  const yOffset = useMotionValue(0);      // live drag offset in px
-  const peekPx = useMotionValue(0);       // how far the next card peeks up (for point_down)
+  const yOffset = useMotionValue(0);
+  const peekPx = useMotionValue(0);
 
-  // Derived y positions for the three visible slots
   const prevY = useTransform(yOffset, (v) => v - containerH.current);
   const currY = yOffset;
-  // Next card: base = containerH; subtract peekPx for point_down effect
   const nextY = useTransform(
     [yOffset, peekPx] as [typeof yOffset, typeof peekPx],
     ([drag, peek]: number[]) => drag + containerH.current - peek,
   );
-  // Next card blur: 2px → 0 as peek grows
   const nextBlur = useTransform(peekPx, [0, containerH.current * 0.15], [2, 0]);
+  const nextBlurFilter = useTransform(nextBlur, (b: number) => `blur(${b}px)`);
   const nextScale = useTransform(peekPx, [0, containerH.current * 0.15], [0.97, 1]);
 
   // ── Session XP & tracking ──
   const [sessionXp, setSessionXp] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
-  const [sessionCorrect, setSessionCorrect] = useState(0);
 
   const handleXp = useCallback((xp: number) => setSessionXp((p) => p + xp), []);
   const handleWrong = useCallback(() => {
@@ -435,7 +519,6 @@ export default function LessonSwipeView({
     setVideoTime({ t, d });
   }, []);
 
-  // Reset on card change
   useEffect(() => {
     setVideoTime(null);
     setShowEffect(false);
@@ -452,12 +535,9 @@ export default function LessonSwipeView({
     const { t, d } = videoTime;
     const effect = currentCard.fourth_wall_effect;
 
-    // Lean-in at 2s
     if (effect === "lean_in" && t >= 2 && !showEffect) setShowEffect(true);
-    // Hold-up at 1.5s
     if (effect === "hold_up" && t >= 1.5 && !showEffect) setShowEffect(true);
 
-    // Point-down: last 2 seconds → peek next card
     if (effect === "point_down" && d > 0) {
       const remaining = d - t;
       if (remaining <= 2 && remaining >= 0) {
@@ -465,28 +545,54 @@ export default function LessonSwipeView({
           pointDownFired.current = true;
           navigator.vibrate?.(30);
         }
-        // Animate peek: 0 → 15% of container height
         const targetPeek = containerH.current * 0.15;
         animate(peekPx, targetPeek, { duration: 0.6, ease: "easeOut" });
       }
     }
-
-    // Split-screen compare: no special timing needed (handled on advance)
   }, [videoTime, currentCard, showEffect, peekPx]);
+
+  // ── Save progress per card ──
+  const saveCardProgress = useCallback(
+    async (cardIndex: number) => {
+      if (!user || !cards.length) return;
+      const card = cards[cardIndex];
+      if (!card) return;
+      await supabase.from("progress").upsert(
+        {
+          user_id: user.id,
+          lesson_id: lessonId,
+          module_id: moduleId ?? card.module_id,
+          completed: card.card_type === "lesson_complete",
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,lesson_id" },
+      );
+    },
+    [user, cards, lessonId, moduleId],
+  );
 
   // ── Navigation ──
   const go = useCallback(
     (direction: 1 | -1) => {
       if (isAnimating) return;
       const newIdx = idx + direction;
-      if (newIdx < 0 || newIdx >= cards.length) {
+      if (newIdx < 0) {
+        // Swipe back from first card → exit request
+        if (direction === -1 && idx === 0) {
+          animate(yOffset, 0, { type: "spring", stiffness: 400, damping: 35 });
+          onExitRequest?.();
+          return;
+        }
+        animate(yOffset, 0, { type: "spring", stiffness: 400, damping: 35 });
+        return;
+      }
+      if (newIdx >= cards.length) {
         animate(yOffset, 0, { type: "spring", stiffness: 400, damping: 35 });
         return;
       }
 
       setIsAnimating(true);
 
-      // Check if next card is a split_screen after split_screen_compare video
       const isSplitTransition =
         direction === 1 &&
         currentCard?.fourth_wall_effect === "split_screen_compare" &&
@@ -504,16 +610,25 @@ export default function LessonSwipeView({
           yOffset.set(0);
           peekPx.set(0);
           setIsAnimating(false);
+          // Save progress
+          saveCardProgress(newIdx);
         },
       });
 
+      // Fire lesson complete callback when arriving at last card
       if (newIdx === cards.length - 1) {
-        onLessonComplete?.(sessionXp);
+        const completeCard = cards[cards.length - 1];
+        const nextLessonId =
+          completeCard?.content_json?.next_lesson != null
+            ? String(completeCard.content_json.next_lesson)
+            : null;
+        onLessonComplete?.(sessionXp, nextLessonId);
       }
     },
     [
-      isAnimating, idx, cards.length, yOffset, peekPx,
-      currentCard, nextCard, sessionXp, onLessonComplete,
+      isAnimating, idx, cards, yOffset, peekPx,
+      currentCard, nextCard, sessionXp,
+      onLessonComplete, onExitRequest, saveCardProgress,
     ],
   );
 
@@ -527,15 +642,18 @@ export default function LessonSwipeView({
     [isAnimating, idx, yOffset, peekPx],
   );
 
-  // ── Auto-advance for non-interactive cards ──
-  // (Video/BRoll auto-advance via onEnded → go(1), Image via onAutoAdvance)
-  // Text cards show swipe hint but never auto-advance
-
-  // ── Gesture ──
+  // ── Gesture (swipe) ──
   const bind = useDrag(
-    ({ active, movement: [, my], velocity: [, vy], last, cancel }) => {
+    ({ active, movement: [mx, my], velocity: [vx, vy], last, cancel }) => {
       if (isAnimating) { cancel?.(); return; }
-      // Ignore if target is a button/input
+
+      // Right swipe (positive mx) from card 0 → exit
+      if (active && mx > 60 && Math.abs(mx) > Math.abs(my) && idx === 0) {
+        cancel?.();
+        onExitRequest?.();
+        return;
+      }
+
       if (active) yOffset.set(my);
 
       if (last) {
@@ -551,7 +669,7 @@ export default function LessonSwipeView({
     { axis: "y", filterTaps: true, pointer: { touch: true } },
   );
 
-  // ── Track whether next card should get split entrance ──
+  // ── Split entrance tracking ──
   const [splitEntranceActive, setSplitEntranceActive] = useState(false);
   useEffect(() => {
     const prev = cards[idx - 1];
@@ -562,7 +680,7 @@ export default function LessonSwipeView({
     );
   }, [idx, cards, currentCard]);
 
-  // ── Loading state ──
+  // ── Loading ──
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -582,25 +700,23 @@ export default function LessonSwipeView({
 
   if (!cards.length) {
     return (
-      <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-        No cards found for lesson {lessonId}.
+      <div className="flex items-center justify-center h-full text-muted-foreground text-sm px-4 text-center">
+        No cards found for lesson {lessonId}. Check the lesson_cards table.
       </div>
     );
   }
 
   const prevCard = cards[idx - 1] ?? null;
-
-  // ── Determine point-down margin on next card ──
   const isPointDownActive = currentCard?.fourth_wall_effect === "point_down";
 
   return (
     <div className="relative w-full h-full flex flex-col bg-background overflow-hidden select-none">
-      {/* ── Progress bar ── */}
+      {/* Progress bar */}
       <div className="absolute top-0 left-0 right-0 z-30 bg-transparent">
         <ProgressBar total={cards.length} current={idx} onJump={jumpTo} />
       </div>
 
-      {/* ── Swipeable card stack ── */}
+      {/* Swipeable card stack */}
       <div
         ref={containerRef}
         {...bind()}
@@ -628,6 +744,7 @@ export default function LessonSwipeView({
                 sessionCorrect={0}
                 sessionTotal={0}
                 dir={dir}
+                onNextLesson={() => {}}
               />
             </div>
           </motion.div>
@@ -656,6 +773,7 @@ export default function LessonSwipeView({
                 streak={streak}
                 nextCard={nextCard ?? undefined}
                 dir={dir}
+                onNextLesson={onNextLesson ?? (() => {})}
               />
             )}
           </div>
@@ -667,9 +785,7 @@ export default function LessonSwipeView({
             style={{
               y: nextY,
               scale: isPointDownActive ? nextScale : 1,
-              filter: isPointDownActive
-                ? useTransform(nextBlur, (b) => `blur(${b}px)`)
-                : undefined,
+              filter: isPointDownActive ? nextBlurFilter : undefined,
               marginTop: isPointDownActive ? -8 : 0,
             }}
             className="absolute inset-0 flex items-start justify-center pt-8 px-4 overflow-y-auto"
@@ -692,13 +808,14 @@ export default function LessonSwipeView({
                 sessionCorrect={0}
                 sessionTotal={0}
                 dir={dir}
+                onNextLesson={() => {}}
               />
             </div>
           </motion.div>
         )}
       </div>
 
-      {/* ── Card counter pill ── */}
+      {/* Card counter pill */}
       <AnimatePresence>
         {idx < cards.length - 1 && (
           <motion.div

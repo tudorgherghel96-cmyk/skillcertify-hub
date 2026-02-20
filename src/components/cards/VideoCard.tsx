@@ -27,7 +27,7 @@ export default function VideoCard({
   onMuteChange,
 }: VideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [muted, setMuted] = useState(externalMuted ?? true);
+  const [muted, setMuted] = useState(externalMuted ?? false);
   const [progress, setProgress] = useState(0);
   const [hasError, setHasError] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);

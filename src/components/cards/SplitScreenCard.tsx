@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { CheckCircle2, XCircle } from "lucide-react";
 import XpBadge from "./shared/XpBadge";
 
@@ -9,6 +10,8 @@ interface SplitScreenCardProps {
   correctDescription: string;
   xpValue?: number;
   dir?: "ltr" | "rtl";
+  /** When true, left panel slides from left, right panel from right */
+  splitEntrance?: boolean;
   onViewed?: () => void;
 }
 
@@ -19,6 +22,7 @@ export default function SplitScreenCard({
   correctDescription,
   xpValue = 5,
   dir = "ltr",
+  splitEntrance = false,
   onViewed,
 }: SplitScreenCardProps) {
   const [viewed, setViewed] = useState(false);
@@ -41,8 +45,11 @@ export default function SplitScreenCard({
         </p>
 
         <div className="flex gap-2">
-          {/* Wrong panel */}
-          <div
+          {/* Wrong panel — slides in from left on splitEntrance */}
+          <motion.div
+            initial={splitEntrance ? { x: -60, opacity: 0 } : false}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
             className="flex-1 rounded-xl p-3 space-y-2"
             style={{ border: "3px solid #C62828", background: "#FFEBEE" }}
           >
@@ -53,10 +60,13 @@ export default function SplitScreenCard({
               </p>
             </div>
             <p className="text-sm text-foreground leading-snug">{wrongDescription}</p>
-          </div>
+          </motion.div>
 
-          {/* Correct panel */}
-          <div
+          {/* Correct panel — slides in from right on splitEntrance */}
+          <motion.div
+            initial={splitEntrance ? { x: 60, opacity: 0 } : false}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.4, ease: "easeOut", delay: splitEntrance ? 0.05 : 0 }}
             className="flex-1 rounded-xl p-3 space-y-2"
             style={{ border: "3px solid #2E7D32", background: "#E8F5E9" }}
           >
@@ -67,7 +77,7 @@ export default function SplitScreenCard({
               </p>
             </div>
             <p className="text-sm text-foreground leading-snug">{correctDescription}</p>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

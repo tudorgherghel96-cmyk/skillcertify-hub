@@ -1,5 +1,6 @@
 import { Home, BookOpen, CreditCard, User } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import { useLocation } from "react-router-dom";
 
 const navItems = [
   { to: "/dashboard", icon: Home, label: "Home" },
@@ -9,6 +10,9 @@ const navItems = [
 ];
 
 const BottomNav = () => {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/lesson/")) return null;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur-md sm:hidden safe-area-bottom" aria-label="Main navigation">
       <div className="flex items-stretch justify-around">

@@ -552,7 +552,7 @@ export default function LessonSwipeView({
   const [levelUpPending, setLevelUpPending] = useState<number | null>(null);
 
   // ── Mute state persists across cards within lesson ──
-  const [lessonMuted, setLessonMuted] = useState(true);
+  const [lessonMuted, setLessonMuted] = useState(false);
 
   const handleXp = useCallback(
     (xp: number) => {

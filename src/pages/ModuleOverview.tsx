@@ -21,7 +21,6 @@ import DownloadTopicButton from "@/components/offline/DownloadTopicButton";
 import {
   useProgress,
   getModuleProgress,
-  getLessonsCompleted,
   isPracticeUnlocked,
   isGqaUnlocked,
   isModuleComplete,
@@ -29,6 +28,7 @@ import {
   hoursUntilResit,
 } from "@/contexts/ProgressContext";
 import { useSuperUser } from "@/contexts/SuperUserContext";
+import { useDbLessonProgress } from "@/hooks/useDbLessonProgress";
 
 const staggerChildren = {
   hidden: {},
@@ -68,18 +68,24 @@ const ModuleOverview = () => {
   const mod = MODULES.find((m) => m.id === moduleId);
   const { progress } = useProgress();
   const { isSuperUser } = useSuperUser();
+  const { progressMap } = useDbLessonProgress();
 
   if (!mod) {
     return <div className="p-4 text-center text-muted-foreground">Topic not found</div>;
   }
 
   const mp = getModuleProgress(progress, moduleId);
-  const lessonsComplete = getLessonsCompleted(mp, mod.lessons.length);
   const practiceReady = isPracticeUnlocked(mp, mod.lessons.length, isSuperUser);
   const gqaReady = isGqaUnlocked(mp, isSuperUser);
   const complete = isModuleComplete(mp);
   const failed = mp.gqa.passed === false;
   const Icon = mod.icon;
+
+  // DB-backed lesson completion
+  const isLessonDone = (lessonNum: number) =>
+    !!progressMap[`${moduleId}.${lessonNum}`]?.completed;
+
+  const lessonsComplete = mod.lessons.filter((l) => isLessonDone(l.id)).length;
 
   return (
     <>
@@ -140,8 +146,8 @@ const ModuleOverview = () => {
           </div>
           <div className="space-y-1.5">
             {mod.lessons.map((lesson, i) => {
-              const done = mp.lessons[lesson.id]?.completed;
-              const prevDone = i === 0 || mp.lessons[mod.lessons[i - 1].id]?.completed;
+              const done = isLessonDone(lesson.id);
+              const prevDone = i === 0 || isLessonDone(mod.lessons[i - 1].id);
               const isLocked = !isSuperUser && !prevDone && !done;
 
               return (

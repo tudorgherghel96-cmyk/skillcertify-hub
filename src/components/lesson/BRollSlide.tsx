@@ -1,61 +1,61 @@
 import { useRef, useEffect, useCallback } from "react";
 
-interface BRollCardProps {
+interface BRollSlideProps {
   mediaUrl: string;
   isActive: boolean;
+  muted: boolean;
   onEnded?: () => void;
 }
 
-export default function BRollCard({ mediaUrl, isActive, onEnded }: BRollCardProps) {
+export default function BRollSlide({ mediaUrl, isActive, muted, onEnded }: BRollSlideProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
     if (isActive) {
+      vid.muted = muted;
       vid.currentTime = 0;
       vid.play().catch(() => {});
     } else {
       vid.pause();
-      vid.currentTime = 0;
     }
-  }, [isActive]);
+  }, [isActive, muted]);
 
-  // Auto-advance immediately on end (no delay for B-roll)
   const handleEnded = useCallback(() => {
-    if (isActive) onEnded?.();
+    if (isActive) {
+      setTimeout(() => onEnded?.(), 500);
+    }
   }, [isActive, onEnded]);
 
   const handleError = useCallback(() => {
-    // On error, skip this card immediately
     if (isActive) onEnded?.();
   }, [isActive, onEnded]);
 
   return (
-    <div
-      className="relative w-full overflow-hidden bg-black"
-      style={{
-        aspectRatio: "9/16",
-        maxHeight: "50vh",
-        borderRadius: 12,
-      }}
-    >
+    <div style={{ width: "100%", height: "100%", position: "relative", background: "#000", overflow: "hidden" }}>
       <video
         ref={videoRef}
         src={mediaUrl}
-        className="absolute inset-0 w-full h-full object-cover"
-        muted
+        muted={muted}
         playsInline
         preload="auto"
         onEnded={handleEnded}
         onError={handleError}
-        style={{ display: "block" }}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          background: "#000",
+          display: "block",
+        }}
       />
-
       {/* Cinematic vignette */}
       <div
-        className="absolute inset-0 pointer-events-none"
         style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
           boxShadow: "inset 0 -40px 60px rgba(0,0,0,0.3)",
           background: "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.3) 100%)",
         }}

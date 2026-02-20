@@ -16,16 +16,17 @@ interface LessonCompleteCardProps {
   onNextLesson?: () => void;
 }
 
-/** Lightweight CSS confetti burst — no extra dependencies */
+/** CSS confetti — 50 multi-coloured pieces */
 function ConfettiBurst() {
-  const colours = ["#FFD700", "#FF6B6B", "#4CAF50", "#2196F3", "#FF9800", "#E91E63"];
-  const pieces = Array.from({ length: 40 }, (_, i) => ({
+  const colours = ["#FFD700", "#FF6B6B", "#4CAF50", "#2196F3", "#FF9800", "#E91E63", "#00BCD4", "#9C27B0"];
+  const pieces = Array.from({ length: 50 }, (_, i) => ({
     id: i,
     color: colours[i % colours.length],
     x: Math.random() * 100,
-    delay: Math.random() * 0.6,
-    size: 6 + Math.random() * 8,
+    delay: Math.random() * 0.8,
+    size: 5 + Math.random() * 9,
     rotation: Math.random() * 360,
+    isCircle: Math.random() > 0.5,
   }));
 
   return (
@@ -35,7 +36,7 @@ function ConfettiBurst() {
           key={p.id}
           initial={{ y: -20, x: `${p.x}vw`, opacity: 1, rotate: 0, scale: 1 }}
           animate={{ y: "100vh", opacity: [1, 1, 0], rotate: p.rotation + 360, scale: [1, 1, 0.4] }}
-          transition={{ duration: 2.2, delay: p.delay, ease: "easeIn" }}
+          transition={{ duration: 2.4, delay: p.delay, ease: "easeIn" }}
           style={{
             position: "absolute",
             top: 0,
@@ -43,7 +44,7 @@ function ConfettiBurst() {
             width: p.size,
             height: p.size,
             background: p.color,
-            borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+            borderRadius: p.isCircle ? "50%" : "2px",
           }}
         />
       ))}
@@ -51,13 +52,15 @@ function ConfettiBurst() {
   );
 }
 
-/** Animated XP counter */
+/** Animated XP counter — 0 → target over 1.5s */
 function XpCounter({ target }: { target: number }) {
   const [displayed, setDisplayed] = useState(0);
   const ref = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    const step = Math.ceil(target / 40);
+    const steps = 60;
+    const interval = 1500 / steps;
+    const step = Math.ceil(target / steps);
     ref.current = setInterval(() => {
       setDisplayed(prev => {
         if (prev + step >= target) {
@@ -66,7 +69,7 @@ function XpCounter({ target }: { target: number }) {
         }
         return prev + step;
       });
-    }, 40);
+    }, interval);
     return () => { if (ref.current) clearInterval(ref.current); };
   }, [target]);
 
@@ -97,18 +100,16 @@ export default function LessonCompleteCard({
     ? Math.round((correctAnswers / totalQuestions) * 100)
     : 100;
   const isConsecutive = streak && streak > 1;
+  const isCourseComplete = !nextLessonId;
 
   useEffect(() => {
-    // Double haptic for streak days
     setTimeout(() => {
-      if (isConsecutive) {
-        triggerHaptic("success");
-        setTimeout(() => triggerHaptic("success"), 200);
-      } else {
-        triggerHaptic("success");
+      // Celebration haptic: [100, 50, 100, 50, 200]
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100, 50, 200]);
       }
     }, 400);
-  }, [isConsecutive]);
+  }, []);
 
   return (
     <div
@@ -125,14 +126,16 @@ export default function LessonCompleteCard({
           transition={{ type: "spring", stiffness: 300, damping: 18, delay: 0.2 }}
           className="text-6xl"
         >
-          🏆
+          {isCourseComplete ? "🎓" : "🏆"}
         </motion.div>
 
         <div>
           <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-1">
-            Lesson Complete
+            {isCourseComplete ? "Course Complete!" : "Lesson Complete"}
           </p>
-          <p className="text-2xl font-bold text-foreground">Great work!</p>
+          <p className="text-2xl font-bold text-foreground">
+            {isCourseComplete ? "You did it! 🎉" : "Great work!"}
+          </p>
         </div>
 
         {/* XP earned */}
@@ -193,11 +196,20 @@ export default function LessonCompleteCard({
           )}
           <button
             onClick={onNextLesson}
-            className="w-full py-3 rounded-xl text-white text-sm font-bold transition-transform active:scale-[0.98]"
-            style={{ background: "#2E7D32" }}
+            className="w-full rounded-2xl text-white font-bold transition-transform active:scale-[0.98] flex items-center justify-center"
+            style={{
+              height: 56,
+              fontSize: 18,
+              fontWeight: 700,
+              background: isCourseComplete
+                ? "linear-gradient(135deg, #7B1FA2, #1565C0)"
+                : "linear-gradient(135deg, #f59e0b, #ef4444)",
+            }}
           >
-            {nextLessonTitle
-              ? `Next: ${nextLessonId} — ${nextLessonTitle} →`
+            {isCourseComplete
+              ? "Back to Dashboard →"
+              : nextLessonTitle
+              ? `Next: ${nextLessonTitle} →`
               : "Back to lessons →"}
           </button>
         </div>

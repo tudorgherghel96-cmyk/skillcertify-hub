@@ -21,32 +21,43 @@ export default function BRollCard({ mediaUrl, isActive, onEnded }: BRollCardProp
     }
   }, [isActive]);
 
+  // Auto-advance immediately on end (no delay for B-roll)
   const handleEnded = useCallback(() => {
+    if (isActive) onEnded?.();
+  }, [isActive, onEnded]);
+
+  const handleError = useCallback(() => {
+    // On error, skip this card immediately
     if (isActive) onEnded?.();
   }, [isActive, onEnded]);
 
   return (
     <div
       className="relative w-full overflow-hidden bg-black"
-      style={{ aspectRatio: "9/16", maxHeight: "50vh" }}
+      style={{
+        aspectRatio: "9/16",
+        maxHeight: "50vh",
+        borderRadius: 12,
+      }}
     >
-      {/* B-roll video */}
       <video
         ref={videoRef}
         src={mediaUrl}
         className="absolute inset-0 w-full h-full object-cover"
         muted
         playsInline
-        preload="metadata"
+        preload="auto"
         onEnded={handleEnded}
+        onError={handleError}
+        style={{ display: "block" }}
       />
 
       {/* Cinematic vignette */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background:
-            "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%)",
+          boxShadow: "inset 0 -40px 60px rgba(0,0,0,0.3)",
+          background: "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.3) 100%)",
         }}
       />
     </div>

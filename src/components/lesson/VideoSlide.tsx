@@ -23,7 +23,7 @@ export default function VideoSlide({
   onTimeUpdate,
 }: VideoSlideProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -72,8 +72,9 @@ export default function VideoSlide({
           playsInline
           muted={muted}
           preload="auto"
+          onLoadStart={() => { if (isActive) setLoading(true); }}
           onCanPlay={() => setLoading(false)}
-          onWaiting={() => setLoading(true)}
+          onWaiting={() => { if (isActive) setLoading(true); }}
           onPlaying={() => setLoading(false)}
           onError={() => { setError(true); setLoading(false); }}
           onTimeUpdate={handleTimeUpdate}
@@ -126,6 +127,7 @@ export default function VideoSlide({
           }}
         >
           <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, margin: 0 }}>Video unavailable</p>
+          <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 10, margin: 0, wordBreak: "break-all", maxWidth: 280, textAlign: "center" }}>{mediaUrl}</p>
           <button
             onClick={handleRetry}
             style={{

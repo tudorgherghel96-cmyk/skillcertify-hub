@@ -85,15 +85,6 @@ export default function LessonPlayer() {
   const [resumeCard, setResumeCard] = useState<number | undefined>(undefined);
   const [currentStreak, setCurrentStreak] = useState<number | undefined>(undefined);
 
-  // Hide bottom nav during lesson
-  useEffect(() => {
-    const bottomNav = document.querySelector("nav.fixed.bottom-0");
-    if (bottomNav) (bottomNav as HTMLElement).style.display = "none";
-    return () => {
-      if (bottomNav) (bottomNav as HTMLElement).style.display = "";
-    };
-  }, []);
-
   // Load streak
   useEffect(() => {
     if (!user) return;
@@ -150,7 +141,7 @@ export default function LessonPlayer() {
   const dir = (language.code === "ar" ? "rtl" : "ltr") as "ltr" | "rtl";
 
   return (
-    <div className="fixed inset-0 z-40 bg-background flex flex-col">
+    <div className="fixed inset-0 z-50 bg-background flex flex-col">
       {/* Back button — absolute, over content */}
       <button
         onClick={handleExitRequest}

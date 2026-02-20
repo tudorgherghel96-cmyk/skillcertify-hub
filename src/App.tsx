@@ -52,16 +52,16 @@ const App = () => (
               <Route path="/select-language" element={<SelectLanguage />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
-              {/* Play-first: Lesson 1.1 accessible without auth */}
-              <Route element={<AppLayout />}>
-                <Route path="/lesson/1/1" element={<LessonPlayer />} />
-              </Route>
+              {/* Lesson player is always full-screen — outside AppLayout */}
+              <Route path="/lesson/1/1" element={<LessonPlayer />} />
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                 <Route path="/dashboard" element={<JourneyDashboard />} />
                 <Route path="/learn" element={<LearnHub />} />
                 <Route path="/my-card" element={<MyCard />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/module/:id" element={<ModuleOverview />} />
+              </Route>
+              <Route element={<ProtectedRoute><></></ProtectedRoute>}>
                 <Route path="/lesson/:moduleId/:lessonId" element={<LessonPlayer />} />
                 <Route path="/practice/boost" element={<BoostDrill />} />
                 <Route path="/practice/:moduleId" element={<PracticeQuiz />} />

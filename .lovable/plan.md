@@ -1,207 +1,206 @@
 
-
-# Comprehensive Plan: Images + End-of-Lesson Quizzes
+# Fix Data Inconsistencies, Empty Stats, and UX Gaps
 
 ## Overview
 
-This plan adds 32 missing images to the lesson seed data and builds a complete end-of-lesson quiz system across all 26 lessons. It also includes a new Supabase table for tracking quiz results, a new `LessonQuiz` card component, module-level practice quizzes, and GQA test simulation improvements.
+This plan addresses the data mismatches, empty UI elements, missing context, and broken flows reported across the Dashboard, My Card, CSCS Prep, Module Overview, Profile, and Learn Hub pages.
 
 ---
 
-## Important: Lesson ID Mapping Discrepancy
+## 1. Fix CSCS Prep vs My Card Data Inconsistency
 
-The DB seed data and `courseData.ts` have different lesson orderings for Module 1 (lessons 4-6 are swapped). Images are named by DB lesson_id, so all image placement will follow the DB structure:
+**Problem**: CSCS Prep shows "All 5 topics passed!" while My Card shows all 5 as "Not taken."
 
-- DB 1.4 = Dynamic Risk Assessment (courseData id:6)
-- DB 1.5 = Reporting Accidents (courseData id:4)
-- DB 1.6 = Safety Signs (courseData id:5)
+**Root cause**: `CscsPrep.tsx` uses `allGqaPassed(progress, isSuperUser)` which returns `true` when super user mode is on. `MyCard.tsx` reads from the same `ProgressContext` but displays per-module GQA status from `getModuleProgress()`, which correctly shows `null` (not taken) when no actual GQA data exists.
 
-The quiz questions provided in the prompt will be re-mapped to match the correct DB lesson. No existing code or data will be altered for this discrepancy.
+**Fix**:
+- In `CscsPrep.tsx`, do NOT pass `isSuperUser` to `allGqaPassed()` for the congratulations banner -- show actual data, not bypassed data
+- In `MyCard.tsx`, do the same -- use real progress, not super-user-bypassed progress, for display purposes
+- Super user mode should only bypass **locks/gates**, not falsify displayed status
 
----
-
-## Phase 1: Add 32 Missing Images to Seed Data
-
-**What**: Create a new SQL migration file that INSERTs the 32 missing image_card entries into `lesson_cards`, using the next available `card_position` in each lesson.
-
-**Approach**:
-- Each image is added as card_type `'image'` with `media_bucket = 'old-content-images'`
-- Images are placed AFTER relevant teaching content, BEFORE quiz questions, spaced evenly
-- Each image gets an exam-relevant caption with TEST TIP where appropriate
-- Existing card positions are shifted up (UPDATE card_position) to make room for new images in the middle of lessons
-- The 26 existing images remain untouched
-
-**Files created**:
-- New SQL migration file for adding missing images (run via migration tool)
-
-**Per-lesson breakdown** (32 images across 18 lessons):
-- Lesson 1.1: +3 images (photo_3, photo_5, photo_6)
-- Lesson 1.2: +2 images (photo_1, photo_3)
-- Lesson 1.3: +2 images (photo_1, photo_3)
-- Lesson 1.4: +2 images (photo_2, photo_3)
-- Lesson 1.5: +2 images (photo_1, photo_3)
-- Lesson 1.6: +2 images (photo_2, photo_3)
-- Lesson 1.7: +3 images (photo_2, photo_3, photo_5)
-- Lesson 1.8: +2 images (photo_1, photo_3)
-- Lesson 2.1: +1 image (photo_3)
-- Lesson 2.2: +2 images (photo_1, photo_2)
-- Lesson 2.3: +2 images (photo_2, photo_3)
-- Lesson 2.4: +2 images (photo_2, photo_3)
-- Lesson 3.1: +2 images (photo_2, photo_3)
-- Lesson 3.2: +2 images (photo_1, photo_3)
-- Lesson 3.3: +2 images (photo_1, photo_3)
-- Lesson 3.4: +2 images (photo_1, photo_3)
-- No new images for lessons 3.5, 4.4, 4.5, 5.3, 5.4 (prompt only lists through specific lessons per module -- images for 4.1-4.3, 5.1-5.2 are covered)
-
-For Module 4 and 5 remaining lessons that have images in the prompt:
-- Lesson 4.1: +2 images (photo_2, photo_3)
-- Lesson 4.2: +2 images (photo_1, photo_3)
-- Lesson 4.3: +2 images (photo_1, photo_2)
-- Lesson 5.1: +2 images (photo_2, photo_3)
-- Lesson 5.2: +2 images (photo_2, photo_3)
+**Files**: `src/pages/CscsPrep.tsx`, `src/pages/MyCard.tsx`
 
 ---
 
-## Phase 2: New Supabase Table for Quiz Results
+## 2. Fix "90 minutes" vs "~18 minutes" Test Duration
 
-**What**: Create a `lesson_quiz_attempts` table to track per-lesson quiz results.
+**Problem**: Module overview says "90 minutes" but GQA test briefing says "~18 minutes."
 
-**Schema**:
-```text
-lesson_quiz_attempts
-  id           uuid PK DEFAULT gen_random_uuid()
-  user_id      uuid NOT NULL
-  lesson_id    text NOT NULL (e.g., '1.4')
-  score        integer NOT NULL
-  total        integer NOT NULL
-  passed       boolean NOT NULL
-  answers_json jsonb DEFAULT '{}'
-  attempted_at timestamptz DEFAULT now()
-```
+**Fix**: Update `ModuleOverview.tsx` line 332 from `"Closed book · 80% to pass · 90 minutes"` to `"Closed book · 80% to pass · ~18 min"` to match the GQA test briefing (which correctly says ~18 min proportional to the 90-min full exam).
 
-**RLS Policies**:
-- Users can INSERT their own attempts (auth.uid() = user_id)
-- Users can SELECT their own attempts (auth.uid() = user_id)
-- No UPDATE or DELETE
+**File**: `src/pages/ModuleOverview.tsx`
 
 ---
 
-## Phase 3: Build LessonQuiz Card Component
+## 3. Enforce Practice Score Gating for Topic Tests
 
-**What**: New `quiz_card` card type rendered in the lesson flow, appearing before the `lesson_complete` card.
+**Problem**: "Start test" button appears even with a 58% best score, despite UI saying "Score 80%+ to unlock test."
 
-**New files**:
-- `src/components/lesson/cards/LessonQuiz.tsx` -- the main quiz component
+**Root cause**: `isGqaUnlocked()` checks `mp.practice.bestScore >= 80`, but the Module Overview renders the "Start test" button based on `gqaReady` which does use this check. The issue is that when `isSuperUser` is true, the gate is bypassed silently without visual indication.
 
-**Component behavior**:
-1. Shows "Lesson Quiz" title with question count (e.g., "Question 3 of 7")
-2. Displays one question at a time with 4 options (A, B, C, D)
-3. Tap to select, then confirm button to submit answer
-4. Immediate feedback: green/red flash, correct answer highlighted, explanation shown, TEST TIP displayed
-5. After all questions: circular progress indicator with score percentage
-6. Pass/fail messaging against 80% threshold (informational) and 60% gating threshold
-7. "Try Again" button reshuffles questions; "Continue" button only if >= 60%
-8. Saves results to `lesson_quiz_attempts` table
+**Fix**: When super user bypasses the gate, show an amber badge like "QA bypass" next to the test button so it's clear the gate is being overridden. This is already partially working but the UI doesn't make it obvious.
 
-**Integration with SwipeContainer**:
-- Add `quiz_card` case to `CardRenderer` in `SwipeContainer.tsx`
-- The quiz card fills the full slide and handles its own internal navigation (questions within the quiz)
-- Swipe is blocked while quiz is in progress (user must complete or skip)
+**File**: `src/pages/ModuleOverview.tsx`
 
 ---
 
-## Phase 4: Add Quiz Data to All 26 Lessons
+## 4. Fix Empty "Level" and "Best Streak" on Profile
 
-**What**: Add quiz_card entries to the seed data for every lesson, positioned just before `lesson_complete`.
+**Problem**: Level and Best Streak labels appear but values seem empty.
 
-**Approach**:
-- Each lesson gets a single `quiz_card` entry with `content_json` containing 5 questions
-- Questions are taken from the prompt, re-mapped to correct DB lesson IDs
-- The `content_json` structure follows the format specified in the prompt
-- For lessons where the prompt provides quiz questions under a different topic name (due to the ordering discrepancy), questions will be matched by content/topic, not by lesson number
+**Root cause**: `gamification.level` and `gamification.longestStreak` default to `1` and `0` respectively in `GamificationContext`. If the Supabase `user_gamification` row hasn't been created yet, these display `1` and `0` which look empty/meaningless. Additionally, `xpToLevel` in `GamificationContext` uses `floor(xp / 500) + 1` (level per 500 XP) while `useXpProgress.ts` uses `floor(xp / 100) + 1` (level per 100 XP) -- this mismatch means levels don't agree.
 
-**Quiz question re-mapping** (prompt lesson -> DB lesson):
-- Prompt "1.4 Accidents" -> DB 1.5 (Reporting Accidents)
-- Prompt "1.5 Safety Signs" -> DB 1.6 (Safety Signs)
-- Prompt "1.6 Dynamic RA" -> DB 1.4 (Dynamic Risk Assessment)
-- Prompt "2.2 Responsibilities" -> DB 2.2 (Safe Lifting -- content overlap, will adapt)
-- Prompt "2.3 How to Lift" -> DB 2.3 (TILE Assessment -- will use TILE questions)
-- Prompt "2.4 Mechanical Aids" -> DB 2.4 (Team Lifting -- will adapt)
-- Prompt "3.2 Hazards at Height" -> DB 3.2 (Ladder Rule -- will adapt)
-- Prompt "3.3 Controlling Risks" -> DB 3.3 (Scaffolding -- will adapt)
-- Prompt "3.4 Regulations" -> DB 3.4 (Fragile Surfaces -- will adapt)
-- For lessons 3.5, 4.4, 4.5, 5.3, 5.4 which have no quiz questions in the prompt: will create appropriate questions based on the lesson content
+**Fix**:
+- Unify `xpToLevel` to use the same threshold everywhere (100 XP per level, matching `useXpProgress.ts`)
+- Show "Level 1" and "0 days" explicitly rather than blank-looking
+- Add XP context: show "Level 2 (158/200 XP)" format so users understand what XP means
 
-**Implementation**: New SQL migration adding quiz_card rows
+**Files**: `src/contexts/GamificationContext.tsx`, `src/pages/Profile.tsx`, `src/pages/Dashboard.tsx`
 
 ---
 
-## Phase 5: Lesson Progression Gating on Quiz Score
+## 5. Add Context to XP Display
 
-**What**: Gate the next lesson behind a 60% quiz score minimum.
+**Problem**: "158 XP" is shown without explanation of what level it corresponds to.
 
-**Changes to existing files** (minimal, additive):
-- `src/hooks/useDbLessonProgress.ts` -- add a query to check best quiz score per lesson
-- `src/pages/ModuleOverview.tsx` -- add quiz status badge (not attempted / failed / passed) next to each lesson, and lock next lesson if previous quiz not passed at 60%+
-- `src/pages/LessonPlayer.tsx` -- on quiz completion, save result and conditionally show "Continue to next lesson" or "Review and retry"
+**Fix**: On the Dashboard stats grid, change the XP cell to show level prominently with XP as secondary text: "Level 2" with "158 XP" beneath. Add a small progress bar showing XP toward next level (e.g., 58/100 to Level 3).
 
----
-
-## Phase 6: Module-Level Practice Quiz Enhancement
-
-**What**: The existing practice quiz system already pulls random questions per module. This phase adds:
-- Display of "best score" on the module page (already partially implemented)
-- Ensure quiz questions from the new lesson quizzes feed into the module practice pool
-
-**Changes**:
-- `src/pages/PracticeQuiz.tsx` -- extend to optionally pull from `lesson_cards` quiz_card content_json as an additional question source
-- This is additive -- the existing `quizQuestions.ts` data remains as-is
+**File**: `src/pages/Dashboard.tsx`
 
 ---
 
-## Phase 7: GQA Module Test Simulation Improvements
+## 6. Make Certificate Section Actionable
 
-**What**: The existing GQA test page already exists. Enhancements:
-- Add a visible timer (proportional: ~18 mins per module)
-- Ensure closed-book mode (no feedback until end)
-- Show results only after completing all questions
-- Track attempts in existing `assessment_attempts` table
+**Problem**: "Your certificate will appear here when you've passed all your tests" doesn't say which tests remain.
 
-**Changes**:
-- `src/pages/GqaTest.tsx` -- add countdown timer, defer feedback to end
+**Fix**: When certificate isn't ready, show remaining topics as a list: "Remaining: Topic 2, Topic 4, Topic 5" based on which GQA modules haven't been passed yet.
+
+**File**: `src/pages/Profile.tsx`
 
 ---
 
-## Technical Details
+## 7. Fix Referral Text
 
-### Files Created (new):
-1. `src/components/lesson/cards/LessonQuiz.tsx` -- Quiz card component
-2. SQL migration for `lesson_quiz_attempts` table + RLS
-3. SQL migration for adding 32 missing image cards
-4. SQL migration for adding quiz_card entries to all 26 lessons
+**Problem**: Already fixed in current code (line 272 shows "get £20 for every friend").
 
-### Files Modified (minimal, additive changes only):
-1. `src/components/lesson/SwipeContainer.tsx` -- add `quiz_card` case to CardRenderer
-2. `src/hooks/useDbLessonProgress.ts` -- add quiz score query
-3. `src/pages/ModuleOverview.tsx` -- add quiz status indicators
-4. `src/pages/LessonPlayer.tsx` -- handle quiz completion callback
-5. `src/pages/GqaTest.tsx` -- add timer and deferred feedback
+**Status**: No change needed -- the code already reads correctly.
 
-### What is NOT changed:
-- All existing card types and their rendering
-- All existing 26 image positions in the seed data
-- The existing Supabase schema (only additive table)
-- The existing lesson flow, swipe navigation, and progress tracking
-- The module/lesson list pages structure
-- Auth, RLS policies on existing tables
+---
+
+## 8. Clarify Lesson Completion vs Assessment Status
+
+**Problem**: "2 of 5 topics done" alongside all assessments "Not taken."
+
+**Fix**: Change dashboard wording from "module_of" (which says "X of 5 topics done") to distinguish between "lessons completed" and "assessments passed." Show two separate stats:
+- "Lessons: X of 26 complete"  
+- "Assessments: X of 5 passed"
+
+This makes it clear that completing lessons and passing assessments are different steps.
+
+**File**: `src/pages/Dashboard.tsx`
+
+---
+
+## 9. Label Career Ladder Cards as "Coming Soon"
+
+**Problem**: Blue, Gold, Black card buttons may lead to dead clicks.
+
+**Fix**: In `CardWallet.tsx`, add a "Coming soon" overlay or badge on the Blue, Gold, and Black cards. Disable click/tap on those cards.
+
+**File**: `src/components/journey/CardWallet.tsx`
+
+---
+
+## 10. Add Quiz Status Indicators for Unattempted Lessons
+
+**Problem**: Quiz badges only show on attempted lessons; unattempted ones show nothing.
+
+**Fix**: In `ModuleOverview.tsx`, update `QuizStatusBadge` to show "Quiz: --" or a subtle indicator when `score === null` and the lesson is completed but quiz not attempted.
+
+**File**: `src/pages/ModuleOverview.tsx`
+
+---
+
+## 11. Dynamic "Quick Practice" Link
+
+**Problem**: Always links to `/practice/1`.
+
+**Fix**: In `LearnHub.tsx`, change the Quick Practice link to dynamically point to the first incomplete module, or the most recent module if all are complete.
+
+**File**: `src/pages/LearnHub.tsx`
+
+---
+
+## 12. Show Per-Lesson Progress on Module Cards
+
+**Problem**: Module cards don't show individual lesson completion without clicking in.
+
+**Fix**: On Dashboard and LearnHub module cards, add a small row of dots (one per lesson) -- filled for complete, empty for incomplete. This gives at-a-glance lesson-level progress.
+
+**Files**: `src/pages/Dashboard.tsx`, `src/pages/LearnHub.tsx`
+
+---
+
+## 13. Add Overall Progress Percentage to Dashboard
+
+**Problem**: No prominent progress percentage despite data existing.
+
+**Fix**: Make the overall progress percentage larger and more prominent in the dashboard progress card. Show it as a big number (e.g., "62%") with "overall progress" label.
+
+**File**: `src/pages/Dashboard.tsx`
+
+---
+
+## 14. Fix "Step 1 of 6" Dynamic Text
+
+**Problem**: Says "Start your lessons" even after lessons are completed.
+
+**Fix**: The `getNextAction()` function already returns dynamic labels like "Continue Topic X". The dashboard CTA button uses this. If the issue is a separate "Step X of 6" element elsewhere, update it to derive from actual progress state. Looking at the code, the Dashboard uses `nextAction.label` which is already dynamic. If there's a static "Step 1 of 6" text elsewhere, it needs to be made dynamic.
+
+**File**: `src/pages/Dashboard.tsx` (if the step text exists there)
+
+---
+
+## 15. Add Personalized Greeting
+
+**Problem**: No "Welcome back, Tudor" greeting.
+
+**Fix**: Update Dashboard welcome text to include the user's name from `useAuth()`. Show "Welcome back, {name}" where name comes from `user?.user_metadata?.full_name` or email prefix.
+
+**File**: `src/pages/Dashboard.tsx`
+
+---
+
+## 16. Fix 0% Progress vs 6-Day Streak Contradiction
+
+**Problem**: 0% progress shown alongside active streak.
+
+**Root cause**: `getOverallProgress()` only counts modules where GQA is passed (not lessons completed), so a user who completed lessons but hasn't passed any GQA shows 0%. This is misleading.
+
+**Fix**: Change `getOverallProgress()` to be a weighted calculation: lessons completed contribute 60% of progress, GQA passes contribute 40%. Alternatively, rename the metric to "Qualification progress" so it's clear it tracks assessment completion, not lesson completion.
+
+**File**: `src/contexts/ProgressContext.tsx`, `src/pages/Dashboard.tsx`
+
+---
+
+## Technical Summary
+
+### Files Modified (17 files):
+1. `src/pages/CscsPrep.tsx` -- Fix super-user display bypass
+2. `src/pages/MyCard.tsx` -- Fix super-user display bypass  
+3. `src/pages/ModuleOverview.tsx` -- Fix duration text, quiz badges, QA bypass indicator
+4. `src/contexts/GamificationContext.tsx` -- Unify xpToLevel threshold
+5. `src/pages/Profile.tsx` -- XP context, certificate remaining tests
+6. `src/pages/Dashboard.tsx` -- Greeting, progress %, lesson dots, XP context, step text
+7. `src/pages/LearnHub.tsx` -- Dynamic Quick Practice link
+8. `src/components/journey/CardWallet.tsx` -- Coming soon labels
+9. `src/contexts/ProgressContext.tsx` -- Weighted overall progress
+
+### No Database Changes Required
+All fixes are frontend logic and display issues.
 
 ### Implementation Order:
-1. DB migration: Create `lesson_quiz_attempts` table
-2. DB migration: Add 32 missing images
-3. Build `LessonQuiz` component
-4. Add `quiz_card` to SwipeContainer
-5. DB migration: Add quiz_card entries to all lessons
-6. Add progression gating
-7. Enhance module page with quiz status
-8. GQA timer enhancement
-
+1. Fix data source inconsistencies (items 1, 3, 16) -- these are the trust-breaking issues
+2. Unify xpToLevel and fix empty stats (items 4, 5)
+3. Fix UI text issues (items 2, 6, 8, 14, 15)
+4. Add missing indicators (items 9, 10, 11, 12, 13)

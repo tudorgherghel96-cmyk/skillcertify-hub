@@ -27,15 +27,18 @@ export default function VideoSlide({
   const [error, setError] = useState(false);
   const [currentSrc, setCurrentSrc] = useState(initialUrl);
   const [triedFallback, setTriedFallback] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const [tapForSound, setTapForSound] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const controlsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const MAX_RETRIES = 2;
 
   // Reset state when the source URL changes (new card)
   useEffect(() => {
     setCurrentSrc(initialUrl);
     setError(false);
     setTriedFallback(false);
+    setRetryCount(0);
     setTapForSound(false);
     setShowControls(false);
   }, [initialUrl]);
@@ -125,6 +128,7 @@ export default function VideoSlide({
   }, [onTimeUpdate]);
 
   const handleError = useCallback(() => {
+    // Try 480p fallback first
     if (!triedFallback) {
       const fallback = getFallbackUrl(currentSrc);
       if (fallback) {
@@ -133,9 +137,22 @@ export default function VideoSlide({
         return;
       }
     }
+    // Auto-retry before giving up (handles transient mobile network issues)
+    if (retryCount < MAX_RETRIES) {
+      setRetryCount((c) => c + 1);
+      const vid = videoRef.current;
+      if (vid) {
+        setTimeout(() => {
+          vid.load();
+          vid.muted = true;
+          vid.play().catch(() => {});
+        }, 500 * (retryCount + 1));
+      }
+      return;
+    }
     setError(true);
     setLoading(false);
-  }, [currentSrc, triedFallback]);
+  }, [currentSrc, triedFallback, retryCount]);
 
   const handleRetry = () => {
     setError(false);
@@ -175,6 +192,7 @@ export default function VideoSlide({
           autoPlay
           playsInline
           muted
+          crossOrigin="anonymous"
           preload="auto"
           onLoadStart={() => { if (isActive) setLoading(true); }}
           onCanPlay={() => setLoading(false)}

@@ -27,13 +27,8 @@ const SelectLanguage = () => {
 
   const handleSelect = (lang: Language) => {
     setSelected(lang);
-  };
-
-  const handleContinue = () => {
-    if (selected) {
-      setLanguage(selected);
-      navigate("/auth");
-    }
+    setLanguage(lang);
+    setTimeout(() => navigate("/auth"), 300);
   };
 
   return (
@@ -112,18 +107,6 @@ const SelectLanguage = () => {
         </div>
       </div>
 
-      {/* Sticky continue button */}
-      <div className="sticky bottom-0 border-t bg-card p-4">
-        <div className="max-w-2xl mx-auto">
-          <Button
-            className="w-full h-14 text-base"
-            disabled={!selected}
-            onClick={handleContinue}
-          >
-            Continue <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-        </div>
-      </div>
     </div>
   );
 };

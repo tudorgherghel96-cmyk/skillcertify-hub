@@ -9,7 +9,8 @@ import { useLanguage, LANGUAGES, type Language } from "@/contexts/LanguageContex
 import { landingText } from "@/i18n/landingTranslations";
 import skillcertifyLogo from "@/assets/skillcertify-logo.png";
 import skillcertifyIcon from "@/assets/skillcertify-icon.png";
-import skillcertifyFullLogo from "@/assets/skillcertify-full-logo.jpg";
+import skillcertifyFullLogo from "@/assets/skillcertify-full-logo.png";
+import heroImage from "@/assets/hero-cscs-card.jpg";
 import cscsLogo from "@/assets/cscs-logo.png";
 import gqaLogo from "@/assets/gqa-logo.png";
 import myCscsLogo from "@/assets/my-cscs-logo.png";
@@ -162,11 +163,25 @@ const Landing = () => {
             )}
           </motion.div>
 
+          {/* Hero image */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="mt-6 max-w-sm mx-auto">
+            <img
+              src={heroImage}
+              alt="CSCS Green Card and SkillCertify app on a construction site"
+              className="w-full rounded-2xl shadow-lg"
+              loading="eager"
+            />
+          </motion.div>
+
           {/* Reassurance line */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.5 }}
             className="mt-4 text-xs text-secondary-foreground/45">
 
             {t("no_laptop")}
@@ -337,8 +352,7 @@ const Landing = () => {
         <div className="max-w-2xl mx-auto space-y-5">
           {/* Logo row */}
           <div className="flex items-center justify-center gap-4">
-            <img alt="SkillCertify" className="h-8 w-auto" src="/lovable-uploads/8ce84cb0-0e09-4a2c-a491-ac5dbd2e8190.jpg" />
-            <img src={skillcertifyLogo} alt="SkillCertify" className="h-8" />
+            <img alt="SkillCertify" className="h-8 w-auto" src={skillcertifyFullLogo} />
             <img src={gqaLogo} alt="GQA Approved Centre" className="h-8 w-auto" />
             <img src={cscsFullLogo} alt="CSCS" className="h-8 w-auto" />
           </div>

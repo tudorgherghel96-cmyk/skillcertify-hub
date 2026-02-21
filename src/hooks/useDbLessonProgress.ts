@@ -13,6 +13,8 @@ export interface LessonProgressRecord {
   xp_earned: number;
   cards_completed: number;
   total_cards: number;
+  best_quiz_score: number | null;
+  quiz_passed: boolean | null;
 }
 
 export type LessonProgressMap = Record<string, LessonProgressRecord>;

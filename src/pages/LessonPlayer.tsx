@@ -308,6 +308,15 @@ export default function LessonPlayer() {
     navigate(`/lesson/${nextMod}/${nextLes}`);
   }, [nextLessonId, navigate]);
 
+  const handleQuizComplete = useCallback(
+    async (passed: boolean, score: number, total: number) => {
+      // Quiz result is saved inside LessonQuiz component itself
+      // Here we just handle progression: auto-advance to next card (lesson_complete)
+      console.log(`Quiz complete: ${score}/${total}, passed: ${passed}`);
+    },
+    [],
+  );
+
   const handleResume = useCallback(() => {
     setInitialIndex(resumeCardIndex);
     setCurrentIndex(resumeCardIndex);
@@ -388,6 +397,7 @@ export default function LessonPlayer() {
             muted={muted}
             onMuteToggle={() => setMuted((m) => !m)}
             lessonTitle={lessonTitle}
+            lessonId={lessonDbId}
             streak={streak}
             nextLessonTitle={nextLessonTitle}
             sessionXp={sessionXp}
@@ -395,6 +405,7 @@ export default function LessonPlayer() {
             onAnswer={handleAnswer}
             onLessonComplete={handleLessonComplete}
             onNextLesson={handleNextLesson}
+            onQuizComplete={handleQuizComplete}
           />
         )}
       </div>

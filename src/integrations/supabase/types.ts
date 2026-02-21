@@ -259,6 +259,39 @@ export type Database = {
         }
         Relationships: []
       }
+      lesson_quiz_attempts: {
+        Row: {
+          answers_json: Json | null
+          attempted_at: string | null
+          id: string
+          lesson_id: string
+          passed: boolean
+          score: number
+          total: number
+          user_id: string
+        }
+        Insert: {
+          answers_json?: Json | null
+          attempted_at?: string | null
+          id?: string
+          lesson_id: string
+          passed: boolean
+          score: number
+          total: number
+          user_id: string
+        }
+        Update: {
+          answers_json?: Json | null
+          attempted_at?: string | null
+          id?: string
+          lesson_id?: string
+          passed?: boolean
+          score?: number
+          total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       lesson_strength: {
         Row: {
           created_at: string

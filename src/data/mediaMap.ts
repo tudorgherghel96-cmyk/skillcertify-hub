@@ -177,7 +177,7 @@ export const lessonMedia: Record<string, LessonMedia> = {
 };
 
 // Helper to get module thumbnail for dashboard
-// Uses hero images from the all-media bucket (lowercase filenames)
+// Uses hero images from the final-correct-media bucket (lowercase filenames)
 import { getMediaUrl } from '@/utils/mediaUtils';
 
 export const moduleThumbnails: Record<number, string> = {

@@ -1,5 +1,5 @@
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const MEDIA_BUCKET = "all-media";
+const MEDIA_BUCKET = "final-correct-media";
 
 /**
  * Detect connection quality and return video tier.

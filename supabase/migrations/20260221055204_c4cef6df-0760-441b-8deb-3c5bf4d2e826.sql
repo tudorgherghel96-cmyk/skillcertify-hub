@@ -1,0 +1,3 @@
+-- Add quiz_card to the card_type check constraint
+ALTER TABLE lesson_cards DROP CONSTRAINT lesson_cards_card_type_check;
+ALTER TABLE lesson_cards ADD CONSTRAINT lesson_cards_card_type_check CHECK (card_type = ANY (ARRAY['hero'::text, 'video'::text, 'broll'::text, 'image'::text, 'remember_this'::text, 'test_tip'::text, 'key_term'::text, 'quick_check'::text, 'multi_select'::text, 'drag_drop'::text, 'tap_to_reveal'::text, 'split_screen'::text, 'scenario'::text, 'speed_drill'::text, 'pattern_card'::text, 'lesson_complete'::text, 'quiz_card'::text]));

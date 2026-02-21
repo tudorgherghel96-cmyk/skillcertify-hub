@@ -17,6 +17,7 @@ import RememberThis from "./cards/RememberThis";
 import TestTip from "./cards/TestTip";
 import KeyTerm from "./cards/KeyTerm";
 import LessonComplete from "./cards/LessonComplete";
+import LessonQuiz from "./cards/LessonQuiz";
 
 interface SwipeContainerProps {
   cards: LessonCard[];
@@ -25,6 +26,7 @@ interface SwipeContainerProps {
   muted: boolean;
   onMuteToggle: () => void;
   lessonTitle: string;
+  lessonId: string;
   streak: number;
   nextLessonTitle?: string;
   sessionXp: number;
@@ -32,6 +34,7 @@ interface SwipeContainerProps {
   onAnswer: (cardPosition: number, correct: boolean, selected: number) => void;
   onLessonComplete: (totalXp: number) => void;
   onNextLesson: () => void;
+  onQuizComplete: (passed: boolean, score: number, total: number) => void;
 }
 
 function CardRenderer({
@@ -42,11 +45,13 @@ function CardRenderer({
   streak,
   nextLessonTitle,
   sessionXp,
+  lessonId,
   isLastLesson,
   onAnswer,
   onLessonComplete,
   onNextLesson,
   onBRollEnd,
+  onQuizComplete,
 }: {
   card: LessonCard;
   isActive: boolean;
@@ -55,11 +60,13 @@ function CardRenderer({
   streak: number;
   nextLessonTitle?: string;
   sessionXp: number;
+  lessonId: string;
   isLastLesson: boolean;
   onAnswer: (correct: boolean, selected: number) => void;
   onLessonComplete: (totalXp: number) => void;
   onNextLesson: () => void;
   onBRollEnd: () => void;
+  onQuizComplete: (passed: boolean, score: number, total: number) => void;
 }) {
   const content = card.content_json as Record<string, unknown>;
 
@@ -248,6 +255,25 @@ function CardRenderer({
         </InteractiveSlide>
       );
 
+    case "quiz_card": {
+      const quizContent = content as {
+        title?: string;
+        subtitle?: string;
+        pass_threshold?: number;
+        questions?: { id: string; question: string; options: { id: string; text: string }[]; correct: string; explanation: string; test_tip?: string; ac_reference?: string }[];
+      };
+      return (
+        <LessonQuiz
+          title={quizContent.title || "Lesson Quiz"}
+          subtitle={quizContent.subtitle}
+          pass_threshold={quizContent.pass_threshold ?? 0.6}
+          questions={quizContent.questions || []}
+          lessonId={lessonId}
+          onQuizComplete={onQuizComplete}
+        />
+      );
+    }
+
     case "lesson_complete":
       return (
         <LessonComplete
@@ -271,6 +297,7 @@ export default function SwipeContainer({
   muted,
   onMuteToggle,
   lessonTitle,
+  lessonId,
   streak,
   nextLessonTitle,
   sessionXp,
@@ -278,6 +305,7 @@ export default function SwipeContainer({
   onAnswer,
   onLessonComplete,
   onNextLesson,
+  onQuizComplete,
 }: SwipeContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -374,11 +402,13 @@ export default function SwipeContainer({
             streak={streak}
             nextLessonTitle={nextLessonTitle}
             sessionXp={sessionXp}
+            lessonId={lessonId}
             isLastLesson={isLastLesson}
             onAnswer={(correct, sel) => onAnswer(card.card_position, correct, sel)}
             onLessonComplete={onLessonComplete}
             onNextLesson={onNextLesson}
             onBRollEnd={() => handleBRollEnd(i)}
+            onQuizComplete={onQuizComplete}
           />
         </div>
       ))}

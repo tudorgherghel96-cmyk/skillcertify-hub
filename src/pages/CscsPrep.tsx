@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -342,14 +342,19 @@ const CscsPrep = () => {
               Back to lessons
             </Link>
           </Button>
-          <Button
+           <Button
             variant="ghost"
             className="flex-1 h-10 text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={() => {
-              if (window.confirm("This will reset all your progress — lessons, practice scores, and test results. Are you sure?")) {
-                // Clear local progress
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              const confirmed = window.confirm("This will reset all your progress — lessons, practice scores, and test results. Are you sure?");
+              if (confirmed) {
                 localStorage.removeItem("skillcertify-progress");
-                window.location.href = "/";
+                // Use setTimeout to escape any event handler context
+                setTimeout(() => {
+                  window.location.href = "/";
+                }, 100);
               }
             }}
           >

@@ -40,7 +40,7 @@ export default function TapToReveal({ panels, xp_value, onComplete }: TapToRevea
           return (
             <div
               key={i}
-              onClick={() => flip(i)}
+              onClick={(e) => { e.stopPropagation(); flip(i); }}
               style={{
                 aspectRatio: "1",
                 borderRadius: 16,

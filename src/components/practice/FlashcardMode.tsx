@@ -115,8 +115,8 @@ const FlashcardMode = ({ cards }: FlashcardModeProps) => {
               Review
             </motion.div>
 
-            <div
-              onClick={() => setFlipped((f) => !f)}
+             <div
+              onClick={(e) => { e.stopPropagation(); setFlipped((f) => !f); }}
               className={`h-full w-full rounded-2xl border-2 p-6 flex flex-col items-center justify-center text-center transition-colors ${
                 flipped
                   ? "bg-card border-primary/30"
@@ -175,8 +175,9 @@ const FlashcardMode = ({ cards }: FlashcardModeProps) => {
 
       {/* Manual buttons for non-touch users */}
       <div className="flex gap-3">
-        <button
-          onClick={() => {
+         <button
+          onClick={(e) => {
+            e.stopPropagation();
             setFlipped(false);
             setDeck((prev) => {
               const [first, ...rest] = prev;
@@ -189,8 +190,9 @@ const FlashcardMode = ({ cards }: FlashcardModeProps) => {
           <XCircle className="inline h-4 w-4 mr-1.5 -mt-0.5" />
           Need to review
         </button>
-        <button
-          onClick={() => {
+         <button
+          onClick={(e) => {
+            e.stopPropagation();
             setFlipped(false);
             setMastered((prev) => new Set(prev).add(current.id));
             setDeck((prev) => {

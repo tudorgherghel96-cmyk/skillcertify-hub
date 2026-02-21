@@ -128,9 +128,9 @@ const DrillMode = ({ questions, onConceptAttempt }: DrillModeProps) => {
               }
 
               return (
-                <button
+                 <button
                   key={i}
-                  onClick={() => handleSelect(i)}
+                  onClick={(e) => { e.stopPropagation(); handleSelect(i); }}
                   disabled={selected !== null}
                   className={`w-full text-left px-4 py-3.5 rounded-xl text-[15px] sm:text-base font-medium border-2 transition-all min-h-[52px] ${borderClass}`}
                 >

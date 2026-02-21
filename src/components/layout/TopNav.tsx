@@ -20,7 +20,7 @@ const TopNav = ({ currentModule, currentLesson, overallProgress = 0 }: TopNavPro
   const { language, setLanguage } = useLanguage();
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-card">
+    <header className="sticky top-0 z-50 border-b bg-card pt-[env(safe-area-inset-top)]">
       <div className="flex items-center justify-between px-4 h-14">
         <Link to="/" className="flex items-center gap-2">
           <img src={skillcertifyIcon} alt="SkillCertify" className="h-7 w-7" />

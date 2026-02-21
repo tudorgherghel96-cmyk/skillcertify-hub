@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
+import { getFallbackUrl, getBaseNameFromUrl, getPosterUrl } from "@/utils/mediaUtils";
 import MuteToggle from "./ui/MuteToggle";
 import LeanInCallout from "./overlays/LeanInCallout";
 import HoldUpCard from "./overlays/HoldUpCard";
@@ -14,7 +15,7 @@ interface VideoSlideProps {
 }
 
 export default function VideoSlide({
-  mediaUrl,
+  mediaUrl: initialUrl,
   isActive,
   muted,
   onMuteToggle,
@@ -25,7 +26,17 @@ export default function VideoSlide({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState(initialUrl);
+  const [triedFallback, setTriedFallback] = useState(false);
 
+  // Reset state when the source URL changes (new card)
+  useEffect(() => {
+    setCurrentSrc(initialUrl);
+    setError(false);
+    setTriedFallback(false);
+  }, [initialUrl]);
+
+  // Autoplay logic — untouched
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
@@ -35,7 +46,7 @@ export default function VideoSlide({
     } else {
       vid.pause();
     }
-  }, [isActive, muted]);
+  }, [isActive, muted, currentSrc]);
 
   const handleTimeUpdate = useCallback(() => {
     const vid = videoRef.current;
@@ -43,14 +54,35 @@ export default function VideoSlide({
     onTimeUpdate?.(vid.currentTime, vid.duration);
   }, [onTimeUpdate]);
 
+  const handleError = useCallback(() => {
+    if (!triedFallback) {
+      const fallback = getFallbackUrl(currentSrc);
+      if (fallback) {
+        setTriedFallback(true);
+        setCurrentSrc(fallback);
+        return;
+      }
+    }
+    setError(true);
+    setLoading(false);
+  }, [currentSrc, triedFallback]);
+
   const handleRetry = () => {
     setError(false);
-    const vid = videoRef.current;
-    if (vid) {
-      vid.load();
-      vid.play().catch(() => {});
-    }
+    setTriedFallback(false);
+    setCurrentSrc(initialUrl);
+    setTimeout(() => {
+      const vid = videoRef.current;
+      if (vid) {
+        vid.load();
+        vid.play().catch(() => {});
+      }
+    }, 50);
   };
+
+  // Derive poster URL from the video base name
+  const baseName = getBaseNameFromUrl(currentSrc);
+  const posterSrc = baseName ? getPosterUrl(baseName) : undefined;
 
   return (
     <div
@@ -68,7 +100,8 @@ export default function VideoSlide({
       {!error && (
         <video
           ref={videoRef}
-          src={mediaUrl}
+          src={currentSrc}
+          poster={posterSrc}
           playsInline
           muted={muted}
           preload="auto"
@@ -76,7 +109,7 @@ export default function VideoSlide({
           onCanPlay={() => setLoading(false)}
           onWaiting={() => { if (isActive) setLoading(true); }}
           onPlaying={() => setLoading(false)}
-          onError={() => { setError(true); setLoading(false); }}
+          onError={handleError}
           onTimeUpdate={handleTimeUpdate}
           style={{
             width: "100%",
@@ -113,7 +146,7 @@ export default function VideoSlide({
         </div>
       )}
 
-      {/* Error state */}
+      {/* Error state — show poster if available */}
       {error && (
         <div
           style={{
@@ -126,8 +159,14 @@ export default function VideoSlide({
             gap: 12,
           }}
         >
+          {posterSrc && (
+            <img
+              src={posterSrc}
+              alt=""
+              style={{ maxWidth: "80%", maxHeight: "60%", objectFit: "contain", borderRadius: 8, marginBottom: 8 }}
+            />
+          )}
           <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, margin: 0 }}>Video unavailable</p>
-          <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 10, margin: 0, wordBreak: "break-all", maxWidth: 280, textAlign: "center" }}>{mediaUrl}</p>
           <button
             onClick={handleRetry}
             style={{

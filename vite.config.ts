@@ -71,8 +71,8 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            // Supabase Storage images (course-media bucket)
-            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/public\/course-media\/.*\.(webp|png|jpg|jpeg)$/i,
+            // Supabase Storage images (all-media bucket)
+            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/public\/all-media\/.*\.(webp|png|jpg|jpeg)$/i,
             handler: "CacheFirst",
             options: {
               cacheName: "lesson-images-cache",
@@ -81,8 +81,8 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            // Supabase Storage videos
-            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/public\/course-media\/.*\.(mp4|webm)$/i,
+            // Supabase Storage videos (all-media bucket)
+            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/public\/all-media\/.*\.(mp4|webm)$/i,
             handler: "CacheFirst",
             options: {
               cacheName: "lesson-videos-cache",

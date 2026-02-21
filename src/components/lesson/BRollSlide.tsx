@@ -1,4 +1,5 @@
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
+import { getFallbackUrl, getBaseNameFromUrl, getPosterUrl } from "@/utils/mediaUtils";
 
 interface BRollSlideProps {
   mediaUrl: string;
@@ -7,12 +8,22 @@ interface BRollSlideProps {
   onEnded?: () => void;
 }
 
-export default function BRollSlide({ mediaUrl, isActive, muted, onEnded }: BRollSlideProps) {
+export default function BRollSlide({ mediaUrl: initialUrl, isActive, muted, onEnded }: BRollSlideProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [currentSrc, setCurrentSrc] = useState(initialUrl);
+  const [triedFallback, setTriedFallback] = useState(false);
+  const [error, setError] = useState(false);
+
+  // Reset on new source
+  useEffect(() => {
+    setCurrentSrc(initialUrl);
+    setError(false);
+    setTriedFallback(false);
+  }, [initialUrl]);
 
   useEffect(() => {
     const vid = videoRef.current;
-    if (!vid) return;
+    if (!vid || error) return;
     if (isActive) {
       vid.muted = muted;
       vid.currentTime = 0;
@@ -20,7 +31,7 @@ export default function BRollSlide({ mediaUrl, isActive, muted, onEnded }: BRoll
     } else {
       vid.pause();
     }
-  }, [isActive, muted]);
+  }, [isActive, muted, currentSrc, error]);
 
   const handleEnded = useCallback(() => {
     if (isActive) {
@@ -29,27 +40,50 @@ export default function BRollSlide({ mediaUrl, isActive, muted, onEnded }: BRoll
   }, [isActive, onEnded]);
 
   const handleError = useCallback(() => {
+    if (!triedFallback) {
+      const fallback = getFallbackUrl(currentSrc);
+      if (fallback) {
+        setTriedFallback(true);
+        setCurrentSrc(fallback);
+        return;
+      }
+    }
+    // Both failed — auto-advance
+    setError(true);
     if (isActive) onEnded?.();
-  }, [isActive, onEnded]);
+  }, [currentSrc, triedFallback, isActive, onEnded]);
+
+  const baseName = getBaseNameFromUrl(currentSrc);
+  const posterSrc = baseName ? getPosterUrl(baseName) : undefined;
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative", background: "#000", overflow: "hidden" }}>
-      <video
-        ref={videoRef}
-        src={mediaUrl}
-        muted={muted}
-        playsInline
-        preload="auto"
-        onEnded={handleEnded}
-        onError={handleError}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "contain",
-          background: "#000",
-          display: "block",
-        }}
-      />
+      {!error && (
+        <video
+          ref={videoRef}
+          src={currentSrc}
+          poster={posterSrc}
+          muted={muted}
+          playsInline
+          preload="auto"
+          onEnded={handleEnded}
+          onError={handleError}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            background: "#000",
+            display: "block",
+          }}
+        />
+      )}
+      {error && posterSrc && (
+        <img
+          src={posterSrc}
+          alt=""
+          style={{ width: "100%", height: "100%", objectFit: "contain" }}
+        />
+      )}
       {/* Cinematic vignette */}
       <div
         style={{

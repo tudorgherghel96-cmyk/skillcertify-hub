@@ -1,33 +1,51 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getMediaUrl, getVideoUrl, getVideoQuality } from "@/utils/mediaUtils";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
 /**
  * Returns the public URL for a lesson card media file.
- * Only two buckets: "lesson-videos" (mp4) and "lesson-images" (jpeg/webp).
+ * Routes everything through the unified `all-media` bucket.
+ *
+ * For videos (bucket = "lesson-videos"): strips trailing .mp4, lowercases,
+ * and returns quality-aware URL (720p or 480p).
+ * For images (bucket = "lesson-images"): lowercases and serves from all-media.
  */
 export function getLessonMediaUrl(
   file: string | null,
   bucket: string | null,
 ): string {
   if (!file || !bucket) return "";
-  // Direct URL construction — avoids a round-trip SDK call
-  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${file}`;
+
+  if (bucket === "lesson-videos") {
+    // Strip only the trailing .mp4 extension, preserve embedded .mp4 in base name
+    const baseName = file.endsWith(".mp4")
+      ? file.slice(0, -4).toLowerCase()
+      : file.toLowerCase();
+    return getVideoUrl(baseName, getVideoQuality());
+  }
+
+  // Images: lowercase and serve from all-media
+  return getMediaUrl(file.toLowerCase());
 }
 
 /**
- * Legacy helper — kept for backward compat. Points at lesson-images bucket.
+ * Legacy helper — points at all-media bucket now.
+ * Paths like "module1_1/1.1_photo_1.webp" → just use the filename part lowercased.
  */
 export function mediaUrl(path: string): string {
-  return `${SUPABASE_URL}/storage/v1/object/public/lesson-images/${path}`;
+  // Legacy paths include folder prefixes like "module1_1/". Strip them.
+  const filename = path.includes("/") ? path.split("/").pop()! : path;
+  return getMediaUrl(filename.toLowerCase());
 }
 
 /**
- * Legacy video helper — kept for backward compat.
+ * Legacy video helper — kept for WelcomeVideo backward compat.
+ * "welcome" still points at old lesson-videos bucket; everything else goes through all-media.
  */
 export function getLessonVideoUrl(lessonId: string): string {
-  const filename = lessonId === "welcome"
-    ? "welcome_video_1_web.mp4"
-    : `${lessonId}_video_web.mp4`;
-  return `${SUPABASE_URL}/storage/v1/object/public/lesson-videos/${filename}`;
+  if (lessonId === "welcome") {
+    return `${SUPABASE_URL}/storage/v1/object/public/lesson-videos/welcome_video_1_web.mp4`;
+  }
+  const baseName = `${lessonId}_video_web`.toLowerCase();
+  return getVideoUrl(baseName, getVideoQuality());
 }

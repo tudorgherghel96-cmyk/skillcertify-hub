@@ -182,7 +182,7 @@ export default function LessonPlayer() {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [initialIndex, setInitialIndex] = useState(0);
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(true);
   const [sessionXp, setSessionXp] = useState(0);
   const [streak, setStreak] = useState(0);
   const [showExit, setShowExit] = useState(false);

@@ -108,7 +108,7 @@ const Landing = () => {
       <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur-md">
         <div className="flex items-center justify-between px-4 h-14 max-w-3xl mx-auto">
           <Link to="/" className="flex items-center gap-2">
-            <img src={skillcertifyIcon} alt="SkillCertify" className="h-7 w-7" />
+            <img src={skillcertifyIcon} alt="SkillCertify" className="h-7 w-auto" />
             <span className="text-lg font-bold text-primary tracking-tight font-[Poppins]">SkillCertify</span>
           </Link>
           <div className="flex items-center gap-1">
@@ -133,17 +133,6 @@ const Landing = () => {
       {/* ═══ HERO ═══ */}
       <section className="relative px-4 pt-10 pb-8 sm:pt-16 sm:pb-12 bg-secondary">
         <div className="max-w-2xl mx-auto text-center">
-          <motion.img
-            src={skillcertifyFullLogo}
-            alt="SkillCertify"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="h-[60px] w-auto mx-auto mb-6"
-            loading="eager"
-            decoding="sync"
-            fetchPriority="high"
-          />
 
           <motion.h1
             initial={{ opacity: 0, y: 12 }}

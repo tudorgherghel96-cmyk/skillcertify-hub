@@ -73,7 +73,7 @@ export default function Scenario({
         {options.map((opt, i) => (
           <button
             key={i}
-            onClick={() => handleSelect(i)}
+            onClick={(e) => { e.stopPropagation(); handleSelect(i); }}
             style={{
               width: "100%",
               minHeight: 60,

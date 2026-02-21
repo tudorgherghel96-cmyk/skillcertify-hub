@@ -106,7 +106,7 @@ export default function QuickCheck({
       {/* Options */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {options.map((opt, i) => (
-          <button key={i} onClick={() => handleSelect(i)} style={getOptionStyle(i)}>
+          <button key={i} onClick={(e) => { e.stopPropagation(); handleSelect(i); }} style={getOptionStyle(i)}>
             <span>{opt.text}</span>
             {answered && i === correct_index && <span style={{ color: "#10b981", fontSize: 18 }}>✓</span>}
             {answered && i === selected && i !== correct_index && <span style={{ color: "#ef4444", fontSize: 18 }}>✗</span>}

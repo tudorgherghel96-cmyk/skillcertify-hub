@@ -1,38 +1,28 @@
 
 
-# Switch Media Bucket from `all-media` to `final-correct-media`
+# Fix iPhone Status Bar Overlap
 
-## Overview
+## Problem
 
-A single constant change propagated through 2 files, plus updating 2 regex patterns in the PWA config. No logic changes -- autoplay, scroll-snap, mute, and fallback behavior are completely untouched.
+On iPhone (especially with notch/Dynamic Island), the TopNav header overlaps with the iOS status bar. The app uses `viewport-fit=cover` and `black-translucent` status bar style, which means content extends behind the status bar. The TopNav needs to add top padding to push below the safe area.
 
 ## Changes
 
-### 1. `src/utils/mediaUtils.ts` (line 2)
+### 1. `src/components/layout/TopNav.tsx`
 
-Change the bucket constant:
-- From: `const MEDIA_BUCKET = "all-media";`
-- To: `const MEDIA_BUCKET = "final-correct-media";`
+Add `safe-area-inset-top` padding to the header element so the nav content sits below the iPhone status bar:
 
-This is the single source of truth -- all `getMediaUrl()`, `getVideoUrl()`, `getPosterUrl()` calls automatically use the new bucket.
+- Change the `<header>` className from `sticky top-0 z-50 border-b bg-card` to include `pt-[env(safe-area-inset-top)]`
+- This pushes the nav bar content (logo, language picker) below the status bar on iPhones
+- On devices without a notch/safe area, `env(safe-area-inset-top)` resolves to `0px`, so no impact
 
-### 2. `vite.config.ts` (lines 75 and 85)
+### 2. `src/components/layout/AppLayout.tsx` (no change needed)
 
-Update the two PWA runtime caching regex patterns to match the new bucket name:
-- Image pattern: `all-media` to `final-correct-media`
-- Video pattern: `all-media` to `final-correct-media`
-
-### 3. Comments only (no functional change)
-
-Update comments in `src/lib/media.ts` and `src/data/mediaMap.ts` that reference "all-media" to say "final-correct-media" for accuracy.
+The `TopNav` is `sticky top-0`, so adding padding inside it is sufficient. No layout changes needed.
 
 ## What Does NOT Change
 
-- Video autoplay logic (`VideoSlide` useEffect with `vid.play()`)
-- Scroll-snap smooth scrolling (`scroll-snap-type: y mandatory`)
-- 720p to 480p fallback chain
-- Mute toggle, B-roll auto-advance, fourth-wall overlays
-- IntersectionObserver card detection
-- All card rendering and interactive components
-- No database changes
+- Bottom navigation (already has `safe-area-bottom`)
+- LessonPlayer NavHeader (already handles safe area independently)
+- Scroll behavior, routing, or any other component
 

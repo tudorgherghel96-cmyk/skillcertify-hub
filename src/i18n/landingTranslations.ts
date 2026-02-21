@@ -39,7 +39,7 @@ type LandingTranslations = Record<LandingKey, string>;
 const landing: Record<string, LandingTranslations> = {
   en: {
     hero_title_1: "Get your CSCS Green Card.",
-    hero_title_2: "Complete the course, pass the tests, and get on site — all from your phone.\nLearn in your language.",
+    hero_title_2: "Complete the course, pass the tests, and get on site — all from your phone.",
     hero_subtitle: "Used by 2,000+ construction workers across the UK",
     cta_start: "Get your Green Card",
     cta_signin: "Already have an account? Sign in",

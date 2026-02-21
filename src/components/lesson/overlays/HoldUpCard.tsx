@@ -30,7 +30,8 @@ export default function HoldUpCard({ text, videoRef }: HoldUpCardProps) {
         padding: "16px 20px",
         boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
         opacity: visible ? 1 : 0,
-        transition: "opacity 400ms ease",
+        transform: visible ? "translateY(0)" : "translateY(20px)",
+        transition: "opacity 400ms ease, transform 400ms ease",
         pointerEvents: "none",
         zIndex: 10,
       }}

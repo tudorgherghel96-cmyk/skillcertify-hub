@@ -32,7 +32,8 @@ export default function LeanInCallout({ text, videoRef }: LeanInCalloutProps) {
         padding: "18px 24px",
         border: "1px solid rgba(255,255,255,0.1)",
         opacity: visible ? 1 : 0,
-        transition: "opacity 600ms ease",
+        transform: visible ? "translateY(0)" : "translateY(20px)",
+        transition: "opacity 600ms ease, transform 600ms ease",
         pointerEvents: "none",
         zIndex: 10,
       }}

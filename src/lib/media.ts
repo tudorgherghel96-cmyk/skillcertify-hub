@@ -1,18 +1,12 @@
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-
-/**
- * Build a public URL for any file in a specific bucket.
- */
-function bucketUrl(bucket: string, filename: string): string {
-  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${filename}`;
-}
+import { getMediaUrl, getVideoUrl, getVideoQuality } from "@/utils/mediaUtils";
 
 /**
  * Returns the public URL for a lesson card media file.
- * Routes media to their ORIGINAL buckets (lesson-videos, lesson-images).
+ * All media lives in the unified `final-correct-media` bucket.
  *
- * For videos (bucket = "lesson-videos"): serves the file directly from lesson-videos.
- * For images (bucket = "lesson-images"): serves the file directly from lesson-images.
+ * For videos (.mp4 files): strips trailing .mp4, lowercases,
+ * and returns quality-aware URL (720p or 480p).
+ * For images: lowercases and serves from final-correct-media.
  */
 export function getLessonMediaUrl(
   file: string | null,
@@ -20,17 +14,23 @@ export function getLessonMediaUrl(
 ): string {
   if (!file || !bucket) return "";
 
-  // Use the original bucket directly — files live in their original buckets
-  return bucketUrl(bucket, file);
+  // Detect video by file extension
+  if (file.toLowerCase().endsWith(".mp4")) {
+    const baseName = file.slice(0, -4).toLowerCase();
+    return getVideoUrl(baseName, getVideoQuality());
+  }
+
+  // Images: lowercase and serve from final-correct-media
+  return getMediaUrl(file.toLowerCase());
 }
 
 /**
- * Legacy helper — images from lesson-images bucket.
- * Paths like "module1_1/1.1_photo_1.webp" → just use the filename part.
+ * Legacy helper — points at final-correct-media bucket.
+ * Paths like "module1_1/1.1_photo_1.webp" → just use the filename part lowercased.
  */
 export function mediaUrl(path: string): string {
   const filename = path.includes("/") ? path.split("/").pop()! : path;
-  return bucketUrl("lesson-images", filename);
+  return getMediaUrl(filename.toLowerCase());
 }
 
 /**
@@ -38,7 +38,7 @@ export function mediaUrl(path: string): string {
  */
 export function getLessonVideoUrl(lessonId: string): string {
   if (lessonId === "welcome") {
-    return bucketUrl("lesson-videos", "welcome_video_1_web.mp4");
+    return getVideoUrl("welcome_video_1_web", getVideoQuality());
   }
-  return bucketUrl("lesson-videos", `${lessonId}_video_web.mp4`);
+  return getVideoUrl(`${lessonId}_video_web`.toLowerCase(), getVideoQuality());
 }

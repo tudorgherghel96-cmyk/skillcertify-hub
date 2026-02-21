@@ -105,8 +105,29 @@ export default function LessonComplete({
       <Confetti />
 
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ fontSize: 64, marginBottom: 12 }}>
-          {isLastLesson ? "🎓" : "🏆"}
+        <div style={{ fontSize: 64, marginBottom: 12, display: "flex", justifyContent: "center" }}>
+          <svg width="80" height="96" viewBox="0 0 80 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="shieldGold" x1="0" y1="0" x2="80" y2="96" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#f59e0b" />
+                <stop offset="50%" stopColor="#fbbf24" />
+                <stop offset="100%" stopColor="#d97706" />
+              </linearGradient>
+              <linearGradient id="checkGold" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#fef3c7" />
+                <stop offset="100%" stopColor="#f59e0b" />
+              </linearGradient>
+            </defs>
+            {/* Shield */}
+            <path d="M40 4L8 18v26c0 22 14 36 32 44 18-8 32-22 32-44V18L40 4z" fill="url(#shieldGold)" opacity="0.9" />
+            <path d="M40 4L8 18v26c0 22 14 36 32 44 18-8 32-22 32-44V18L40 4z" fill="none" stroke="#fbbf24" strokeWidth="2" />
+            {/* Graduation cap */}
+            <polygon points="40,28 18,40 40,52 62,40" fill="#1a1a2e" opacity="0.8" />
+            <line x1="40" y1="52" x2="40" y2="66" stroke="#1a1a2e" strokeWidth="2" opacity="0.6" />
+            <path d="M26 44v12c0 4 6 8 14 8s14-4 14-8V44" fill="none" stroke="#1a1a2e" strokeWidth="2" opacity="0.6" />
+            {/* Checkmark */}
+            <path d="M28 46l8 8 16-18" fill="none" stroke="url(#checkGold)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </div>
 
         <h1 style={{ color: "white", fontSize: 28, fontWeight: 800, margin: "0 0 8px 0" }}>
@@ -124,7 +145,7 @@ export default function LessonComplete({
         )}
 
         <button
-          onClick={onNext}
+          onClick={(e) => { e.stopPropagation(); onNext(); }}
           style={{
             width: "100%",
             maxWidth: 360,

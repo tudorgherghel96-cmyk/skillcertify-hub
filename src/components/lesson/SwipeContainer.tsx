@@ -311,7 +311,7 @@ export default function SwipeContainer({
   useEffect(() => {
     if (didScrollRef.current || !containerRef.current) return;
     if (initialIndex > 0) {
-      containerRef.current.scrollTo({ top: initialIndex * window.innerHeight, behavior: "instant" as ScrollBehavior });
+      containerRef.current.scrollTo({ top: initialIndex * containerRef.current.clientHeight, behavior: "instant" as ScrollBehavior });
     }
     didScrollRef.current = true;
   }, [initialIndex]);
@@ -320,7 +320,7 @@ export default function SwipeContainer({
     (cardIndex: number) => {
       const next = cardIndex + 1;
       if (next < cards.length && containerRef.current) {
-        containerRef.current.scrollTo({ top: next * window.innerHeight, behavior: "smooth" });
+        containerRef.current.scrollTo({ top: next * containerRef.current.clientHeight, behavior: "smooth" });
       }
     },
     [cards.length],
@@ -335,7 +335,7 @@ export default function SwipeContainer({
     <div
       ref={containerRef}
       style={{
-        height: "100dvh",
+        height: "100%",
         overflowY: "scroll",
         overflowX: "hidden",
         scrollSnapType: "y mandatory",
@@ -351,7 +351,7 @@ export default function SwipeContainer({
           ref={(el) => { slideRefs.current[i] = el; }}
           data-index={i}
           style={{
-            height: "100dvh",
+            height: "100%",
             width: "100%",
             scrollSnapAlign: "start",
             scrollSnapStop: "always",

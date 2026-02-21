@@ -1,6 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { getFallbackUrl, getBaseNameFromUrl, getPosterUrl } from "@/utils/mediaUtils";
-import MuteToggle from "./ui/MuteToggle";
 import LeanInCallout from "./overlays/LeanInCallout";
 import HoldUpCard from "./overlays/HoldUpCard";
 
@@ -29,6 +28,8 @@ export default function VideoSlide({
   const [currentSrc, setCurrentSrc] = useState(initialUrl);
   const [triedFallback, setTriedFallback] = useState(false);
   const [tapForSound, setTapForSound] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+  const controlsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Reset state when the source URL changes (new card)
   useEffect(() => {
@@ -36,32 +37,61 @@ export default function VideoSlide({
     setError(false);
     setTriedFallback(false);
     setTapForSound(false);
+    setShowControls(false);
   }, [initialUrl]);
 
-  // Autoplay logic — play with sound, fallback to muted if blocked
+  // Autoplay logic — start muted for browser policy, unmute on onPlaying
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
 
     if (isActive) {
-      vid.muted = muted;
+      // Start muted to satisfy autoplay policy, then unmute in onPlaying
+      vid.muted = true;
       const playPromise = vid.play();
       if (playPromise !== undefined) {
-        playPromise.catch((err) => {
-          if (err.name === "NotAllowedError") {
-            // Browser blocked unmuted autoplay — mute and retry
-            vid.muted = true;
-            vid.play().catch(() => {});
-            setTapForSound(true);
-          }
+        playPromise.catch(() => {
+          // Even muted autoplay blocked — rare but handle it
+          setTapForSound(true);
         });
       }
     } else {
       vid.pause();
+      setShowControls(false);
     }
-  }, [isActive, muted, currentSrc]);
+  }, [isActive, currentSrc]);
 
-  // When user taps the "tap for sound" overlay, unmute
+  // Once video starts playing, try to unmute (sound ON by default like TikTok)
+  const handlePlaying = useCallback(() => {
+    setLoading(false);
+    const vid = videoRef.current;
+    if (!vid) return;
+
+    if (!muted) {
+      // Try to unmute — if browser blocks, keep muted and show tap-for-sound
+      vid.muted = false;
+      // Some browsers will pause if unmuting isn't allowed — check after a tick
+      setTimeout(() => {
+        if (vid.paused && isActive) {
+          vid.muted = true;
+          vid.play().catch(() => {});
+          setTapForSound(true);
+        }
+      }, 50);
+    } else {
+      vid.muted = true;
+    }
+  }, [muted, isActive]);
+
+  // Sync muted prop changes (from parent toggle)
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid || !isActive) return;
+    vid.muted = muted;
+    if (!muted) setTapForSound(false);
+  }, [muted, isActive]);
+
+  // When user taps the "tap for sound" indicator, unmute via parent
   const handleTapForSound = useCallback(() => {
     const vid = videoRef.current;
     if (vid) {
@@ -69,6 +99,23 @@ export default function VideoSlide({
       vid.play().catch(() => {});
     }
     setTapForSound(false);
+    if (muted) onMuteToggle();
+  }, [muted, onMuteToggle]);
+
+  // Tap video to toggle play/pause and show controls briefly
+  const handleVideoTap = useCallback(() => {
+    const vid = videoRef.current;
+    if (!vid) return;
+
+    if (vid.paused) {
+      vid.play().catch(() => {});
+    } else {
+      vid.pause();
+    }
+
+    setShowControls(true);
+    if (controlsTimer.current) clearTimeout(controlsTimer.current);
+    controlsTimer.current = setTimeout(() => setShowControls(false), 3000);
   }, []);
 
   const handleTimeUpdate = useCallback(() => {
@@ -98,12 +145,12 @@ export default function VideoSlide({
       const vid = videoRef.current;
       if (vid) {
         vid.load();
+        vid.muted = true;
         vid.play().catch(() => {});
       }
     }, 50);
   };
 
-  // Derive poster URL from the video base name
   const baseName = getBaseNameFromUrl(currentSrc);
   const posterSrc = baseName ? getPosterUrl(baseName) : undefined;
 
@@ -127,22 +174,22 @@ export default function VideoSlide({
           poster={posterSrc}
           autoPlay
           playsInline
-          controls
-          muted={muted}
-          crossOrigin="anonymous"
+          muted
           preload="auto"
           onLoadStart={() => { if (isActive) setLoading(true); }}
           onCanPlay={() => setLoading(false)}
           onWaiting={() => { if (isActive) setLoading(true); }}
-          onPlaying={() => setLoading(false)}
+          onPlaying={handlePlaying}
           onError={handleError}
           onTimeUpdate={handleTimeUpdate}
+          onClick={handleVideoTap}
           style={{
             width: "100%",
             height: "100%",
             objectFit: "contain",
             background: "#000",
             display: "block",
+            cursor: "pointer",
           }}
         />
       )}
@@ -176,6 +223,41 @@ export default function VideoSlide({
         </button>
       )}
 
+      {/* Mute toggle */}
+      {!error && !tapForSound && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 16,
+            right: 16,
+            zIndex: 20,
+            opacity: showControls ? 1 : 0.6,
+            transition: "opacity 0.3s",
+          }}
+        >
+          <button
+            onClick={(e) => { e.stopPropagation(); onMuteToggle(); }}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: "rgba(0,0,0,0.5)",
+              backdropFilter: "blur(8px)",
+              border: "1px solid rgba(255,255,255,0.15)",
+              color: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              fontSize: 18,
+            }}
+            aria-label={muted ? "Unmute" : "Mute"}
+          >
+            {muted ? "🔇" : "🔊"}
+          </button>
+        </div>
+      )}
+
       {/* Loading spinner */}
       {loading && !error && (
         <div
@@ -201,7 +283,7 @@ export default function VideoSlide({
         </div>
       )}
 
-      {/* Error state — show poster if available */}
+      {/* Error state */}
       {error && (
         <div
           style={{
@@ -238,9 +320,6 @@ export default function VideoSlide({
           </button>
         </div>
       )}
-
-      {/* Mute toggle */}
-      {!error && !tapForSound && <MuteToggle muted={muted} onToggle={onMuteToggle} />}
 
       {/* Fourth-wall overlays */}
       {fourthWallEffect === "lean_in" && overlayText && (

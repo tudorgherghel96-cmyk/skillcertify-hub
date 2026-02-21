@@ -102,8 +102,9 @@ const Landing = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mt-3 text-sm sm:text-base text-secondary-foreground/70 max-w-md mx-auto">
-
             {t("hero_title_2")}
+            <br />
+            <span className="font-semibold text-secondary-foreground/80">Learn in your language.</span>
           </motion.p>
 
           {/* CTA */}

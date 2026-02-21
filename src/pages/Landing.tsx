@@ -346,7 +346,7 @@ const Landing = () => {
           {/* Address + centre number — compact */}
           <div className="text-center">
             <p className="text-xs text-secondary-foreground/50">
-              Zeus House, London, N1 7NG · GQA Centre: XXXXXX
+              Zeus House, London, N1 7NG
             </p>
           </div>
 

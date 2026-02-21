@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import trophyImg from "@/assets/trophy.png";
 
 interface LessonCompleteProps {
   totalXp: number;

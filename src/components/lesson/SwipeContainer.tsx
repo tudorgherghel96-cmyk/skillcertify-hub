@@ -283,6 +283,11 @@ export default function SwipeContainer({
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
   const didScrollRef = useRef(false);
 
+  // Reset scroll flag when cards change (new lesson loaded)
+  useEffect(() => {
+    didScrollRef.current = false;
+  }, [cards]);
+
   // Set up IntersectionObserver for active card detection
   useEffect(() => {
     const container = containerRef.current;

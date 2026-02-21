@@ -189,6 +189,16 @@ export default function LessonPlayer() {
   const [showResume, setShowResume] = useState(false);
   const [resumeCardIndex, setResumeCardIndex] = useState(0);
 
+  // Reset state when lesson changes (e.g. "Next Lesson" navigation)
+  useEffect(() => {
+    setCurrentIndex(0);
+    setInitialIndex(0);
+    setSessionXp(0);
+    setCards([]);
+    setLoading(true);
+    setShowResume(false);
+  }, [lessonDbId]);
+
   const heroContent = cards[0]?.content_json as Record<string, unknown> | undefined;
   const lessonTitle = (heroContent?.lesson_title ?? heroContent?.title) as string || "Lesson";
   const nextLessonContent = cards

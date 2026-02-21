@@ -294,9 +294,15 @@ const GqaTest = () => {
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-primary shrink-0 mt-0.5">⏱</span>
+              <Clock className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <span>
-                90 minutes total
+                <strong>~18 minutes</strong> — timed like the real exam (90 min for 58 questions)
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary shrink-0 mt-0.5">📝</span>
+              <span>
+                <strong>No feedback until the end</strong> — results shown after all questions
               </span>
             </li>
             <li className="flex items-start gap-2">

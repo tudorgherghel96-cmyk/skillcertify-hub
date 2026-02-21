@@ -4,11 +4,11 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
 /**
  * Returns the public URL for a lesson card media file.
- * Routes everything through the unified `all-media` bucket.
+ * Routes everything through the unified `final-correct-media` bucket.
  *
  * For videos (bucket = "lesson-videos"): strips trailing .mp4, lowercases,
  * and returns quality-aware URL (720p or 480p).
- * For images (bucket = "lesson-images"): lowercases and serves from all-media.
+ * For images (bucket = "lesson-images"): lowercases and serves from final-correct-media.
  */
 export function getLessonMediaUrl(
   file: string | null,
@@ -24,12 +24,12 @@ export function getLessonMediaUrl(
     return getVideoUrl(baseName, getVideoQuality());
   }
 
-  // Images: lowercase and serve from all-media
+  // Images: lowercase and serve from final-correct-media
   return getMediaUrl(file.toLowerCase());
 }
 
 /**
- * Legacy helper — points at all-media bucket now.
+ * Legacy helper — points at final-correct-media bucket now.
  * Paths like "module1_1/1.1_photo_1.webp" → just use the filename part lowercased.
  */
 export function mediaUrl(path: string): string {

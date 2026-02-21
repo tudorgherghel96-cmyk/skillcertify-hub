@@ -22,9 +22,9 @@ export default function HoldUpCard({ text, videoRef }: HoldUpCardProps) {
     <div
       style={{
         position: "absolute",
-        top: "25%",
-        left: "15%",
-        right: "15%",
+        bottom: "5%",
+        left: "5%",
+        right: "5%",
         background: "rgba(255,255,255,0.95)",
         borderRadius: 12,
         padding: "16px 20px",

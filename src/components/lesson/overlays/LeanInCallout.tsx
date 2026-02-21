@@ -22,7 +22,7 @@ export default function LeanInCallout({ text, videoRef }: LeanInCalloutProps) {
     <div
       style={{
         position: "absolute",
-        bottom: "15%",
+        bottom: "5%",
         left: "5%",
         right: "5%",
         background: "rgba(0,0,0,0.85)",

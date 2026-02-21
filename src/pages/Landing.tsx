@@ -51,8 +51,8 @@ const Landing = () => {
   const steps = [
     { icon: BookOpen, title: t("step_learn"), desc: t("step_learn_desc") },
     { icon: Target, title: t("step_practice"), desc: t("step_practice_desc") },
-    { icon: Award, title: t("step_pass"), desc: t("step_pass_desc") },
-    { icon: CreditCard, title: t("step_card"), desc: t("step_card_desc") },
+    { icon: Award, title: t("step_cert"), desc: t("step_cert_desc") },
+    { icon: CreditCard, title: t("step_cscs"), desc: t("step_cscs_desc") },
   ];
 
   const careerCards = [

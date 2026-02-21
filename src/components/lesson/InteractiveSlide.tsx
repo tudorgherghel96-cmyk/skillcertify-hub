@@ -19,6 +19,9 @@ export default function InteractiveSlide({ children }: InteractiveSlideProps) {
       }}
     >
       <div
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+        onPointerUp={(e) => e.stopPropagation()}
         style={{
           width: "100%",
           maxWidth: 400,
@@ -27,6 +30,7 @@ export default function InteractiveSlide({ children }: InteractiveSlideProps) {
           paddingBottom: "env(safe-area-inset-bottom)",
           overflowY: "auto",
           maxHeight: "100%",
+          touchAction: "manipulation",
         }}
       >
         {children}

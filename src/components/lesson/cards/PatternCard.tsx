@@ -65,7 +65,7 @@ export default function PatternCard({ hazards, diseases, correct_pairs, xp_value
               return (
                 <button
                   key={h.id}
-                  onClick={() => handleHazard(h.id)}
+                  onClick={(e) => { e.stopPropagation(); handleHazard(h.id); }}
                   style={{
                     padding: "12px 14px",
                     borderRadius: 12,
@@ -98,7 +98,7 @@ export default function PatternCard({ hazards, diseases, correct_pairs, xp_value
               return (
                 <button
                   key={d.id}
-                  onClick={() => handleDisease(d.id)}
+                  onClick={(e) => { e.stopPropagation(); handleDisease(d.id); }}
                   style={{
                     padding: "12px 14px",
                     borderRadius: 12,

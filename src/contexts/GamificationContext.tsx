@@ -93,8 +93,8 @@ const daysBetween = (a: string, b: string) =>
   Math.floor((new Date(b).getTime() - new Date(a).getTime()) / 86400000);
 
 function xpToLevel(xp: number): number {
-  // Each level = 500 XP, level 1 starts at 0
-  return Math.floor(xp / 500) + 1;
+  // Each level = 100 XP, matching useXpProgress.ts
+  return Math.floor(xp / 100) + 1;
 }
 
 /* ─── badge definitions ─── */

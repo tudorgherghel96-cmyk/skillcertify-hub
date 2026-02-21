@@ -102,12 +102,21 @@ export const hoursUntilResit = (mp: ModuleProgress): number => {
 export const allGqaPassed = (state: ProgressState, superUser = false): boolean =>
   superUser || MODULES.every((m) => getModuleProgress(state, m.id).gqa.passed === true);
 
-export const getOverallProgress = (state: ProgressState): { modulesComplete: number; percentage: number } => {
+export const getOverallProgress = (state: ProgressState): { modulesComplete: number; percentage: number; lessonsComplete: number; totalLessons: number } => {
   let done = 0;
+  let lessonsComplete = 0;
+  let totalLessons = 0;
   MODULES.forEach((m) => {
-    if (isModuleComplete(getModuleProgress(state, m.id))) done++;
+    const mp = getModuleProgress(state, m.id);
+    if (isModuleComplete(mp)) done++;
+    totalLessons += m.lessons.length;
+    lessonsComplete += getLessonsCompleted(mp, m.lessons.length);
   });
-  return { modulesComplete: done, percentage: Math.round((done / MODULES.length) * 100) };
+  // Weighted: lessons 60%, assessments 40%
+  const lessonPct = totalLessons > 0 ? (lessonsComplete / totalLessons) * 60 : 0;
+  const gqaPct = (done / MODULES.length) * 40;
+  const percentage = Math.round(lessonPct + gqaPct);
+  return { modulesComplete: done, percentage, lessonsComplete, totalLessons };
 };
 
 export const getNextAction = (

@@ -130,7 +130,21 @@ export default function LearnHub() {
                     </div>
 
                     {unlocked && !complete && (
-                      <Progress value={percent} className="h-1.5" />
+                      <div className="space-y-2">
+                        <Progress value={percent} className="h-1.5" />
+                        <div className="flex gap-1">
+                          {mod.lessons.map((lesson) => {
+                            const key = `${mod.id}.${lesson.id}`;
+                            const done = progressMap[key]?.completed;
+                            return (
+                              <div
+                                key={lesson.id}
+                                className={`h-1.5 flex-1 rounded-full ${done ? "bg-primary" : "bg-muted"}`}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -144,7 +158,7 @@ export default function LearnHub() {
       <motion.div variants={fadeUp} className="space-y-3">
         <h2 className="text-lg font-bold text-foreground">Practice</h2>
         <div className="grid grid-cols-2 gap-3">
-          <Link to="/practice/1">
+          <Link to={`/practice/${firstIncompleteMod?.id ?? MODULES[MODULES.length - 1].id}`}>
             <Card className="hover:border-primary/20 transition-all active:scale-[0.98]">
               <CardContent className="py-4 flex flex-col items-center gap-2 text-center">
                 <Target className="h-6 w-6 text-primary" />

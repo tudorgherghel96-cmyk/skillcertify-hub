@@ -27,7 +27,15 @@ export default function BRollSlide({ mediaUrl: initialUrl, isActive, muted, onEn
     if (isActive) {
       vid.muted = muted;
       vid.currentTime = 0;
-      vid.play().catch(() => {});
+      const p = vid.play();
+      if (p !== undefined) {
+        p.catch((err) => {
+          if (err.name === "NotAllowedError") {
+            vid.muted = true;
+            vid.play().catch(() => {});
+          }
+        });
+      }
     } else {
       vid.pause();
     }
@@ -63,8 +71,10 @@ export default function BRollSlide({ mediaUrl: initialUrl, isActive, muted, onEn
           ref={videoRef}
           src={currentSrc}
           poster={posterSrc}
+          autoPlay
           muted={muted}
           playsInline
+          crossOrigin="anonymous"
           preload="auto"
           onEnded={handleEnded}
           onError={handleError}

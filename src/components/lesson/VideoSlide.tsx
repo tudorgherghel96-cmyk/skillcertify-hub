@@ -28,25 +28,48 @@ export default function VideoSlide({
   const [error, setError] = useState(false);
   const [currentSrc, setCurrentSrc] = useState(initialUrl);
   const [triedFallback, setTriedFallback] = useState(false);
+  const [tapForSound, setTapForSound] = useState(false);
 
   // Reset state when the source URL changes (new card)
   useEffect(() => {
     setCurrentSrc(initialUrl);
     setError(false);
     setTriedFallback(false);
+    setTapForSound(false);
   }, [initialUrl]);
 
-  // Autoplay logic — untouched
+  // Autoplay logic — play with sound, fallback to muted if blocked
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
-    vid.muted = muted;
+
     if (isActive) {
-      vid.play().catch(() => {});
+      vid.muted = muted;
+      const playPromise = vid.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          if (err.name === "NotAllowedError") {
+            // Browser blocked unmuted autoplay — mute and retry
+            vid.muted = true;
+            vid.play().catch(() => {});
+            setTapForSound(true);
+          }
+        });
+      }
     } else {
       vid.pause();
     }
   }, [isActive, muted, currentSrc]);
+
+  // When user taps the "tap for sound" overlay, unmute
+  const handleTapForSound = useCallback(() => {
+    const vid = videoRef.current;
+    if (vid) {
+      vid.muted = false;
+      vid.play().catch(() => {});
+    }
+    setTapForSound(false);
+  }, []);
 
   const handleTimeUpdate = useCallback(() => {
     const vid = videoRef.current;
@@ -102,8 +125,11 @@ export default function VideoSlide({
           ref={videoRef}
           src={currentSrc}
           poster={posterSrc}
+          autoPlay
           playsInline
+          controls
           muted={muted}
+          crossOrigin="anonymous"
           preload="auto"
           onLoadStart={() => { if (isActive) setLoading(true); }}
           onCanPlay={() => setLoading(false)}
@@ -119,6 +145,35 @@ export default function VideoSlide({
             display: "block",
           }}
         />
+      )}
+
+      {/* Tap for sound indicator */}
+      {tapForSound && !error && (
+        <button
+          onClick={handleTapForSound}
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            zIndex: 20,
+            background: "rgba(0,0,0,0.7)",
+            backdropFilter: "blur(8px)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: 20,
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            animation: "tapPulse 2s ease-in-out infinite",
+          }}
+        >
+          🔊 Tap for sound
+        </button>
       )}
 
       {/* Loading spinner */}
@@ -185,7 +240,7 @@ export default function VideoSlide({
       )}
 
       {/* Mute toggle */}
-      {!error && <MuteToggle muted={muted} onToggle={onMuteToggle} />}
+      {!error && !tapForSound && <MuteToggle muted={muted} onToggle={onMuteToggle} />}
 
       {/* Fourth-wall overlays */}
       {fourthWallEffect === "lean_in" && overlayText && (
@@ -197,6 +252,7 @@ export default function VideoSlide({
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes tapPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
       `}</style>
     </div>
   );

@@ -1,206 +1,122 @@
 
-# Fix Data Inconsistencies, Empty Stats, and UX Gaps
+
+# Media Migration to `all-media` Bucket
 
 ## Overview
 
-This plan addresses the data mismatches, empty UI elements, missing context, and broken flows reported across the Dashboard, My Card, CSCS Prep, Module Overview, Profile, and Learn Hub pages.
+Migrate all media references from the old `lesson-images` and `lesson-videos` buckets to the new unified `all-media` bucket containing 282 re-encoded files with adaptive quality (720p/480p video pairs with .jpg posters). This must preserve video autoplay, smooth scroll-snap scrolling, and all existing UX behaviors.
+
+## What Changes
+
+### 1. New media utility (`src/utils/mediaUtils.ts`)
+
+A single source of truth for building media URLs from the `all-media` bucket:
+- `getMediaUrl(filename)` -- builds a public URL for any file
+- `getVideoUrl(baseName, quality?)` -- appends `_720p.mp4` or `_480p.mp4` based on connection quality
+- `getPosterUrl(baseName)` -- appends `.jpg` for poster/thumbnail
+- `getFallbackUrl(url)` -- converts a 720p URL to 480p for error fallback
+- `getVideoQuality()` -- reads `navigator.connection` to pick 720p vs 480p
+
+### 2. Update `src/lib/media.ts` -- Redirect to `all-media` bucket
+
+- `getLessonMediaUrl(file, bucket)`: Instead of constructing URLs from `lesson-images`/`lesson-videos`, route everything through `all-media`. For video files (`.mp4`), strip the extension, lowercase, and construct the quality-aware URL. For images, just lowercase the filename and point at `all-media`.
+- `mediaUrl(path)`: Point at `all-media` bucket instead of `lesson-images`
+- `getLessonVideoUrl(lessonId)`: This is only used by `WelcomeVideo` and `SlideRenderer`/`LessonMedia`. Since there's no welcome video in the new bucket, keep legacy behavior for `welcome` and update the rest.
+
+### 3. Update `VideoSlide.tsx` -- Add 720p/480p fallback with poster
+
+Currently the video `src` comes from `card.mediaUrl`. The enrichment in `LessonPlayer.tsx` calls `getLessonMediaUrl(media_file, media_bucket)` which will now return a 720p URL from `all-media`.
+
+Add fallback logic: if the 720p video errors, try 480p. If both fail, show the poster image (same base name + `.jpg`). This happens inside `VideoSlide` since it already has error handling.
+
+Key constraint: **autoplay must still work**. The current `useEffect` that calls `vid.play()` when `isActive` changes will remain untouched. Only the `onError` handler changes to attempt the 480p fallback before showing the error state.
+
+### 4. Update `BRollSlide.tsx` -- Same 720p/480p fallback
+
+Add the same fallback pattern. B-roll videos auto-advance on end, so the `onEnded` callback stays intact.
+
+### 5. Update `LessonPlayer.tsx` -- Enrichment logic
+
+The `getLessonMediaUrl` call already handles the mapping. The DB stores `media_file: "M1-L7-C02-teach-110v.mp4"` and `media_bucket: "lesson-videos"`. The updated `getLessonMediaUrl` will:
+1. Detect video files by extension
+2. Strip `.mp4`, lowercase the base name
+3. Return quality-aware URL from `all-media`
+
+For image files (`media_bucket: "lesson-images"`), it lowercases and serves from `all-media`.
+
+### 6. Update `src/data/mediaMap.ts` -- Point at `all-media`
+
+- `mediaUrl()` already calls `lib/media.ts` which will be updated
+- `moduleThumbnails`: The hero images now exist as lowercase in `all-media` (e.g., `hero-m1-l1-construction-site-hazards.jpeg`). Update the filenames to lowercase and bucket to `all-media`.
+
+### 7. Update `vite.config.ts` -- PWA caching rules
+
+Replace `course-media` URL patterns with `all-media`:
+- Images: match `/all-media/.*\.(webp|png|jpg|jpeg)$/i`
+- Videos: match `/all-media/.*\.(mp4|webm)$/i`
+
+### 8. Update `src/lib/offlineStorage.ts`
+
+Cache name stays the same (it's just a string key). No functional change needed since the URLs will change automatically via the media utilities.
+
+### 9. Update `DownloadTopicButton.tsx`
+
+Currently gathers URLs via `lessonMedia` images + `getLessonVideoUrl()`. These will automatically resolve to `all-media` after the media utility updates. No direct changes needed.
+
+### 10. Update `WelcomeVideo.tsx`
+
+No welcome video exists in `all-media`. Keep `getLessonVideoUrl("welcome")` pointing at the old `lesson-videos` bucket as a special case, or hide the component if the video 404s (it already does this via `onError`).
 
 ---
 
-## 1. Fix CSCS Prep vs My Card Data Inconsistency
+## What Does NOT Change (Preserving Existing UX)
 
-**Problem**: CSCS Prep shows "All 5 topics passed!" while My Card shows all 5 as "Not taken."
-
-**Root cause**: `CscsPrep.tsx` uses `allGqaPassed(progress, isSuperUser)` which returns `true` when super user mode is on. `MyCard.tsx` reads from the same `ProgressContext` but displays per-module GQA status from `getModuleProgress()`, which correctly shows `null` (not taken) when no actual GQA data exists.
-
-**Fix**:
-- In `CscsPrep.tsx`, do NOT pass `isSuperUser` to `allGqaPassed()` for the congratulations banner -- show actual data, not bypassed data
-- In `MyCard.tsx`, do the same -- use real progress, not super-user-bypassed progress, for display purposes
-- Super user mode should only bypass **locks/gates**, not falsify displayed status
-
-**Files**: `src/pages/CscsPrep.tsx`, `src/pages/MyCard.tsx`
+- **Scroll-snap behavior**: `SwipeContainer` CSS (`scroll-snap-type: y mandatory`, `WebkitOverflowScrolling: touch`) is untouched
+- **Video autoplay**: `VideoSlide`'s `useEffect` that calls `vid.play()` on `isActive` stays the same
+- **B-roll auto-advance**: `BRollSlide`'s `onEnded` callback stays intact
+- **Mute toggle**: Global mute state passed through `SwipeContainer` is unchanged
+- **IntersectionObserver**: Card detection logic in `SwipeContainer` is unchanged
+- **Fourth-wall overlays**: `LeanInCallout` and `HoldUpCard` in `VideoSlide` remain
+- **Interactive cards**: All quiz, drag-drop, tap-to-reveal cards have no media changes
 
 ---
 
-## 2. Fix "90 minutes" vs "~18 minutes" Test Duration
+## Technical Details
 
-**Problem**: Module overview says "90 minutes" but GQA test briefing says "~18 minutes."
+### DB filename to `all-media` mapping
 
-**Fix**: Update `ModuleOverview.tsx` line 332 from `"Closed book · 80% to pass · 90 minutes"` to `"Closed book · 80% to pass · ~18 min"` to match the GQA test briefing (which correctly says ~18 min proportional to the 90-min full exam).
+The `lesson_cards` table stores:
+- Videos: `media_file = "M1-L7-C02-teach-110v.mp4"`, `media_bucket = "lesson-videos"`
+- Images: `media_file = "1.7_photo_1.webp"`, `media_bucket = "lesson-images"`
+- Heroes: `media_file = "hero-M1-L7-electrical-fire-ppe.jpeg"`, `media_bucket = "lesson-images"`
 
-**File**: `src/pages/ModuleOverview.tsx`
+The `all-media` bucket has:
+- Videos: `m1-l7-c02-teach-110v_720p.mp4`, `m1-l7-c02-teach-110v_480p.mp4`, `m1-l7-c02-teach-110v.jpg`
+- Images: `1.1_photo_1.webp` (same name, already lowercase)
+- Heroes: `hero-m1-l1-construction-site-hazards.jpeg` (lowercase)
 
----
+Mapping rule in `getLessonMediaUrl`:
+- If bucket is `lesson-videos`: strip `.mp4`, lowercase, append `_720p.mp4` (or `_480p.mp4` based on quality)
+- If bucket is `lesson-images`: lowercase the filename, serve from `all-media`
 
-## 3. Enforce Practice Score Gating for Topic Tests
+### Special case: `m1-l7-c05-lean-in-co2.mp4`
 
-**Problem**: "Start test" button appears even with a 58% best score, despite UI saying "Score 80%+ to unlock test."
+This file has `.mp4` embedded in its base name. The DB stores `M1-L7-C05-lean-in-co2.mp4`. When we strip `.mp4` and lowercase, we get `m1-l7-c05-lean-in-co2` -- but the actual files are `m1-l7-c05-lean-in-co2.mp4_720p.mp4`. So the stripping logic must only strip a trailing `.mp4`, not embedded ones. Since the DB value ends in `.mp4` and the actual base name also ends in `.mp4`, we need to be careful: strip only the extension, and the base name `m1-l7-c05-lean-in-co2.mp4` is correct as-is for lookup.
 
-**Root cause**: `isGqaUnlocked()` checks `mp.practice.bestScore >= 80`, but the Module Overview renders the "Start test" button based on `gqaReady` which does use this check. The issue is that when `isSuperUser` is true, the gate is bypassed silently without visual indication.
+### Video preloading
 
-**Fix**: When super user bypasses the gate, show an amber badge like "QA bypass" next to the test button so it's clear the gate is being overridden. This is already partially working but the UI doesn't make it obvious.
+Add lightweight preloading: when a video card becomes active, fetch the next video card's 720p URL in the background using the Cache API. This is additive and doesn't affect scrolling.
 
-**File**: `src/pages/ModuleOverview.tsx`
+### Files Modified
 
----
+1. **NEW**: `src/utils/mediaUtils.ts` -- media URL builder with quality detection
+2. `src/lib/media.ts` -- redirect all URLs to `all-media` bucket
+3. `src/components/lesson/VideoSlide.tsx` -- add 720p to 480p fallback on error
+4. `src/components/lesson/BRollSlide.tsx` -- add 720p to 480p fallback on error
+5. `src/data/mediaMap.ts` -- lowercase hero filenames for `moduleThumbnails`
+6. `vite.config.ts` -- update PWA cache URL patterns to match `all-media`
+7. `src/lib/offlineStorage.ts` -- minor: update cache name constant if needed
 
-## 4. Fix Empty "Level" and "Best Streak" on Profile
+### No DB Changes Required
 
-**Problem**: Level and Best Streak labels appear but values seem empty.
-
-**Root cause**: `gamification.level` and `gamification.longestStreak` default to `1` and `0` respectively in `GamificationContext`. If the Supabase `user_gamification` row hasn't been created yet, these display `1` and `0` which look empty/meaningless. Additionally, `xpToLevel` in `GamificationContext` uses `floor(xp / 500) + 1` (level per 500 XP) while `useXpProgress.ts` uses `floor(xp / 100) + 1` (level per 100 XP) -- this mismatch means levels don't agree.
-
-**Fix**:
-- Unify `xpToLevel` to use the same threshold everywhere (100 XP per level, matching `useXpProgress.ts`)
-- Show "Level 1" and "0 days" explicitly rather than blank-looking
-- Add XP context: show "Level 2 (158/200 XP)" format so users understand what XP means
-
-**Files**: `src/contexts/GamificationContext.tsx`, `src/pages/Profile.tsx`, `src/pages/Dashboard.tsx`
-
----
-
-## 5. Add Context to XP Display
-
-**Problem**: "158 XP" is shown without explanation of what level it corresponds to.
-
-**Fix**: On the Dashboard stats grid, change the XP cell to show level prominently with XP as secondary text: "Level 2" with "158 XP" beneath. Add a small progress bar showing XP toward next level (e.g., 58/100 to Level 3).
-
-**File**: `src/pages/Dashboard.tsx`
-
----
-
-## 6. Make Certificate Section Actionable
-
-**Problem**: "Your certificate will appear here when you've passed all your tests" doesn't say which tests remain.
-
-**Fix**: When certificate isn't ready, show remaining topics as a list: "Remaining: Topic 2, Topic 4, Topic 5" based on which GQA modules haven't been passed yet.
-
-**File**: `src/pages/Profile.tsx`
-
----
-
-## 7. Fix Referral Text
-
-**Problem**: Already fixed in current code (line 272 shows "get £20 for every friend").
-
-**Status**: No change needed -- the code already reads correctly.
-
----
-
-## 8. Clarify Lesson Completion vs Assessment Status
-
-**Problem**: "2 of 5 topics done" alongside all assessments "Not taken."
-
-**Fix**: Change dashboard wording from "module_of" (which says "X of 5 topics done") to distinguish between "lessons completed" and "assessments passed." Show two separate stats:
-- "Lessons: X of 26 complete"  
-- "Assessments: X of 5 passed"
-
-This makes it clear that completing lessons and passing assessments are different steps.
-
-**File**: `src/pages/Dashboard.tsx`
-
----
-
-## 9. Label Career Ladder Cards as "Coming Soon"
-
-**Problem**: Blue, Gold, Black card buttons may lead to dead clicks.
-
-**Fix**: In `CardWallet.tsx`, add a "Coming soon" overlay or badge on the Blue, Gold, and Black cards. Disable click/tap on those cards.
-
-**File**: `src/components/journey/CardWallet.tsx`
-
----
-
-## 10. Add Quiz Status Indicators for Unattempted Lessons
-
-**Problem**: Quiz badges only show on attempted lessons; unattempted ones show nothing.
-
-**Fix**: In `ModuleOverview.tsx`, update `QuizStatusBadge` to show "Quiz: --" or a subtle indicator when `score === null` and the lesson is completed but quiz not attempted.
-
-**File**: `src/pages/ModuleOverview.tsx`
-
----
-
-## 11. Dynamic "Quick Practice" Link
-
-**Problem**: Always links to `/practice/1`.
-
-**Fix**: In `LearnHub.tsx`, change the Quick Practice link to dynamically point to the first incomplete module, or the most recent module if all are complete.
-
-**File**: `src/pages/LearnHub.tsx`
-
----
-
-## 12. Show Per-Lesson Progress on Module Cards
-
-**Problem**: Module cards don't show individual lesson completion without clicking in.
-
-**Fix**: On Dashboard and LearnHub module cards, add a small row of dots (one per lesson) -- filled for complete, empty for incomplete. This gives at-a-glance lesson-level progress.
-
-**Files**: `src/pages/Dashboard.tsx`, `src/pages/LearnHub.tsx`
-
----
-
-## 13. Add Overall Progress Percentage to Dashboard
-
-**Problem**: No prominent progress percentage despite data existing.
-
-**Fix**: Make the overall progress percentage larger and more prominent in the dashboard progress card. Show it as a big number (e.g., "62%") with "overall progress" label.
-
-**File**: `src/pages/Dashboard.tsx`
-
----
-
-## 14. Fix "Step 1 of 6" Dynamic Text
-
-**Problem**: Says "Start your lessons" even after lessons are completed.
-
-**Fix**: The `getNextAction()` function already returns dynamic labels like "Continue Topic X". The dashboard CTA button uses this. If the issue is a separate "Step X of 6" element elsewhere, update it to derive from actual progress state. Looking at the code, the Dashboard uses `nextAction.label` which is already dynamic. If there's a static "Step 1 of 6" text elsewhere, it needs to be made dynamic.
-
-**File**: `src/pages/Dashboard.tsx` (if the step text exists there)
-
----
-
-## 15. Add Personalized Greeting
-
-**Problem**: No "Welcome back, Tudor" greeting.
-
-**Fix**: Update Dashboard welcome text to include the user's name from `useAuth()`. Show "Welcome back, {name}" where name comes from `user?.user_metadata?.full_name` or email prefix.
-
-**File**: `src/pages/Dashboard.tsx`
-
----
-
-## 16. Fix 0% Progress vs 6-Day Streak Contradiction
-
-**Problem**: 0% progress shown alongside active streak.
-
-**Root cause**: `getOverallProgress()` only counts modules where GQA is passed (not lessons completed), so a user who completed lessons but hasn't passed any GQA shows 0%. This is misleading.
-
-**Fix**: Change `getOverallProgress()` to be a weighted calculation: lessons completed contribute 60% of progress, GQA passes contribute 40%. Alternatively, rename the metric to "Qualification progress" so it's clear it tracks assessment completion, not lesson completion.
-
-**File**: `src/contexts/ProgressContext.tsx`, `src/pages/Dashboard.tsx`
-
----
-
-## Technical Summary
-
-### Files Modified (17 files):
-1. `src/pages/CscsPrep.tsx` -- Fix super-user display bypass
-2. `src/pages/MyCard.tsx` -- Fix super-user display bypass  
-3. `src/pages/ModuleOverview.tsx` -- Fix duration text, quiz badges, QA bypass indicator
-4. `src/contexts/GamificationContext.tsx` -- Unify xpToLevel threshold
-5. `src/pages/Profile.tsx` -- XP context, certificate remaining tests
-6. `src/pages/Dashboard.tsx` -- Greeting, progress %, lesson dots, XP context, step text
-7. `src/pages/LearnHub.tsx` -- Dynamic Quick Practice link
-8. `src/components/journey/CardWallet.tsx` -- Coming soon labels
-9. `src/contexts/ProgressContext.tsx` -- Weighted overall progress
-
-### No Database Changes Required
-All fixes are frontend logic and display issues.
-
-### Implementation Order:
-1. Fix data source inconsistencies (items 1, 3, 16) -- these are the trust-breaking issues
-2. Unify xpToLevel and fix empty stats (items 4, 5)
-3. Fix UI text issues (items 2, 6, 8, 14, 15)
-4. Add missing indicators (items 9, 10, 11, 12, 13)
+All mapping is handled in frontend code. The `lesson_cards` table data stays the same.

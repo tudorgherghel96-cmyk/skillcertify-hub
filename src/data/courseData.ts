@@ -72,6 +72,7 @@ export const MODULES: Module[] = [
       { id: 2, title: "Ladder Safety" },
       { id: 3, title: "Scaffold Safety" },
       { id: 4, title: "Fragile Roofs, Internal Voids, and Fall Protection" },
+      { id: 5, title: "Fall Protection" },
     ],
     topics: [
       "Regulations",
@@ -81,6 +82,7 @@ export const MODULES: Module[] = [
       "Voids",
       "MEWPs",
       "Fall arrest",
+      "Fall protection",
     ],
   },
   {
@@ -91,6 +93,8 @@ export const MODULES: Module[] = [
       { id: 1, title: "COSHH: Substances Hazardous to Health" },
       { id: 2, title: "Asbestos: The Silent Killer" },
       { id: 3, title: "Drugs, Alcohol, Noise, and Vibration" },
+      { id: 4, title: "Dust and Chemicals" },
+      { id: 5, title: "Drugs, Alcohol & Substance Misuse" },
     ],
     topics: [
       "COSHH",
@@ -99,7 +103,9 @@ export const MODULES: Module[] = [
       "Noise",
       "Vibration",
       "Dust",
+      "Chemicals",
       "PPE matching",
+      "Substance misuse",
     ],
   },
   {
@@ -109,6 +115,8 @@ export const MODULES: Module[] = [
     lessons: [
       { id: 1, title: "Hazards Around Moving Plant and Vehicles" },
       { id: 2, title: "Exclusion Zones, Safeguards, and Emergency Stops" },
+      { id: 3, title: "Traffic Management" },
+      { id: 4, title: "Overhead Services & Buried Utilities" },
     ],
     topics: [
       "Exclusion zones",
@@ -116,6 +124,9 @@ export const MODULES: Module[] = [
       "Vehicles",
       "Emergency stops",
       "Safeguards",
+      "Traffic management",
+      "Overhead services",
+      "Buried utilities",
     ],
   },
 ];

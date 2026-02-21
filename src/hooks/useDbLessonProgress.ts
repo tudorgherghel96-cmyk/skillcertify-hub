@@ -51,8 +51,37 @@ export function useDbLessonProgress() {
           xp_earned: row.xp_earned ?? 0,
           cards_completed: row.cards_completed ?? 0,
           total_cards: row.total_cards ?? 0,
+          best_quiz_score: null,
+          quiz_passed: null,
         };
       }
+
+      // Fetch best quiz scores per lesson
+      const { data: quizData } = await supabase
+        .from("lesson_quiz_attempts")
+        .select("lesson_id, score, total, passed")
+        .eq("user_id", user.id);
+
+      for (const row of quizData ?? []) {
+        const pct = row.total > 0 ? Math.round((row.score / row.total) * 100) : 0;
+        const existing = map[row.lesson_id];
+        if (existing) {
+          if (existing.best_quiz_score === null || pct > existing.best_quiz_score) {
+            existing.best_quiz_score = pct;
+            existing.quiz_passed = row.passed;
+          }
+        } else {
+          map[row.lesson_id] = {
+            completed: false,
+            xp_earned: 0,
+            cards_completed: 0,
+            total_cards: 0,
+            best_quiz_score: pct,
+            quiz_passed: row.passed,
+          };
+        }
+      }
+
       setProgressMap(map);
       setLoading(false);
     };

@@ -62,6 +62,23 @@ const GlassCard = ({ children, className = "", hoverable = true, ...props }: {
   </motion.div>
 );
 
+/** Quiz status badge for each lesson row */
+const QuizStatusBadge = ({ score, passed }: { score: number | null; passed: boolean | null }) => {
+  if (score === null) return null;
+  if (passed) {
+    return (
+      <Badge variant="secondary" className="bg-primary/10 text-primary text-[10px] ml-auto shrink-0">
+        Quiz {score}% ✓
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="secondary" className="bg-destructive/10 text-destructive text-[10px] ml-auto shrink-0">
+      Quiz {score}%
+    </Badge>
+  );
+};
+
 const ModuleOverview = () => {
   const { id } = useParams();
   const moduleId = Number(id) || 1;
@@ -84,6 +101,18 @@ const ModuleOverview = () => {
   // DB-backed lesson completion
   const isLessonDone = (lessonNum: number) =>
     !!progressMap[`${moduleId}.${lessonNum}`]?.completed;
+
+  // Quiz gating: previous lesson must have quiz passed at 60%+ (or be superuser)
+  const isQuizGated = (lessonIndex: number) => {
+    if (isSuperUser || lessonIndex === 0) return false;
+    const prevLesson = mod.lessons[lessonIndex - 1];
+    const prevProgress = progressMap[`${moduleId}.${prevLesson.id}`];
+    if (!prevProgress) return true;
+    if (!prevProgress.completed) return true;
+    // If prev lesson has a quiz, require 60%+
+    if (prevProgress.best_quiz_score !== null && (prevProgress.best_quiz_score ?? 0) < 60) return true;
+    return false;
+  };
 
   const lessonsComplete = mod.lessons.filter((l) => isLessonDone(l.id)).length;
 
@@ -148,7 +177,9 @@ const ModuleOverview = () => {
             {mod.lessons.map((lesson, i) => {
               const done = isLessonDone(lesson.id);
               const prevDone = i === 0 || isLessonDone(mod.lessons[i - 1].id);
-              const isLocked = !isSuperUser && !prevDone && !done;
+              const quizGated = isQuizGated(i);
+              const isLocked = !isSuperUser && (!prevDone || quizGated) && !done;
+              const lessonProgress = progressMap[`${moduleId}.${lesson.id}`];
 
               return (
                 <Link
@@ -177,6 +208,12 @@ const ModuleOverview = () => {
                       <span className="text-sm flex-1">
                         {moduleId}.{lesson.id} — {lesson.title}
                       </span>
+                      {lessonProgress && (
+                        <QuizStatusBadge
+                          score={lessonProgress.best_quiz_score}
+                          passed={lessonProgress.quiz_passed}
+                        />
+                      )}
                       {!isLocked && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
                     </CardContent>
                   </GlassCard>

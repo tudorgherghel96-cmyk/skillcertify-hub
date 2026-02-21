@@ -104,7 +104,7 @@ const Landing = () => {
             className="mt-3 text-sm sm:text-base text-secondary-foreground/70 max-w-md mx-auto">
             {t("hero_title_2")}
             <br />
-            <span className="font-semibold text-secondary-foreground/80">Learn in your language.</span>
+            <span className="font-semibold text-secondary-foreground/80 inline-block mt-2">Learn in your language.</span>
           </motion.p>
 
           {/* CTA */}

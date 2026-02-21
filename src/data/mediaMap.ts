@@ -177,13 +177,13 @@ export const lessonMedia: Record<string, LessonMedia> = {
 };
 
 // Helper to get module thumbnail for dashboard
-// Uses actual hero images from the lesson-images Supabase bucket
-import { getLessonMediaUrl } from '@/lib/media';
+// Uses hero images from the all-media bucket (lowercase filenames)
+import { getMediaUrl } from '@/utils/mediaUtils';
 
 export const moduleThumbnails: Record<number, string> = {
-  1: getLessonMediaUrl('hero-M1-L1-construction-site-hazards.jpeg', 'lesson-images'),
-  2: getLessonMediaUrl('hero-M2-L2-safe-lifting.jpeg', 'lesson-images'),
-  3: getLessonMediaUrl('hero-M3-L1-working-at-height.jpeg', 'lesson-images'),
-  4: getLessonMediaUrl('hero-M4-L1-coshh.jpeg', 'lesson-images'),
-  5: getLessonMediaUrl('hero-M5-L1-banksman.jpeg', 'lesson-images'),
+  1: getMediaUrl('hero-m1-l1-construction-site-hazards.jpeg'),
+  2: getMediaUrl('hero-m2-l2-safe-lifting.jpeg'),
+  3: getMediaUrl('hero-m3-l1-working-at-height.jpeg'),
+  4: getMediaUrl('hero-m4-l1-coshh.jpeg'),
+  5: getMediaUrl('hero-m5-l1-banksman.jpeg'),
 };

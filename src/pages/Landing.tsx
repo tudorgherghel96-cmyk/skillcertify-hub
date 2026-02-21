@@ -138,7 +138,7 @@ const Landing = () => {
             className="mt-6 flex items-center justify-center gap-3">
 
             <div className="flex items-center gap-2 h-9 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5">
-              <img alt="GQA" className="h-5 w-auto" src="/lovable-uploads/510b8c6a-93fa-4ca9-93a6-1586b34e49d7.png" />
+              <img alt="GQA" className="h-5 w-auto" src={gqaLogo} />
               <span className="text-[10px] sm:text-xs font-medium text-secondary-foreground/60">GQA Approved Centre</span>
             </div>
             <div className="flex items-center gap-2 h-9 px-3 rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5">
@@ -339,6 +339,7 @@ const Landing = () => {
           <div className="flex items-center justify-center gap-4">
             <img alt="SkillCertify" className="h-8 w-auto" src="/lovable-uploads/8ce84cb0-0e09-4a2c-a491-ac5dbd2e8190.jpg" />
             <img src={skillcertifyLogo} alt="SkillCertify" className="h-8" />
+            <img src={gqaLogo} alt="GQA Approved Centre" className="h-8 w-auto" />
             <img src={cscsFullLogo} alt="CSCS" className="h-8 w-auto" />
           </div>
 

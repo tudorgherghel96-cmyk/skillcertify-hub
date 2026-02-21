@@ -80,7 +80,7 @@ const Landing = () => {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="h-12 w-auto mx-auto mb-6"
+            className="h-[60px] w-auto mx-auto mb-6"
             loading="eager"
             decoding="sync"
             fetchPriority="high" />

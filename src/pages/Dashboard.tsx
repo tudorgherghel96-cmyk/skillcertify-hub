@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -112,6 +113,7 @@ const Dashboard = () => {
   const { gamification, badges, nudges, motivationalMessage, refreshLessonStrength } = useGamification();
   const { language } = useLanguage();
   const { isSuperUser } = useSuperUser();
+  const { user } = useAuth();
   const lang = language.code;
   const overall = getOverallProgress(progress);
   const nextAction = getNextAction(progress);
@@ -156,7 +158,10 @@ const Dashboard = () => {
         {/* Welcome */}
         <motion.div variants={fadeUp}>
           <h1 className="text-xl sm:text-2xl font-bold">
-            {ui("welcome_back", lang)} <span className="text-primary">{ui("fastest_route", lang)}</span>
+            {user?.user_metadata?.full_name
+              ? `Welcome back, ${user.user_metadata.full_name.split(" ")[0]}! 👋`
+              : `${ui("welcome_back", lang)}`}{" "}
+            <span className="text-primary">{ui("fastest_route", lang)}</span>
           </h1>
         </motion.div>
 
@@ -241,13 +246,20 @@ const Dashboard = () => {
         <motion.div variants={fadeUp}>
           <GlassCard>
             <CardContent className="pt-5 pb-4 space-y-3">
-              <div className="flex justify-between items-baseline">
-                <span className="font-semibold text-sm">
-                  {ui("module_of", lang, overall.modulesComplete)} — {ui("gqa_passed", lang, gqaPassed, gqaPassed !== 1 ? "s" : "")}
-                </span>
-                <span className="text-xs text-muted-foreground">{overall.percentage}%</span>
+              {/* Big progress % */}
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <p className="text-3xl font-extrabold text-primary">{overall.percentage}%</p>
+                  <p className="text-[10px] text-muted-foreground font-medium">Overall Progress</p>
+                </div>
+                <div className="flex-1 space-y-1">
+                  <Progress value={overall.percentage} className="h-2.5" />
+                  <div className="flex justify-between text-[10px] text-muted-foreground">
+                    <span>Lessons: {overall.lessonsComplete}/{overall.totalLessons}</span>
+                    <span>Assessments: {gqaPassed}/5 passed</span>
+                  </div>
+                </div>
               </div>
-              <Progress value={overall.percentage} className="h-2.5" />
 
               {nextAction && (
                 <Button asChild className="w-full h-12 mt-1">
@@ -273,8 +285,8 @@ const Dashboard = () => {
                   <p className="text-[10px] text-muted-foreground">{ui("day_streak", lang)}</p>
                 </div>
                 <div className="text-center p-2 rounded-lg bg-muted/50">
-                  <p className="text-lg font-bold text-foreground">{gamification.totalXp}</p>
-                  <p className="text-[10px] text-muted-foreground">XP</p>
+                  <p className="text-sm font-bold text-foreground">Level {gamification.level}</p>
+                  <p className="text-[10px] text-muted-foreground">{gamification.totalXp} XP</p>
                 </div>
                 <div className="text-center p-2 rounded-lg bg-muted/50">
                   <p className="text-lg font-bold text-foreground">
@@ -284,9 +296,9 @@ const Dashboard = () => {
                 </div>
                 <div className="text-center p-2 rounded-lg bg-muted/50">
                   <p className="text-lg font-bold text-foreground">
-                    {gamification.level}
+                    {Math.round((gamification.totalXp % 100) / 100 * 100)}%
                   </p>
-                  <p className="text-[10px] text-muted-foreground">Level</p>
+                  <p className="text-[10px] text-muted-foreground">To Next Lvl</p>
                 </div>
               </div>
             </CardContent>

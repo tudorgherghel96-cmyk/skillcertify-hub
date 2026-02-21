@@ -63,8 +63,17 @@ const GlassCard = ({ children, className = "", hoverable = true, ...props }: {
 );
 
 /** Quiz status badge for each lesson row */
-const QuizStatusBadge = ({ score, passed }: { score: number | null; passed: boolean | null }) => {
-  if (score === null) return null;
+const QuizStatusBadge = ({ score, passed, lessonDone }: { score: number | null; passed: boolean | null; lessonDone?: boolean }) => {
+  if (score === null) {
+    if (lessonDone) {
+      return (
+        <Badge variant="outline" className="text-[10px] ml-auto shrink-0 text-muted-foreground">
+          Quiz: —
+        </Badge>
+      );
+    }
+    return null;
+  }
   if (passed) {
     return (
       <Badge variant="secondary" className="bg-primary/10 text-primary text-[10px] ml-auto shrink-0">
@@ -208,12 +217,11 @@ const ModuleOverview = () => {
                       <span className="text-sm flex-1">
                         {moduleId}.{lesson.id} — {lesson.title}
                       </span>
-                      {lessonProgress && (
-                        <QuizStatusBadge
-                          score={lessonProgress.best_quiz_score}
-                          passed={lessonProgress.quiz_passed}
-                        />
-                      )}
+                      <QuizStatusBadge
+                        score={lessonProgress?.best_quiz_score ?? null}
+                        passed={lessonProgress?.quiz_passed ?? null}
+                        lessonDone={done}
+                      />
                       {!isLocked && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
                     </CardContent>
                   </GlassCard>
@@ -329,18 +337,25 @@ const ModuleOverview = () => {
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {gqaReady
-                        ? "Closed book · 80% to pass · 90 minutes"
+                        ? "Closed book · 80% to pass · ~18 min"
                         : "Score 80%+ in practice to unlock the test"}
                     </p>
                   </div>
                 </div>
               )}
               {gqaReady && !complete && !failed && (
-                <Button asChild className="w-full h-11">
-                  <Link to={`/gqa-test/${moduleId}`}>
-                    <ExternalLink className="mr-2 h-4 w-4" /> Start test
-                  </Link>
-                </Button>
+                <div className="space-y-2">
+                  {isSuperUser && mp.practice.bestScore < 80 && (
+                    <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30 text-[10px]">
+                      QA bypass — practice score {mp.practice.bestScore}%
+                    </Badge>
+                  )}
+                  <Button asChild className="w-full h-11">
+                    <Link to={`/gqa-test/${moduleId}`}>
+                      <ExternalLink className="mr-2 h-4 w-4" /> Start test
+                    </Link>
+                  </Button>
+                </div>
               )}
             </CardContent>
           </GlassCard>

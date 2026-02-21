@@ -6,7 +6,8 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
 import { useSuperUser } from "@/contexts/SuperUserContext";
-import { allGqaPassed, useProgress } from "@/contexts/ProgressContext";
+import { allGqaPassed, useProgress, getModuleProgress } from "@/contexts/ProgressContext";
+import { MODULES } from "@/data/courseData";
 import { useGamification } from "@/contexts/GamificationContext";
 import { useAccessibility, type TextSize } from "@/contexts/AccessibilityContext";
 import { inviteFriend, generateReferralCode } from "@/lib/sharing";
@@ -133,17 +134,21 @@ export default function Profile() {
             <h3 className="text-sm font-bold flex items-center gap-2">
               <Star className="h-4 w-4 text-primary" /> Your Stats
             </h3>
-            <div className="grid grid-cols-3 gap-3">
+             <div className="grid grid-cols-3 gap-3">
+              <div className="text-center p-2 rounded-lg bg-muted/50">
+                <p className="text-lg font-bold text-foreground">
+                  Level {gamification.level}
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  {gamification.totalXp % 100}/{100} XP to next
+                </p>
+              </div>
               <div className="text-center p-2 rounded-lg bg-muted/50">
                 <p className="text-lg font-bold text-foreground">{gamification.totalXp}</p>
                 <p className="text-[10px] text-muted-foreground">Total XP</p>
               </div>
               <div className="text-center p-2 rounded-lg bg-muted/50">
-                <p className="text-lg font-bold text-foreground">{gamification.level}</p>
-                <p className="text-[10px] text-muted-foreground">Level</p>
-              </div>
-              <div className="text-center p-2 rounded-lg bg-muted/50">
-                <p className="text-lg font-bold text-foreground">{gamification.longestStreak}</p>
+                <p className="text-lg font-bold text-foreground">{gamification.longestStreak} days</p>
                 <p className="text-[10px] text-muted-foreground">Best Streak</p>
               </div>
             </div>
@@ -191,6 +196,16 @@ export default function Profile() {
                     ? "Your certificate is ready to download."
                     : "Your certificate will appear here when you've passed all your tests."}
                 </p>
+                {!hasQualification && (() => {
+                  const remaining = MODULES.filter(
+                    (m) => getModuleProgress(progress, m.id).gqa.passed !== true
+                  );
+                  return remaining.length > 0 ? (
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Remaining: {remaining.map((m) => `Topic ${m.id}`).join(", ")}
+                    </p>
+                  ) : null;
+                })()}
               </div>
               {hasQualification && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
             </div>

@@ -28,7 +28,10 @@ const CscsPrep = () => {
   const { progress } = useProgress();
   const navigate = useNavigate();
   const { isSuperUser } = useSuperUser();
-  const allPassed = allGqaPassed(progress, isSuperUser);
+  // For display: show actual data, not super-user bypass
+  const allPassedReal = allGqaPassed(progress, false);
+  // For gating: allow super user to access the page
+  const allPassedGate = allGqaPassed(progress, isSuperUser);
 
   const [mockStarted, setMockStarted] = useState(false);
   const [mockResult, setMockResult] = useState<{
@@ -51,7 +54,7 @@ const CscsPrep = () => {
   );
 
   // Gate: must pass all 5 topics
-  if (!allPassed) {
+  if (!allPassedGate) {
     const remaining = MODULES.filter(
       (m) => !isModuleComplete(getModuleProgress(progress, m.id))
     );

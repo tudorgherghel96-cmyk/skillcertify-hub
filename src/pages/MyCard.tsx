@@ -47,7 +47,7 @@ export default function MyCard() {
   const allPractice80 = MODULES.every(
     (m) => getModuleProgress(progress, m.id).practice.bestScore >= 80
   );
-  const allGqa = allGqaPassed(progress, isSuperUser);
+  const allGqa = allGqaPassed(progress, false); // Show real data, not super-user bypass
   const cscsPassed = progress.cscs.passed === true;
 
   const getStatus = (done: boolean, prevDone: boolean): StepStatus =>

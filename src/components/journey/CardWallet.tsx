@@ -102,8 +102,9 @@ export default function CardWallet({ currentTarget = "green" }: CardWalletProps)
                   className="w-full aspect-[1.586/1] object-cover"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center">
-                  <Lock className="h-5 w-5 text-muted-foreground" />
+                <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex flex-col items-center justify-center gap-1">
+                  <Lock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-[8px] font-semibold text-muted-foreground uppercase tracking-wide">Coming soon</span>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-1.5">
                   <p className="text-[9px] font-semibold text-white truncate">{card.label}</p>

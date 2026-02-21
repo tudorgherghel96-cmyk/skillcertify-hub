@@ -12,6 +12,8 @@ import {
   ListChecks,
   Trophy,
   Clock,
+  BookOpen,
+  RotateCcw,
 } from "lucide-react";
 import { MODULES } from "@/data/courseData";
 import { useProgress } from "@/contexts/ProgressContext";
@@ -318,7 +320,7 @@ const CscsPrep = () => {
       </Card>
 
       {/* CSCS Test Button */}
-      <div className="pt-2 pb-4">
+      <div className="pt-2 pb-2">
         <Button asChild className="w-full h-14 text-base font-bold">
           <Link to="/cscs-test">
             <ShieldCheck className="mr-2 h-5 w-5" />
@@ -327,6 +329,37 @@ const CscsPrep = () => {
           </Link>
         </Button>
       </div>
+
+      {/* Back to learning / Reset */}
+      <div className="border rounded-xl p-4 bg-card space-y-3">
+        <p className="text-xs text-muted-foreground text-center">
+          Want to revise more or start fresh?
+        </p>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" className="flex-1 h-10">
+            <Link to="/learn">
+              <BookOpen className="mr-1.5 h-4 w-4" />
+              Back to lessons
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            className="flex-1 h-10 text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={() => {
+              if (window.confirm("This will reset all your progress — lessons, practice scores, and test results. Are you sure?")) {
+                // Clear local progress
+                localStorage.removeItem("skillcertify-progress");
+                window.location.href = "/";
+              }
+            }}
+          >
+            <RotateCcw className="mr-1.5 h-4 w-4" />
+            Reset progress
+          </Button>
+        </div>
+      </div>
+
+      <div className="h-4" />
     </div>
   );
 };

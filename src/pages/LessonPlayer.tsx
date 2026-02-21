@@ -74,7 +74,7 @@ function ExitModal({ open, onStay, onLeave }: { open: boolean; onStay: () => voi
                 Keep going
               </button>
               <button
-                onClick={onLeave}
+                onClick={(e) => { e.stopPropagation(); onLeave(); }}
                 style={{
                   flex: 1, height: 52, borderRadius: 16, background: "#C62828", border: "none",
                   color: "white", fontSize: 15, fontWeight: 600, cursor: "pointer",
@@ -399,7 +399,7 @@ export default function LessonPlayer() {
         )}
       </div>
 
-      <ExitModal open={showExit} onStay={() => setShowExit(false)} onLeave={() => navigate(-1)} />
+      <ExitModal open={showExit} onStay={() => setShowExit(false)} onLeave={() => navigate("/learn")} />
       <ResumeModal
         open={showResume}
         cardIndex={resumeCardIndex}

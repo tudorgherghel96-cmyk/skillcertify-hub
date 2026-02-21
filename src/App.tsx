@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ProgressProvider } from "@/contexts/ProgressContext";
 import { GamificationProvider } from "@/contexts/GamificationContext";
@@ -61,7 +61,7 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/module/:id" element={<ModuleOverview />} />
               </Route>
-              <Route element={<ProtectedRoute><></></ProtectedRoute>}>
+              <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
                 <Route path="/lesson/:moduleId/:lessonId" element={<LessonPlayer />} />
                 <Route path="/practice/boost" element={<BoostDrill />} />
                 <Route path="/practice/:moduleId" element={<PracticeQuiz />} />

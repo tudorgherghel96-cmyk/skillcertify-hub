@@ -20,10 +20,11 @@ export const lessonMedia: Record<string, LessonMedia> = {
   "1.1": {
     images: [
       { src: mediaUrl('module1_1/1.1_photo_1.webp'), alt: 'Wet floor slip hazard on construction walkway' },
-      { src: mediaUrl('module1_1/1.1_photo_2.webp'), alt: 'Stack of bricks on uneven ground' },
+      { src: mediaUrl('module1_1/1.1_photo_5.webp'), alt: 'Trailing cables — a common site hazard' },
       { src: mediaUrl('module1_1/1.1_photo_3.webp'), alt: 'Scaffold pole across walkway — trip hazard' },
       { src: mediaUrl('module1_1/1.1_photo_4.webp'), alt: 'Paint tins near drainage — environmental hazard' },
-      { src: mediaUrl('module1_1/1.1_photo_5.webp'), alt: 'Power cables across wet surface — electrical hazard' },
+      { src: mediaUrl('module1_1/1.1_photo_1.webp'), alt: 'Wet floor slip hazard — can you spot the hazards?' },
+      { src: mediaUrl('module1_1/1.1_photo_2.webp'), alt: 'Materials stacked incorrectly — brick stack on uneven ground' },
       { src: mediaUrl('module1_1/1.1_photo_6.webp'), alt: 'Hazard vs Risk comparison infographic' },
     ]
   },

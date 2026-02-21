@@ -11,18 +11,17 @@ export default function ImageSlide({ src, alt = "", caption, isActive }: ImageSl
   const [imgError, setImgError] = useState(false);
 
   return (
-    <div style={{ width: "100%", height: "100%", position: "relative", background: "#111", overflow: "hidden" }}>
+    <div style={{ width: "100%", height: "100%", background: "#000", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
       {!imgError && src && (
         <img
           src={src}
           alt={alt}
           onError={() => setImgError(true)}
           style={{
-            position: "absolute",
-            inset: 0,
             width: "100%",
             height: "100%",
-            objectFit: "cover",
+            objectFit: "contain",
+            display: "block",
           }}
           loading="lazy"
         />
@@ -41,8 +40,8 @@ export default function ImageSlide({ src, alt = "", caption, isActive }: ImageSl
             bottom: 0,
             left: 0,
             right: 0,
-            padding: "20px 20px",
-            background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)",
+            padding: "24px 20px",
+            background: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.4) 60%, transparent)",
           }}
         >
           <p

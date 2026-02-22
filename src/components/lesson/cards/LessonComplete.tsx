@@ -55,7 +55,7 @@ function Confetti() {
         <div
           key={p.id}
           style={{
-            position: "fixed",
+            position: "absolute",
             left: `${p.x}%`,
             top: -20,
             width: p.size,

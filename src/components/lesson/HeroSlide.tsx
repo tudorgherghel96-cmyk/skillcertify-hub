@@ -54,7 +54,7 @@ export default function HeroSlide({ src, lessonTitle, moduleNumber, durationLabe
       <div
         style={{
           position: "absolute",
-          top: 100,
+          top: 130,
           left: 20,
           background: "rgba(255,255,255,0.15)",
           backdropFilter: "blur(12px)",
@@ -75,7 +75,7 @@ export default function HeroSlide({ src, lessonTitle, moduleNumber, durationLabe
         <div
           style={{
             position: "absolute",
-            top: 100,
+            top: 130,
             right: 20,
             background: "rgba(255,255,255,0.15)",
             backdropFilter: "blur(12px)",

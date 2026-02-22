@@ -1,5 +1,6 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -38,6 +39,13 @@ function shuffleArray<T>(arr: T[]): T[] {
   return shuffled;
 }
 
+function shuffleQuestions(rawQs: QuizQuestion[]): QuizQuestion[] {
+  return shuffleArray(rawQs).map((q) => {
+    const shuffledOpts = shuffleArray(q.options);
+    return { ...q, options: shuffledOpts };
+  });
+}
+
 export default function LessonQuiz({
   title,
   subtitle,
@@ -47,17 +55,16 @@ export default function LessonQuiz({
   onQuizComplete,
 }: LessonQuizProps) {
   const { user } = useAuth();
-  const [questions, setQuestions] = useState(() => shuffleArray(rawQuestions));
+  const [questions, setQuestions] = useState(() => shuffleQuestions(rawQuestions));
   const [currentQ, setCurrentQ] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [showResults, setShowResults] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const savedRef = useRef(false);
 
   const q = questions[currentQ];
   const isCorrect = confirmed && selected === q?.correct;
-  const isWrong = confirmed && selected !== q?.correct;
 
   const score = useMemo(() => {
     if (!showResults) return 0;
@@ -72,11 +79,13 @@ export default function LessonQuiz({
   const passed = pct >= pass_threshold * 100;
   const examReady = pct >= 80;
 
-  const handleConfirm = useCallback(() => {
-    if (!selected || !q) return;
+  // Single-tap: selecting an option immediately confirms
+  const handleSelect = useCallback((optId: string) => {
+    if (confirmed || !q) return;
+    setSelected(optId);
     setConfirmed(true);
-    setAnswers((prev) => ({ ...prev, [q.id]: selected }));
-  }, [selected, q]);
+    setAnswers((prev) => ({ ...prev, [q.id]: optId }));
+  }, [confirmed, q]);
 
   const handleNext = useCallback(() => {
     if (currentQ < total - 1) {
@@ -88,36 +97,40 @@ export default function LessonQuiz({
     }
   }, [currentQ, total]);
 
-  const handleFinish = useCallback(async () => {
+  // Auto-save when results are shown
+  useEffect(() => {
+    if (!showResults || savedRef.current) return;
     const finalScore = questions.reduce(
       (acc, qq) => acc + (answers[qq.id] === qq.correct ? 1 : 0),
       0,
     );
     const finalPassed = Math.round((finalScore / total) * 100) >= pass_threshold * 100;
+    savedRef.current = true;
 
     if (user) {
-      setSaving(true);
-      await supabase.from("lesson_quiz_attempts" as any).insert({
+      supabase.from("lesson_quiz_attempts" as any).insert({
         user_id: user.id,
         lesson_id: lessonId,
         score: finalScore,
         total,
         passed: finalPassed,
         answers_json: answers,
+      }).then(() => {
+        onQuizComplete(finalPassed, finalScore, total);
       });
-      setSaving(false);
+    } else {
+      onQuizComplete(finalPassed, finalScore, total);
     }
-
-    onQuizComplete(finalPassed, finalScore, total);
-  }, [questions, answers, total, pass_threshold, user, lessonId, onQuizComplete]);
+  }, [showResults, questions, answers, total, pass_threshold, user, lessonId, onQuizComplete]);
 
   const handleRetry = useCallback(() => {
-    setQuestions(shuffleArray(rawQuestions));
+    setQuestions(shuffleQuestions(rawQuestions));
     setCurrentQ(0);
     setSelected(null);
     setConfirmed(false);
     setAnswers({});
     setShowResults(false);
+    savedRef.current = false;
   }, [rawQuestions]);
 
   // Results screen
@@ -176,21 +189,20 @@ export default function LessonQuiz({
           >
             🔄 Try Again
           </button>
-          {passed && (
-            <button
-              onClick={handleFinish}
-              disabled={saving}
-              className="h-12 rounded-2xl bg-amber-500 text-white font-bold text-sm disabled:opacity-50"
-            >
-              {saving ? "Saving..." : "Continue →"}
-            </button>
-          )}
           {!passed && (
             <p className="text-xs text-white/40 text-center">
               Score at least {Math.round(pass_threshold * 100)}% to continue to the next lesson.
             </p>
           )}
         </div>
+
+        {/* Swipe hint */}
+        {passed && (
+          <div className="flex flex-col items-center gap-1 mt-8 animate-bounce">
+            <ChevronUp size={20} className="text-white/40" />
+            <span className="text-xs text-white/40">Swipe up to continue</span>
+          </div>
+        )}
       </div>
     );
   }
@@ -251,10 +263,6 @@ export default function LessonQuiz({
                   border = "rgba(239,68,68,0.5)";
                   labelBg = "rgba(239,68,68,0.3)";
                 }
-              } else if (isSelected) {
-                bg = "rgba(245,158,11,0.15)";
-                border = "rgba(245,158,11,0.5)";
-                labelBg = "rgba(245,158,11,0.3)";
               }
 
               return (
@@ -262,7 +270,7 @@ export default function LessonQuiz({
                   key={opt.id}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (!confirmed) setSelected(opt.id);
+                    handleSelect(opt.id);
                   }}
                   disabled={confirmed}
                   style={{ background: bg, borderColor: border }}
@@ -311,25 +319,17 @@ export default function LessonQuiz({
         </motion.div>
       </AnimatePresence>
 
-      {/* Action button */}
-      <div className="mt-4">
-        {!confirmed ? (
-          <button
-            onClick={(e) => { e.stopPropagation(); handleConfirm(); }}
-            disabled={!selected}
-            className="w-full h-12 rounded-2xl bg-amber-500 text-white font-bold text-sm disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
-          >
-            Confirm Answer
-          </button>
-        ) : (
+      {/* Next button - only shown after answering */}
+      {confirmed && (
+        <div className="mt-4">
           <button
             onClick={(e) => { e.stopPropagation(); handleNext(); }}
             className="w-full h-12 rounded-2xl bg-white/10 border border-white/15 text-white font-semibold text-sm"
           >
             {currentQ < total - 1 ? "Next Question →" : "See Results"}
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

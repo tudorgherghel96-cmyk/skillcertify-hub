@@ -77,7 +77,7 @@ function CardRenderer({
           src={card.mediaUrl || ""}
           lessonTitle={(content.lesson_title as string) || ""}
           moduleNumber={card.module_id}
-          durationLabel={content.duration_label as string | undefined}
+          durationLabel={(content.duration_label || content.duration) as string | undefined}
           isActive={isActive}
         />
       );

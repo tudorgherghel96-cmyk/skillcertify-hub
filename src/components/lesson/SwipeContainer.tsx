@@ -161,17 +161,33 @@ function CardRenderer({
       );
     }
 
-    case "drag_drop":
+    case "drag_drop": {
+      // Normalize: DB stores flat string arrays, component expects { id, text }[]
+      const rawItems = (content.items as (string | { id: string; text: string })[]) || [];
+      const normItems = rawItems.map((item, i) =>
+        typeof item === "string" ? { id: `item-${i}`, text: item } : item
+      );
+      const rawTargets = (content.targets as (string | { id: string; text: string })[]) || [];
+      const normTargets = rawTargets.map((t, i) =>
+        typeof t === "string" ? { id: `target-${i}`, text: t } : t
+      );
+      // Generate correct_pairs from positional matching if not provided
+      const ddPairs = (content.correct_pairs as Record<string, string>) ||
+        normItems.reduce((acc, item, i) => {
+          if (normTargets[i]) acc[item.id] = normTargets[i].id;
+          return acc;
+        }, {} as Record<string, string>);
       return (
         <InteractiveSlide>
           <DragDrop
-            items={(content.items as { id: string; text: string }[]) || []}
-            targets={(content.targets as { id: string; text: string }[]) || []}
-            correct_pairs={(content.correct_pairs as Record<string, string>) || {}}
+            items={normItems}
+            targets={normTargets}
+            correct_pairs={ddPairs}
             xp_value={card.xp_value}
           />
         </InteractiveSlide>
       );
+    }
 
     case "tap_to_reveal":
       return (
@@ -217,17 +233,29 @@ function CardRenderer({
         </InteractiveSlide>
       );
 
-    case "pattern_card":
+    case "pattern_card": {
+      // Normalize: DB stores pairs: [{ hazard, disease }], component expects separate arrays
+      const rawPairs = (content.pairs as { hazard: string; disease: string }[]) || [];
+      const pcHazards = rawPairs.length > 0
+        ? rawPairs.map((p, i) => ({ id: `h-${i}`, text: p.hazard }))
+        : ((content.hazards as { id: string; text: string }[]) || []);
+      const pcDiseases = rawPairs.length > 0
+        ? rawPairs.map((p, i) => ({ id: `d-${i}`, text: p.disease }))
+        : ((content.diseases as { id: string; text: string }[]) || []);
+      const pcPairs = rawPairs.length > 0
+        ? rawPairs.reduce((acc, _, i) => { acc[`h-${i}`] = `d-${i}`; return acc; }, {} as Record<string, string>)
+        : ((content.correct_pairs as Record<string, string>) || {});
       return (
         <InteractiveSlide>
           <PatternCard
-            hazards={(content.hazards as { id: string; text: string }[]) || []}
-            diseases={(content.diseases as { id: string; text: string }[]) || []}
-            correct_pairs={(content.correct_pairs as Record<string, string>) || {}}
+            hazards={pcHazards}
+            diseases={pcDiseases}
+            correct_pairs={pcPairs}
             xp_value={card.xp_value}
           />
         </InteractiveSlide>
       );
+    }
 
     case "remember_this":
       return (

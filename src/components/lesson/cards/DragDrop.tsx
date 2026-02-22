@@ -90,6 +90,14 @@ export default function DragDrop({ items, targets, correct_pairs, xp_value, onCo
 
   const matchedItemIds = new Set(Object.values(matched));
 
+  if (!items?.length || !targets?.length) {
+    return (
+      <div style={{ padding: 24, textAlign: "center", color: "rgba(255,255,255,0.5)" }}>
+        <p>No matching pairs available for this card.</p>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}

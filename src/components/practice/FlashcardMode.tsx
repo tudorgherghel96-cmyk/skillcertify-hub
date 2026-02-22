@@ -144,7 +144,7 @@ const FlashcardMode = ({ cards }: FlashcardModeProps) => {
                         : "Test Tip"}
                     </span>
                     <p className="text-base sm:text-lg font-semibold text-foreground leading-relaxed">
-                      {current.front}
+                      {current.front ?? "No question available"}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Tap to reveal answer
@@ -160,7 +160,7 @@ const FlashcardMode = ({ cards }: FlashcardModeProps) => {
                   >
                     <RotateCcw className="h-4 w-4 text-primary mx-auto" />
                     <p className="text-[15px] sm:text-base text-foreground leading-relaxed font-medium">
-                      {current.back}
+                      {current.back ?? "No answer available"}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Swipe right if you know it, left to review again

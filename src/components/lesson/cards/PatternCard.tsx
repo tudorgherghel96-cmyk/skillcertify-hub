@@ -45,6 +45,14 @@ export default function PatternCard({ hazards, diseases, correct_pairs, xp_value
     }
   };
 
+  if (!hazards?.length || !diseases?.length) {
+    return (
+      <div style={{ padding: 24, textAlign: "center", color: "rgba(255,255,255,0.5)" }}>
+        <p>No pattern matching available for this card.</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <p style={{ color: "#f59e0b", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 20px 0" }}>

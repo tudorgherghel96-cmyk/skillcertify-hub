@@ -1,28 +1,64 @@
 
+# Fix: Matching Game, Pattern Card, and Flashcards
 
-# Fix iPhone Status Bar Overlap
+## Problems Found
 
-## Problem
+### 1. Matching Game (DragDrop) -- Tiles show blank, nothing works
+The database stores items and targets as simple text lists (e.g., `["Trailing cables", "Unmarked bottles"]`), but the code expects objects with `id` and `text` fields. Since the data is just strings, the component tries to read `.id` and `.text` on a plain string, getting `undefined` for both -- so tiles render empty.
 
-On iPhone (especially with notch/Dynamic Island), the TopNav header overlaps with the iOS status bar. The app uses `viewport-fit=cover` and `black-translucent` status bar style, which means content extends behind the status bar. The TopNav needs to add top padding to push below the safe area.
+Additionally, the database has no `correct_pairs` field. The correct matching is implied by position (first item matches first target), but the code expects an explicit map.
 
-## Changes
+### 2. Pattern Card (Match Hazard to Disease) -- Nothing renders at all
+The database stores data as `pairs: [{ hazard: "Silica dust", disease: "Silicosis" }, ...]`, but the code looks for separate `hazards` and `diseases` arrays which don't exist in the data. Both default to empty arrays, so the component renders nothing.
 
-### 1. `src/components/layout/TopNav.tsx`
+### 3. Flashcards -- Needs verification
+The flashcard component code and data generation look correct. The issue may be that no flashcards are generated for the selected module (if lessons aren't completed or the content data doesn't include `remember`/`testTip` blocks). Will add defensive handling to show a clear message and ensure text is visible.
 
-Add `safe-area-inset-top` padding to the header element so the nav content sits below the iPhone status bar:
+---
 
-- Change the `<header>` className from `sticky top-0 z-50 border-b bg-card` to include `pt-[env(safe-area-inset-top)]`
-- This pushes the nav bar content (logo, language picker) below the status bar on iPhones
-- On devices without a notch/safe area, `env(safe-area-inset-top)` resolves to `0px`, so no impact
+## Fix Plan
 
-### 2. `src/components/layout/AppLayout.tsx` (no change needed)
+### Step 1: Fix DragDrop data normalization in SwipeContainer
+In the `SwipeContainer.tsx` `CardRenderer`, transform the flat string arrays from the database into the `{ id, text }` objects the component expects, and auto-generate `correct_pairs` from positional matching:
 
-The `TopNav` is `sticky top-0`, so adding padding inside it is sufficient. No layout changes needed.
+```text
+// Before (broken):
+items={(content.items as { id: string; text: string }[]) || []}
+targets={(content.targets as { id: string; text: string }[]) || []}
+correct_pairs={(content.correct_pairs as Record<string, string>) || {}}
 
-## What Does NOT Change
+// After (fixed):
+// Normalize flat strings to { id, text } objects
+// Generate correct_pairs from position (item-0 -> target-0)
+```
 
-- Bottom navigation (already has `safe-area-bottom`)
-- LessonPlayer NavHeader (already handles safe area independently)
-- Scroll behavior, routing, or any other component
+### Step 2: Fix PatternCard data normalization in SwipeContainer
+Transform the `pairs` array from the database into the separate `hazards`, `diseases`, and `correct_pairs` that the component expects:
 
+```text
+// Before (broken):
+hazards={(content.hazards as ...) || []}  // doesn't exist in DB
+diseases={(content.diseases as ...) || []} // doesn't exist in DB
+
+// After (fixed):
+// Extract from content.pairs: [{ hazard, disease }]
+// Build hazards[], diseases[], and correct_pairs map
+```
+
+### Step 3: Add defensive handling in FlashcardMode
+Add null/undefined guards on the current card's `front` and `back` fields, and ensure fallback text is displayed if data is missing.
+
+### Step 4: Add defensive handling in DragDrop and PatternCard components
+Add guards so if `items`/`targets`/`hazards`/`diseases` are empty, a meaningful fallback message is shown instead of a blank screen.
+
+---
+
+## Technical Details
+
+**Files to modify:**
+- `src/components/lesson/SwipeContainer.tsx` -- Fix data normalization for `drag_drop` and `pattern_card` cases (lines 164-230)
+- `src/components/lesson/cards/DragDrop.tsx` -- Add empty state guard
+- `src/components/lesson/cards/PatternCard.tsx` -- Add empty state guard
+- `src/components/practice/FlashcardMode.tsx` -- Add null guards on card text fields
+
+**No database changes needed** -- the data in the database is correct; the code just wasn't reading it properly.

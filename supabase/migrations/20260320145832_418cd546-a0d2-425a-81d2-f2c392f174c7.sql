@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/lessons/welfare-facilities.webp', media_bucket = NULL WHERE id = '4f9403fa-52f3-4230-9cfe-4e7c6aa1ad5b';

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 interface MultiSelectProps {
   question: string;
-  options: { text: string }[];
+  options: ({ text: string } | string)[];
   correct_indices: number[];
   xp_value: number;
   onAnswer?: (score: number, total: number) => void;

@@ -71,7 +71,14 @@ export default function TapToReveal({ panels, xp_value, onComplete }: TapToRevea
                   padding: 12,
                 }}
               >
-                <span style={{ color: "white", fontSize: 15, fontWeight: 700, textAlign: "center" }}>{panel.front || panel.label}</span>
+                {panel.icon ? (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                    <SafetySignIcon icon={panel.icon} size={36} />
+                    <span style={{ color: "white", fontSize: 13, fontWeight: 700, textAlign: "center" }}>{panel.front || panel.label}</span>
+                  </div>
+                ) : (
+                  <span style={{ color: "white", fontSize: 15, fontWeight: 700, textAlign: "center" }}>{panel.front || panel.label}</span>
+                )}
               </div>
 
               {/* Back */}

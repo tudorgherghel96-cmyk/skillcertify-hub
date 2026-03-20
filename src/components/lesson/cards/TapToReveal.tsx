@@ -90,10 +90,11 @@ function FlipCard({
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
           transform: "rotateY(180deg)",
-          padding: 8,
+          padding: 6,
+          overflow: "hidden",
         }}
       >
-        <span style={{ color: "white", fontSize: 11, fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
+        <span style={{ color: "white", fontSize: 10, fontWeight: 600, textAlign: "center", lineHeight: 1.2, wordBreak: "break-word" }}>
           {panel.back || panel.content}
         </span>
       </div>

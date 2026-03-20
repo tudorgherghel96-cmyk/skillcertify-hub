@@ -69,7 +69,7 @@ export default function TapToReveal({ panels, xp_value, onComplete }: TapToRevea
                   padding: 12,
                 }}
               >
-                <span style={{ color: "white", fontSize: 15, fontWeight: 700, textAlign: "center" }}>{panel.front}</span>
+                <span style={{ color: "white", fontSize: 15, fontWeight: 700, textAlign: "center" }}>{panel.front || panel.label}</span>
               </div>
 
               {/* Back */}

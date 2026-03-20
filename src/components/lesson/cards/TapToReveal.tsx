@@ -56,15 +56,16 @@ function FlipCard({
           justifyContent: "center",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
-          padding: 8,
+          padding: 6,
           flexDirection: "column",
-          gap: 4,
+          gap: 2,
+          overflow: "hidden",
         }}
       >
         {panel.icon ? (
           <>
             <SafetySignIcon icon={panel.icon} size={28} />
-            <span style={{ color: "white", fontSize: 12, fontWeight: 700, textAlign: "center", lineHeight: 1.2 }}>
+            <span style={{ color: "white", fontSize: 10, fontWeight: 700, textAlign: "center", lineHeight: 1.1, wordBreak: "break-word" }}>
               {panel.front || panel.label}
             </span>
           </>
@@ -89,10 +90,11 @@ function FlipCard({
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
           transform: "rotateY(180deg)",
-          padding: 8,
+          padding: 6,
+          overflow: "hidden",
         }}
       >
-        <span style={{ color: "white", fontSize: 11, fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
+        <span style={{ color: "white", fontSize: 10, fontWeight: 600, textAlign: "center", lineHeight: 1.2, wordBreak: "break-word" }}>
           {panel.back || panel.content}
         </span>
       </div>

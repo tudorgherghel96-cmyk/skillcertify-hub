@@ -105,6 +105,20 @@ export default function SplitScreen({
             transform: tapped === "left" ? "scale(0.97)" : "scale(1)",
           }}
         >
+          {left_image && (
+            <img
+              src={left_image}
+              alt="Option A"
+              loading="eager"
+              style={{
+                width: "100%",
+                height: 100,
+                objectFit: "cover",
+                borderRadius: 10,
+                marginBottom: 8,
+              }}
+            />
+          )}
           <p
             style={{
               color: revealed || tapped === "left" ? "#ef4444" : "rgba(255,255,255,0.4)",

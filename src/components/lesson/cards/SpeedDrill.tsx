@@ -36,7 +36,7 @@ export default function SpeedDrill({ questions, xp_value, timerSeconds = 3, onCo
           onComplete?.(score + (wasCorrect ? 1 : 0), questions.length);
         } else {
           setQIndex(next);
-          setTimeLeft(TIMER_SECONDS);
+          setTimeLeft(timerSeconds);
         }
       }, 400);
     },

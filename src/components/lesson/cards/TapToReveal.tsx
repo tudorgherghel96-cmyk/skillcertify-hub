@@ -1,8 +1,10 @@
 import { useState } from "react";
 
 interface Panel {
-  front: string;
-  back: string;
+  front?: string;
+  back?: string;
+  label?: string;
+  content?: string;
 }
 
 interface TapToRevealProps {

@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET content_json = '{"panels": [{"front": "RED CIRCLE", "back": "Prohibition — Do NOT"}, {"front": "YELLOW TRIANGLE", "back": "Warning — Danger"}, {"front": "BLUE CIRCLE", "back": "Mandatory — You MUST"}, {"front": "GREEN RECTANGLE", "back": "Safe Condition — Safety info"}]}'::jsonb WHERE id = '6d32bbf9-5271-49f5-9643-06605f7f7617';

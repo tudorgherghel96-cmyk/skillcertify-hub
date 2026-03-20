@@ -30,7 +30,7 @@ export default function InteractiveSlide({ children }: InteractiveSlideProps) {
           paddingBottom: "env(safe-area-inset-bottom)",
           overflowY: "auto",
           maxHeight: "100%",
-          touchAction: "manipulation",
+          touchAction: "none",
         }}
       >
         {children}

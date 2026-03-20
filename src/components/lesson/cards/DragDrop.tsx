@@ -12,25 +12,57 @@ interface DropTarget {
 interface DragDropProps {
   items: DragItem[];
   targets: DropTarget[];
-  correct_pairs: Record<string, string>; // item.id -> target.id
+  correct_pairs: Record<string, string>;
   xp_value: number;
   onComplete?: () => void;
 }
 
 export default function DragDrop({ items, targets, correct_pairs, xp_value, onComplete }: DragDropProps) {
-  const [matched, setMatched] = useState<Record<string, string>>({}); // targetId -> itemId
+  const [matched, setMatched] = useState<Record<string, string>>({});
   const [dragging, setDragging] = useState<string | null>(null);
   const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
   const [wrong, setWrong] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const targetRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const allMatched = Object.keys(correct_pairs).every((itemId) => {
-    return Object.values(matched).includes(itemId);
-  });
+  const allMatched = Object.keys(correct_pairs).every((itemId) =>
+    Object.values(matched).includes(itemId)
+  );
 
+  const handleDrop = useCallback((clientX: number, clientY: number, dragItemId: string, currentMatched: Record<string, string>) => {
+    let droppedOnTarget: string | null = null;
+    for (const [targetId, el] of Object.entries(targetRefs.current)) {
+      if (!el) continue;
+      const rect = el.getBoundingClientRect();
+      if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+        droppedOnTarget = targetId;
+        break;
+      }
+    }
+
+    if (droppedOnTarget) {
+      const correctItemForTarget = Object.entries(correct_pairs).find(
+        ([, tid]) => tid === droppedOnTarget
+      )?.[0];
+
+      if (correctItemForTarget === dragItemId && !currentMatched[droppedOnTarget]) {
+        const newMatched = { ...currentMatched, [droppedOnTarget]: dragItemId };
+        setMatched(newMatched);
+        if (navigator.vibrate) navigator.vibrate(50);
+        const allDone = Object.keys(correct_pairs).every((id) => Object.values(newMatched).includes(id));
+        if (allDone) setTimeout(() => onComplete?.(), 500);
+      } else {
+        setWrong(dragItemId);
+        if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+        setTimeout(() => setWrong(null), 600);
+      }
+    }
+
+    setDragging(null);
+  }, [correct_pairs, onComplete]);
+
+  // Touch handlers
   const handleTouchStart = useCallback((e: React.TouchEvent, itemId: string) => {
-    // Don't drag already matched items
     if (Object.values(matched).includes(itemId)) return;
     e.preventDefault();
     const touch = e.touches[0];
@@ -48,45 +80,27 @@ export default function DragDrop({ items, targets, correct_pairs, xp_value, onCo
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (!dragging) return;
     const touch = e.changedTouches[0];
+    handleDrop(touch.clientX, touch.clientY, dragging, matched);
+  }, [dragging, matched, handleDrop]);
 
-    // Find which target the touch is over
-    let droppedOnTarget: string | null = null;
-    for (const [targetId, el] of Object.entries(targetRefs.current)) {
-      if (!el) continue;
-      const rect = el.getBoundingClientRect();
-      if (
-        touch.clientX >= rect.left &&
-        touch.clientX <= rect.right &&
-        touch.clientY >= rect.top &&
-        touch.clientY <= rect.bottom
-      ) {
-        droppedOnTarget = targetId;
-        break;
-      }
-    }
+  // Mouse handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent, itemId: string) => {
+    if (Object.values(matched).includes(itemId)) return;
+    e.preventDefault();
+    setDragging(itemId);
+    setDragPos({ x: e.clientX, y: e.clientY });
+  }, [matched]);
 
-    if (droppedOnTarget) {
-      const correctItemForTarget = Object.entries(correct_pairs).find(
-        ([, tid]) => tid === droppedOnTarget
-      )?.[0];
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!dragging) return;
+    e.preventDefault();
+    setDragPos({ x: e.clientX, y: e.clientY });
+  }, [dragging]);
 
-      if (correctItemForTarget === dragging && !matched[droppedOnTarget]) {
-        // Correct match
-        setMatched((prev) => ({ ...prev, [droppedOnTarget]: dragging }));
-        if (navigator.vibrate) navigator.vibrate(50);
-        const newMatched = { ...matched, [droppedOnTarget]: dragging };
-        const allDone = Object.keys(correct_pairs).every((id) => Object.values(newMatched).includes(id));
-        if (allDone) setTimeout(() => onComplete?.(), 500);
-      } else {
-        // Wrong
-        setWrong(dragging);
-        if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
-        setTimeout(() => setWrong(null), 600);
-      }
-    }
-
-    setDragging(null);
-  }, [dragging, matched, correct_pairs, onComplete]);
+  const handleMouseUp = useCallback((e: React.MouseEvent) => {
+    if (!dragging) return;
+    handleDrop(e.clientX, e.clientY, dragging, matched);
+  }, [dragging, matched, handleDrop]);
 
   const matchedItemIds = new Set(Object.values(matched));
 
@@ -103,6 +117,8 @@ export default function DragDrop({ items, targets, correct_pairs, xp_value, onCo
       ref={containerRef}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
       style={{ touchAction: "none", userSelect: "none" }}
     >
       <p style={{ color: "#f59e0b", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 20px 0" }}>
@@ -110,7 +126,6 @@ export default function DragDrop({ items, targets, correct_pairs, xp_value, onCo
       </p>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {/* Items column */}
         <div>
           <p style={{ color: "#f59e0b", fontSize: 11, textTransform: "uppercase", letterSpacing: 1, margin: "0 0 8px 0", fontWeight: 700 }}>
             MATCH
@@ -123,6 +138,7 @@ export default function DragDrop({ items, targets, correct_pairs, xp_value, onCo
                 <div
                   key={item.id}
                   onTouchStart={(e) => handleTouchStart(e, item.id)}
+                  onMouseDown={(e) => handleMouseDown(e, item.id)}
                   style={{
                     padding: "14px 16px",
                     borderRadius: 12,
@@ -143,7 +159,6 @@ export default function DragDrop({ items, targets, correct_pairs, xp_value, onCo
           </div>
         </div>
 
-        {/* Targets column */}
         <div>
           <p style={{ color: "#f59e0b", fontSize: 11, textTransform: "uppercase", letterSpacing: 1, margin: "0 0 8px 0", fontWeight: 700 }}>
             WITH
@@ -178,7 +193,6 @@ export default function DragDrop({ items, targets, correct_pairs, xp_value, onCo
         </div>
       </div>
 
-      {/* Floating drag ghost */}
       {dragging && (
         <div
           style={{

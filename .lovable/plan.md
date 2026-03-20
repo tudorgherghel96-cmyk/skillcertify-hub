@@ -1,53 +1,26 @@
 
 
-# Improve Tap to Reveal Card 6 — Fire Triangle (Lesson 1.7)
+# Add Fire Triangle Teaching Card Before Tap-to-Reveal
 
 ## Problem
-The current card has generic labels ("Corner 1", "Corner 2", "Corner 3", "Centre") that reveal single words (HEAT, FUEL, OXYGEN). It doesn't teach anything — just reveals labels with no context, no exam relevance, and no visual meaning.
+The Tap-to-Reveal card (position 6) tests learners on the Fire Triangle, but they haven't been taught the concept first. The video at position 5 may cover it, but there's no explicit knowledge card explaining what the Fire Triangle is before the interactive quiz.
 
 ## Solution
-Redesign the content to teach the **Fire Triangle** concept properly — each panel's front shows a recognisable cue (emoji/symbol + short prompt) and the back gives a memorable fact or test tip. Add fire-themed icons.
+Insert a new `remember_this` card at position 6 that teaches the Fire Triangle, and shift the existing cards (positions 6+) up by one.
 
-### Database update for card `171d2556-9935-4b3b-b0cd-3fc6dba7000b`
+### New card content
+A "Remember This" card with structured text that the existing formatter will auto-detect and render as a clean numbered/titled layout:
 
-New `content_json`:
-```json
-{
-  "title": "The Fire Triangle",
-  "panels": [
-    {
-      "front": "🔥 Side 1",
-      "back": "HEAT — ignition sources like sparks, hot works, or electrical faults",
-      "icon": "warning"
-    },
-    {
-      "front": "⛽ Side 2",
-      "back": "FUEL — wood, paper, flammable liquids, gas, dust",
-      "icon": "warning"
-    },
-    {
-      "front": "💨 Side 3",
-      "back": "OXYGEN — always present in the air (21%)",
-      "icon": "warning"
-    },
-    {
-      "front": "🧯 How to stop fire?",
-      "back": "Remove ANY ONE side of the triangle — that's how extinguishers work!",
-      "icon": "safe_condition"
-    }
-  ],
-  "xp_value": 15
-}
+```
+THE FIRE TRIANGLE: Fire needs THREE things to burn — remove any one to stop the fire. 1) HEAT — sparks, hot works, electrical faults, friction 2) FUEL — wood, paper, flammable liquids, gas, dust 3) OXYGEN — always present in the air (about 21%). A fire extinguisher works by removing one side of the triangle.
 ```
 
-### Component update — render optional `title`
-Update `TapToReveal.tsx` to accept and render an optional `title` prop above the grid — displayed as a bold heading so the learner knows the topic before tapping.
+This will be parsed by `formatRememberText` into a title ("THE FIRE TRIANGLE") plus 3 numbered items with a closing plain-text line.
 
-### SwipeContainer update
-Pass through the `title` field from `content_json` to the `TapToReveal` component.
+### Database operations (using insert/update tool, not migrations)
+1. **Shift positions**: `UPDATE lesson_cards SET card_position = card_position + 1 WHERE lesson_id = '1.7' AND card_position >= 6 ORDER BY card_position DESC`
+2. **Insert new card**: Insert a `remember_this` card at position 6 with `lesson_id = '1.7'`, `module_id = 1`, `xp_value = 5`
 
 ### Files changed
-- `supabase/migrations/` — new migration updating card content
-- `src/components/lesson/cards/TapToReveal.tsx` — add optional `title` prop
-- `src/components/lesson/SwipeContainer.tsx` — pass `title` through
+None — this is a data-only change. The existing `RememberThis` component and `formatRememberText` utility will handle rendering automatically.
 

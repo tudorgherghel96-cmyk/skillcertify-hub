@@ -76,7 +76,7 @@ export default function SpeedDrill({ questions, xp_value, timerSeconds = 3, onCo
   }
 
   const q = questions[qIndex];
-  const pct = timeLeft / TIMER_SECONDS;
+  const pct = timeLeft / timerSeconds;
   const radius = 28;
   const circumference = 2 * Math.PI * radius;
   const strokeDash = circumference * (1 - pct);

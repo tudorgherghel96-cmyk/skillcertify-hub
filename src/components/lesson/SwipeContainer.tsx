@@ -163,9 +163,9 @@ function CardRenderer({
 
     case "drag_drop": {
       // Normalize: DB stores flat string arrays, component expects { id, text }[]
-      const rawItems = (content.items as (string | { id: string; text: string })[]) || [];
+      const rawItems = (content.items as (string | { id: string; text: string; icon?: string })[]) || [];
       const normItems = rawItems.map((item, i) =>
-        typeof item === "string" ? { id: `item-${i}`, text: item } : item
+        typeof item === "string" ? { id: `item-${i}`, text: item } : { id: item.id || `item-${i}`, text: item.text, ...(item.icon ? { icon: item.icon } : {}) }
       );
       const rawTargets = (content.targets as (string | { id: string; text: string })[]) || [];
       const normTargets = rawTargets.map((t, i) =>

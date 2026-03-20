@@ -1,8 +1,45 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 
+function SafetySignIcon({ icon }: { icon: string }) {
+  const size = 28;
+  switch (icon) {
+    case "prohibition":
+      return (
+        <svg width={size} height={size} viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
+          <circle cx="20" cy="20" r="18" fill="#dc2626" stroke="#991b1b" strokeWidth="2" />
+          <line x1="10" y1="10" x2="30" y2="30" stroke="white" strokeWidth="4" strokeLinecap="round" />
+        </svg>
+      );
+    case "warning":
+      return (
+        <svg width={size} height={size} viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
+          <polygon points="20,4 38,36 2,36" fill="#eab308" stroke="#a16207" strokeWidth="2" strokeLinejoin="round" />
+          <text x="20" y="31" textAnchor="middle" fontSize="22" fontWeight="bold" fill="#1a1a1a">!</text>
+        </svg>
+      );
+    case "mandatory":
+      return (
+        <svg width={size} height={size} viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
+          <circle cx="20" cy="20" r="18" fill="#2563eb" stroke="#1d4ed8" strokeWidth="2" />
+          <circle cx="20" cy="20" r="6" fill="white" />
+        </svg>
+      );
+    case "safe_condition":
+      return (
+        <svg width={size} height={size} viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
+          <rect x="2" y="8" width="36" height="24" rx="3" fill="#16a34a" stroke="#15803d" strokeWidth="2" />
+          <text x="20" y="25" textAnchor="middle" fontSize="16" fontWeight="bold" fill="white">+</text>
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
 interface DragItem {
   id: string;
   text: string;
+  icon?: string;
 }
 interface DropTarget {
   id: string;
@@ -159,9 +196,13 @@ export default function DragDrop({ items, targets, correct_pairs, xp_value, onCo
                     cursor: isMatched ? "default" : "grab",
                     animation: isWrong ? "shake 300ms ease" : undefined,
                     touchAction: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
                   }}
                 >
-                  {isMatched && "✓ "}{item.text}
+                  {item.icon && <SafetySignIcon icon={item.icon} />}
+                  <span>{isMatched && "✓ "}{item.text}</span>
                 </div>
               );
             })}
@@ -218,9 +259,12 @@ export default function DragDrop({ items, targets, correct_pairs, xp_value, onCo
             fontWeight: 600,
             boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
             transform: "scale(1.05)",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
           }}
         >
-          {items.find((i) => i.id === dragging)?.text}
+          {(() => { const di = items.find((i) => i.id === dragging); return di ? <>{di.icon && <SafetySignIcon icon={di.icon} />}<span>{di.text}</span></> : null; })()}
         </div>
       )}
 

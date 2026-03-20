@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/accident-book-reporting.webp' WHERE id = '39df5470-890b-4961-8461-d2a7def4b8ad';

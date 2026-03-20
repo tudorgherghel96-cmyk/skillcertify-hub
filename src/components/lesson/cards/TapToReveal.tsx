@@ -56,9 +56,10 @@ function FlipCard({
           justifyContent: "center",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
-          padding: 8,
+          padding: 6,
           flexDirection: "column",
-          gap: 4,
+          gap: 2,
+          overflow: "hidden",
         }}
       >
         {panel.icon ? (

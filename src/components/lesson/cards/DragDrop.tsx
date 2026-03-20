@@ -196,9 +196,13 @@ export default function DragDrop({ items, targets, correct_pairs, xp_value, onCo
                     cursor: isMatched ? "default" : "grab",
                     animation: isWrong ? "shake 300ms ease" : undefined,
                     touchAction: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
                   }}
                 >
-                  {isMatched && "✓ "}{item.text}
+                  {item.icon && <SafetySignIcon icon={item.icon} />}
+                  <span>{isMatched && "✓ "}{item.text}</span>
                 </div>
               );
             })}

@@ -1,8 +1,10 @@
 import { useState } from "react";
 
 interface Panel {
-  front: string;
-  back: string;
+  front?: string;
+  back?: string;
+  label?: string;
+  content?: string;
 }
 
 interface TapToRevealProps {
@@ -67,7 +69,7 @@ export default function TapToReveal({ panels, xp_value, onComplete }: TapToRevea
                   padding: 12,
                 }}
               >
-                <span style={{ color: "white", fontSize: 15, fontWeight: 700, textAlign: "center" }}>{panel.front}</span>
+                <span style={{ color: "white", fontSize: 15, fontWeight: 700, textAlign: "center" }}>{panel.front || panel.label}</span>
               </div>
 
               {/* Back */}
@@ -87,7 +89,7 @@ export default function TapToReveal({ panels, xp_value, onComplete }: TapToRevea
                   padding: 12,
                 }}
               >
-                <span style={{ color: "white", fontSize: 13, fontWeight: 600, textAlign: "center", lineHeight: 1.4 }}>{panel.back}</span>
+                <span style={{ color: "white", fontSize: 13, fontWeight: 600, textAlign: "center", lineHeight: 1.4 }}>{panel.back || panel.content}</span>
               </div>
             </div>
           );

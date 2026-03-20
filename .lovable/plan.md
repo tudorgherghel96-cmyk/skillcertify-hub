@@ -1,26 +1,34 @@
 
 
-# Split Lesson 1.5 Card 14 — Image Only + New Text Card
+# Fix: TapToReveal Not Working in Safety Signs and Symbols (Lesson 1.6)
 
-## Current State
-Card 14 (ID: `9a10e6a5-d78d-4b13-9c47-82a54060c9be`) is an `image` card showing `1.4_photo_2.webp` with caption: *"Near misses MUST be reported — they help prevent future accidents. Fractures, amputations, and injuries causing 7+ days off work must be reported under RIDDOR."*
+## Problem
+The TapToReveal card in lesson 1.6 has panel data with keys `label` and `content`, but the component expects `front` and `back`. This means all panel text renders as blank/undefined — the cards appear empty and tapping reveals nothing meaningful.
 
-Cards after it: 15 (quiz_card), 16 (lesson_complete).
+**Database data**: `{ "label": "RED CIRCLE", "content": "Prohibition — Do NOT" }`
+**Component expects**: `{ "front": "...", "back": "..." }`
 
-## Plan
+## Fix
 
-### 1. Update card 14 — image only, no caption
-Remove caption from `content_json`, keep alt text only.
+### Option A — Fix the data (recommended, minimal change)
+One migration to update the `content_json` for card `6d32bbf9-5271-49f5-9643-06605f7f7617`, rewriting `label`/`content` to `front`/`back`:
 
-### 2. Insert new card at position 15
-A `remember_this` card with text: *"Near misses MUST be reported — they help prevent future accidents. Fractures, amputations, and injuries causing 7+ days off work must be reported under RIDDOR."*
+```sql
+UPDATE lesson_cards
+SET content_json = '{
+  "panels": [
+    {"front": "RED CIRCLE", "back": "Prohibition — Do NOT"},
+    {"front": "YELLOW TRIANGLE", "back": "Warning — Danger"},
+    {"front": "BLUE CIRCLE", "back": "Mandatory — You MUST"},
+    {"front": "GREEN RECTANGLE", "back": "Safe Condition — Safety info"}
+  ]
+}'::jsonb
+WHERE id = '6d32bbf9-5271-49f5-9643-06605f7f7617';
+```
 
-This card type renders with a highlight/callout style which suits the instructional tone.
+### Option B — Make the component resilient (belt-and-suspenders)
+Also update `TapToReveal.tsx` to accept `label`/`content` as fallback keys, so future cards with either schema work.
 
-### 3. Bump existing cards
-- Quiz card (pos 15) → position 16
-- Lesson complete card (pos 16) → position 17
-
-### Technical Detail
-Three SQL statements via the insert tool — update card 14's `content_json`, shift positions 15–16 up by 1, insert new `remember_this` card at position 15.
+### Recommendation
+Do both: fix the data AND add fallback key support in the component for resilience.
 

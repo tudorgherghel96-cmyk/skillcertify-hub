@@ -2,7 +2,7 @@ import { useState } from "react";
 
 interface MultiSelectProps {
   question: string;
-  options: { text: string }[];
+  options: ({ text: string } | string)[];
   correct_indices: number[];
   xp_value: number;
   onAnswer?: (score: number, total: number) => void;
@@ -99,7 +99,7 @@ export default function MultiSelect({ question, options, correct_indices, xp_val
             >
               {selected.has(i) && "✓"}
             </div>
-            <span>{opt.text}</span>
+            <span>{typeof opt === "string" ? opt : opt.text}</span>
           </button>
         ))}
       </div>

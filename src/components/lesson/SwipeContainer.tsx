@@ -205,10 +205,12 @@ function CardRenderer({
       return (
         <InteractiveSlide>
           <SplitScreen
-            left_text={content.left_text as string}
-            right_text={content.right_text as string}
+            left_text={(content.left_text || content.left) as string}
+            right_text={(content.right_text || content.right) as string}
             left_label={content.left_label as string | undefined}
             right_label={content.right_label as string | undefined}
+            title={content.title as string | undefined}
+            takeaway={content.takeaway as string | undefined}
           />
         </InteractiveSlide>
       );

@@ -7,6 +7,35 @@ interface ImageSlideProps {
   isActive: boolean;
 }
 
+/** Auto-bold text before a colon or ALL-CAPS words (3+ chars) */
+function highlightKeyTerms(text: string) {
+  const colonIdx = text.indexOf(":");
+  if (colonIdx > 0 && colonIdx < 40) {
+    const before = text.slice(0, colonIdx);
+    const after = text.slice(colonIdx + 1).trim();
+    return (
+      <>
+        <span style={{ fontWeight: 700, color: "white" }}>{before}:</span> {after}
+      </>
+    );
+  }
+  const parts = text.split(/(\b[A-Z]{3,}\b)/g);
+  if (parts.length > 1) {
+    return (
+      <>
+        {parts.map((part, i) =>
+          /^[A-Z]{3,}$/.test(part) ? (
+            <span key={i} style={{ fontWeight: 700, color: "white" }}>{part}</span>
+          ) : (
+            <span key={i}>{part}</span>
+          )
+        )}
+      </>
+    );
+  }
+  return text;
+}
+
 export default function ImageSlide({ src, alt = "", caption, isActive }: ImageSlideProps) {
   const [imgError, setImgError] = useState(false);
 
@@ -44,22 +73,51 @@ export default function ImageSlide({ src, alt = "", caption, isActive }: ImageSl
               bottom: 0,
               left: 0,
               right: 0,
-              padding: "24px 20px",
-              background: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.4) 60%, transparent)",
+              padding: "32px 16px 24px",
+              background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.15) 80%, transparent 100%)",
+              opacity: isActive ? 1 : 0,
+              transform: isActive ? "translateY(0)" : "translateY(8px)",
+              transition: "opacity 500ms ease-out, transform 500ms ease-out",
             }}
           >
             {mainCaption && (
-              <p
+              <div
                 style={{
-                  color: "white",
-                  fontSize: 15,
-                  fontWeight: 500,
-                  margin: 0,
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                  background: "rgba(255,255,255,0.08)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  padding: "14px 16px",
+                  display: "flex",
+                  alignItems: "stretch",
+                  gap: 0,
                 }}
               >
-                {mainCaption}
-              </p>
+                {/* Left accent bar */}
+                <div
+                  style={{
+                    width: 3,
+                    borderRadius: 2,
+                    background: "hsl(205, 91%, 43%)",
+                    flexShrink: 0,
+                    marginRight: 14,
+                  }}
+                />
+                <p
+                  style={{
+                    color: "rgba(255,255,255,0.92)",
+                    fontSize: 16,
+                    fontWeight: 600,
+                    lineHeight: 1.5,
+                    letterSpacing: "0.2px",
+                    margin: 0,
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                  }}
+                >
+                  {highlightKeyTerms(mainCaption)}
+                </p>
+              </div>
             )}
             {tipText && (
               <div

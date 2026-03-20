@@ -1,22 +1,28 @@
 
 
-# Replace Card 16 Image with Uploaded Photo
+# Replace Card 17 Image and Update Caption
 
 ## What
-Replace the current `1.2_photo_2.webp` image on card 16 (lesson 1.2) with the user's uploaded photo (`test_tip_risk_ass.jpeg`), optimized for fast loading.
+Replace card 17's image (`1.2_photo_3.webp`) with the uploaded `5_steps_risk.jpeg` infographic, optimized for fast loading. Update the caption to remove the "5 steps" description but keep the TEST TIP.
 
 ## Steps
 
 ### 1. Optimize and copy the image
-Copy `user-uploads://test_tip_risk_ass.jpeg` to `public/images/risk-assessment-competent-person.webp`, converting to WebP for smaller file size and faster loading. If WebP conversion isn't available at copy time, copy as JPEG and ensure it's reasonably sized.
+Copy `user-uploads://5_steps_risk.jpeg` to `public/images/five-steps-risk-assessment.webp`, converting to WebP and resizing to ~800px width for fast loading on mobile.
 
 ### 2. Update database
-Run a migration to point card 16 at the local image:
+Run a migration to update card 17 with the new local image path and revised caption:
+
 ```sql
 UPDATE lesson_cards
-SET media_file = '/images/risk-assessment-competent-person.webp'
-WHERE id = '94054296-e70a-4a1f-85c7-3bf56100e968';
+SET media_file = '/images/five-steps-risk-assessment.webp',
+    content_json = jsonb_set(
+      content_json::jsonb,
+      '{caption}',
+      '"TEST TIP: You MUST know all 5 steps for the exam."'
+    )
+WHERE id = '9aa06162-f77d-4525-b356-ec0fcb12b0bd';
 ```
 
-The existing `getLessonMediaUrl` local path support (leading `/`) handles the rest — no code changes needed.
+No code changes needed — the existing `getLessonMediaUrl` local path support handles it.
 

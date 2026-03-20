@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/dynamic-risk-assessment-site.webp' WHERE id = '9483b1bd-5979-401d-aaa8-8395f87306b5';

@@ -1,20 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import SafetySignIcon from "./SafetySignIcon";
 
 interface DrillQuestion {
   question: string;
   options: string[];
   correct_index: number;
+  icon?: string;
 }
 
 interface SpeedDrillProps {
   questions: DrillQuestion[];
   xp_value: number;
+  timerSeconds?: number;
   onComplete?: (score: number, total: number) => void;
 }
 
-const TIMER_SECONDS = 3;
-
-export default function SpeedDrill({ questions, xp_value, onComplete }: SpeedDrillProps) {
+export default function SpeedDrill({ questions, xp_value, timerSeconds = 3, onComplete }: SpeedDrillProps) {
   const [qIndex, setQIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);

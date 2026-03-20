@@ -1,27 +1,22 @@
 
 
-# Shuffle DragDrop Items So Pairs Aren't Obvious
+# Replace Card 16 Image with Uploaded Photo
 
-## Problem
-Items and targets render in the same positional order, so each item sits directly next to its correct match. The game has no challenge.
+## What
+Replace the current `1.2_photo_2.webp` image on card 16 (lesson 1.2) with the user's uploaded photo (`test_tip_risk_ass.jpeg`), optimized for fast loading.
 
-## Fix
-In `DragDrop.tsx`, shuffle the `items` array on initial render using a `useMemo` with a Fisher-Yates shuffle. This randomizes the left column while keeping the right column (targets) in place, so users actually have to think about which item matches which target.
+## Steps
 
-### Change in `DragDrop.tsx`
-- Add a `useMemo` at the top of the component that creates a shuffled copy of `items`:
-```typescript
-const shuffledItems = useMemo(() => {
-  const arr = [...items];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}, [items]);
+### 1. Optimize and copy the image
+Copy `user-uploads://test_tip_risk_ass.jpeg` to `public/images/risk-assessment-competent-person.webp`, converting to WebP for smaller file size and faster loading. If WebP conversion isn't available at copy time, copy as JPEG and ensure it's reasonably sized.
+
+### 2. Update database
+Run a migration to point card 16 at the local image:
+```sql
+UPDATE lesson_cards
+SET media_file = '/images/risk-assessment-competent-person.webp'
+WHERE id = '94054296-e70a-4a1f-85c7-3bf56100e968';
 ```
-- Replace all references to `items.map(...)` in the render with `shuffledItems.map(...)`
-- Keep the `items.find(...)` call for the dragging ghost element as-is (it just looks up text by id)
 
-One file changed, no other modifications needed.
+The existing `getLessonMediaUrl` local path support (leading `/`) handles the rest — no code changes needed.
 

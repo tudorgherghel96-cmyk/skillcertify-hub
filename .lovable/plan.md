@@ -1,34 +1,27 @@
 
 
-# Fix Card 7 (Lesson 1.2) — Use Uploaded Risk Assessment Image
-
-## Current State
-Card 7 in lesson 1.2 (id: `e69a098a-e51c-449c-a712-64ae3667e61a`) shows `1.2_photo_1.webp` from Supabase storage. The user has provided a new image to use instead.
+# Fix DragDrop — Add Mouse Event Support
 
 ## Problem
-The media pipeline (`getLessonMediaUrl`) always constructs Supabase storage URLs. Simply placing the image in `public/` won't work without a small code change.
+The DragDrop component only uses `onTouchStart/Move/End` events. In the Lovable preview (and desktop browsers), the user interacts with mouse events, not touch events — so dragging does nothing.
 
 ## Plan
 
-### 1. Copy uploaded image into the project
-Copy `user-uploads://risk_assessmrnt_photo.png` to `public/images/risk-assessment-form.png`.
+### Update `DragDrop.tsx` to support both mouse and touch
 
-### 2. Update `getLessonMediaUrl` to support local paths
-Add a check at the top of the function: if `file` starts with `/` (absolute local path), return it directly instead of constructing a Supabase storage URL. This is a 2-line change in `src/lib/media.ts`.
+Add mouse event handlers (`onMouseDown`, `onMouseMove`, `onMouseUp`) mirroring the existing touch handlers:
 
-### 3. Update the database
-Run a migration to set `media_file` to `/images/risk-assessment-form.png` for this card. The leading `/` signals the media function to treat it as a local path.
+- **`onMouseDown`** on each item: sets `dragging` and `dragPos` using `e.clientX/Y`
+- **`onMouseMove`** on the container: updates `dragPos`
+- **`onMouseUp`** on the container: hit-tests against target refs and performs match/wrong logic (same as `handleTouchEnd`)
 
-```sql
-UPDATE lesson_cards
-SET media_file = '/images/risk-assessment-form.png'
-WHERE id = 'e69a098a-e51c-449c-a712-64ae3667e61a';
-```
+Extract the shared "drop" logic (hit-test targets, check correct pairs, update matched state) into a reusable function called from both `handleTouchEnd` and `handleMouseUp`.
 
-### Technical Detail
-The change to `getLessonMediaUrl` is minimal and backward-compatible:
-```typescript
-if (file.startsWith('/')) return file; // local public asset
-```
-All existing cards using bucket filenames continue to work unchanged.
+Add `onMouseDown` to each item div alongside the existing `onTouchStart`. Add `onMouseMove` and `onMouseUp` to the container div alongside `onTouchMove` and `onTouchEnd`.
+
+### Fix `touchAction` conflict in `InteractiveSlide.tsx`
+
+Change `touchAction: "manipulation"` to `touchAction: "none"` so it doesn't override the DragDrop's `touchAction: "none"` setting, which is needed to prevent the browser from intercepting touch drags as scrolls.
+
+No other files need changes.
 

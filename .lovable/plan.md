@@ -1,32 +1,35 @@
 
 
-# Improve RememberThis Content Readability
+# Enhance Bottom Caption Text Across All Card Types
 
 ## Problem
-Many "Remember This" cards fall through to the plain-text fallback because their content doesn't match the numbered list or key=value patterns. This results in dense, hard-to-read paragraphs. Examples:
-- "HYGIENE: Wash hands before eating. Weil's disease from rat urine. Cement causes dermatitis/burns."
-- "SCAFFOLD: Guardrails (top), Mid-rails (middle), Toe boards (bottom)."
-- "NOISE: 80 dB = available. 85 dB = MANDATORY. Permanent."
+Image card captions are plain white text (15px, weight 500) on a basic gradient — visually flat, easy to ignore, and not engaging for students. The same applies to video overlay text (LeanInCallout, HoldUpCard) which could be more visually striking.
 
-These all render as a single block of text with no visual structure.
+## What changes
 
-## Solution
-Enhance the parser to detect **sentence-based lists** (period-separated facts) as a new structured type, and improve the component to render them as distinct visual items.
+### 1. `src/components/lesson/ImageSlide.tsx` — Redesign caption area
+The biggest impact. Currently a simple gradient with plain text. Enhance to:
 
-### `src/lib/formatRememberText.ts`
-Add a new detection step between key=value and fallback:
+- **Stronger gradient** — taller (40% of card height), darker base for better contrast
+- **Glassmorphism caption panel** — wrap text in a frosted glass card (`rgba(255,255,255,0.08)`, `backdrop-filter: blur(16px)`, rounded corners, subtle border)
+- **Better typography** — 16px size, weight 600, line-height 1.5, letter-spacing 0.2px
+- **Auto-highlight key terms** — reuse the `highlightKeyTerms` logic from RememberThis to bold ALL-CAPS words and text before colons
+- **Left accent bar** — 3px blue/amber vertical bar on the left edge of the caption panel for visual anchoring
+- **Subtle entrance animation** — fade-in when `isActive` becomes true (opacity transition)
+- Keep TEST TIP callout styling as-is (already good)
 
-1. **New item type**: Add `"bullet"` to `ParsedItem.type`
-2. **Sentence splitter** (step 3.5): After key=value fails, split the body on `.` boundaries. If there are 2+ meaningful sentences (each >8 chars), return them as `bullet` items
-3. This catches all the cards that currently fall through to a dense paragraph
+### 2. `src/components/lesson/overlays/LeanInCallout.tsx` — More eye-catching
+- Add a **blue left accent bar** (3px) inside the callout
+- Add a small **"👀 Lean in"** label above the text in blue-400
+- Increase font size from 16px to 17px
 
-### `src/components/lesson/cards/RememberThis.tsx`
-1. **Render bullet items** with a small blue dot/dash indicator (instead of numbered badge) — each sentence gets its own panel row, same styling as numbered items
-2. **Increase gap** from `gap-3` to `gap-4` for more breathing room between items
-3. **Add subtle intro text** — when a title exists but items are sentence-based, render a thin separator after the title
-4. **Bold key terms** — auto-bold text before colons or in ALL CAPS within each item for emphasis
+### 3. `src/components/lesson/overlays/HoldUpCard.tsx` — More attention-grabbing
+- Add a **red/amber top accent bar** (full width, 3px)
+- Add **"✋ Hold up"** label in bold above the text
+- Add subtle amber border glow
 
 ### Files changed
-- `src/lib/formatRememberText.ts` — add sentence-based list detection + bullet type
-- `src/components/lesson/cards/RememberThis.tsx` — render bullet items, increase spacing, bold key terms
+- `src/components/lesson/ImageSlide.tsx` — glassmorphism caption panel with key term highlighting
+- `src/components/lesson/overlays/LeanInCallout.tsx` — add accent bar + label
+- `src/components/lesson/overlays/HoldUpCard.tsx` — add accent bar + label
 

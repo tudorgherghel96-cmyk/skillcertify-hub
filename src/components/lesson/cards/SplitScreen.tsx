@@ -17,6 +17,8 @@ export default function SplitScreen({
   right_label = "✓ Right",
   left_text,
   right_text,
+  left_image,
+  right_image,
   title,
   takeaway,
   onComplete,

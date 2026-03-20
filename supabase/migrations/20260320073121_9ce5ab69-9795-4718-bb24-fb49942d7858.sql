@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/risk-assessment-competent-person.webp' WHERE id = '94054296-e70a-4a1f-85c7-3bf56100e968';

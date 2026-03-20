@@ -226,20 +226,30 @@ function CardRenderer({
     case "speed_drill": {
       // Normalize DB format: questions may be {answer,image} (sign drill) or {question,options,correct_index}
       const rawDrillQs = (content.questions as Record<string, unknown>[]) || [];
+      const drillTimer = (content.time_per_question as number) || undefined;
+      // Map DB image keys to SafetySignIcon types
+      const imageToIcon: Record<string, string> = {
+        red_circle: "prohibition", red_circle_2: "prohibition",
+        yellow_triangle: "warning",
+        blue_circle: "mandatory", blue_circle_2: "mandatory",
+        green_rectangle: "safe_condition",
+      };
       const normalizedDrillQs = rawDrillQs.map((q) => {
         if (q.options && Array.isArray(q.options)) {
-          return q as unknown as { question: string; options: string[]; correct_index: number };
+          return q as unknown as { question: string; options: string[]; correct_index: number; icon?: string };
         }
         // Sign-matching format: {answer, image} → generate question with shuffled options
         const correctAnswer = (q.answer as string) || "";
+        const imageKey = (q.image as string) || "";
         const allAnswers = [...new Set(rawDrillQs.map((r) => (r.answer as string) || ""))];
         const distractors = allAnswers.filter((a) => a !== correctAnswer);
         const shuffledDistractors = distractors.sort(() => Math.random() - 0.5).slice(0, 3);
         const options = [correctAnswer, ...shuffledDistractors].sort(() => Math.random() - 0.5);
         return {
-          question: `What type of sign is this? (${(q.image as string) || ""})`,
+          question: "What type of sign is this?",
           options,
           correct_index: options.indexOf(correctAnswer),
+          icon: imageToIcon[imageKey] || undefined,
         };
       });
       return (
@@ -247,6 +257,7 @@ function CardRenderer({
           <SpeedDrill
             questions={normalizedDrillQs}
             xp_value={card.xp_value}
+            timerSeconds={drillTimer}
           />
         </InteractiveSlide>
       );

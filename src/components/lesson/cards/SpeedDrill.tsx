@@ -1,25 +1,26 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import SafetySignIcon from "./SafetySignIcon";
 
 interface DrillQuestion {
   question: string;
   options: string[];
   correct_index: number;
+  icon?: string;
 }
 
 interface SpeedDrillProps {
   questions: DrillQuestion[];
   xp_value: number;
+  timerSeconds?: number;
   onComplete?: (score: number, total: number) => void;
 }
 
-const TIMER_SECONDS = 3;
-
-export default function SpeedDrill({ questions, xp_value, onComplete }: SpeedDrillProps) {
+export default function SpeedDrill({ questions, xp_value, timerSeconds = 3, onComplete }: SpeedDrillProps) {
   const [qIndex, setQIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
-  const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
+  const [timeLeft, setTimeLeft] = useState(timerSeconds);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const advance = useCallback(
@@ -35,7 +36,7 @@ export default function SpeedDrill({ questions, xp_value, onComplete }: SpeedDri
           onComplete?.(score + (wasCorrect ? 1 : 0), questions.length);
         } else {
           setQIndex(next);
-          setTimeLeft(TIMER_SECONDS);
+          setTimeLeft(timerSeconds);
         }
       }, 400);
     },
@@ -44,7 +45,7 @@ export default function SpeedDrill({ questions, xp_value, onComplete }: SpeedDri
 
   useEffect(() => {
     if (done || feedback) return;
-    setTimeLeft(TIMER_SECONDS);
+    setTimeLeft(timerSeconds);
     timerRef.current = setInterval(() => {
       setTimeLeft((t) => {
         if (t <= 1) {
@@ -75,7 +76,7 @@ export default function SpeedDrill({ questions, xp_value, onComplete }: SpeedDri
   }
 
   const q = questions[qIndex];
-  const pct = timeLeft / TIMER_SECONDS;
+  const pct = timeLeft / timerSeconds;
   const radius = 28;
   const circumference = 2 * Math.PI * radius;
   const strokeDash = circumference * (1 - pct);
@@ -115,6 +116,11 @@ export default function SpeedDrill({ questions, xp_value, onComplete }: SpeedDri
       <p style={{ color: "#f59e0b", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 4px 0", textAlign: "center" }}>
         Speed Drill ⚡ {qIndex + 1}/{questions.length}
       </p>
+      {q.icon && (
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          <SafetySignIcon icon={q.icon} size={48} />
+        </div>
+      )}
       <p style={{ color: "white", fontSize: 20, fontWeight: 700, lineHeight: 1.4, margin: "0 0 24px 0", textAlign: "center" }}>
         {q.question}
       </p>

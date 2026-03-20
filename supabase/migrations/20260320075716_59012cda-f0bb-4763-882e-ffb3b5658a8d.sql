@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/method-statement-steps.webp' WHERE id = '9af9525c-f847-4d3d-8ff7-9efdb301609a';

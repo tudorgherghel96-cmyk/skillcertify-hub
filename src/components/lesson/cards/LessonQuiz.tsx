@@ -295,23 +295,27 @@ export default function LessonQuiz({
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-4 p-3.5 rounded-xl border space-y-2"
+              className="mt-4 rounded-xl border overflow-hidden space-y-0"
               style={{
                 background: isCorrect ? "rgba(34,197,94,0.08)" : "rgba(239,68,68,0.08)",
                 borderColor: isCorrect ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)",
               }}
             >
-              <p className="text-xs text-white/70 leading-relaxed">
-                {q.explanation}
-              </p>
+              <div className={`h-[3px] w-full ${isCorrect ? "bg-green-500" : "bg-red-500"}`} />
+              <div className="p-3.5 flex items-stretch gap-0">
+                <div className={`w-[3px] rounded-full shrink-0 mr-3 ${isCorrect ? "bg-green-500" : "bg-red-500"}`} />
+                <p className="text-[14px] text-white/85 leading-[1.7] font-medium">
+                  {q.explanation}
+                </p>
+              </div>
               {q.test_tip && (
-                <div className="flex items-stretch gap-0 bg-amber-500/10 rounded-xl p-3 border border-amber-500/20">
+                <div className="mx-3.5 mb-3.5 flex items-stretch gap-0 bg-amber-500/10 rounded-xl p-3 border border-amber-500/20">
                   <div className="w-[3px] rounded-full bg-amber-500 shrink-0 mr-3" />
                   <div className="flex-1">
                     <p className="text-amber-400 text-[10px] font-bold uppercase tracking-[1.5px] mb-1">
                       📝 Test Tip
                     </p>
-                    <p className="text-[13px] text-amber-200/90 leading-relaxed font-medium">
+                    <p className="text-[13px] text-amber-200/90 leading-[1.7] font-medium">
                       {q.test_tip}
                     </p>
                   </div>

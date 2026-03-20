@@ -259,9 +259,12 @@ export default function DragDrop({ items, targets, correct_pairs, xp_value, onCo
             fontWeight: 600,
             boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
             transform: "scale(1.05)",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
           }}
         >
-          {items.find((i) => i.id === dragging)?.text}
+          {(() => { const di = items.find((i) => i.id === dragging); return di ? <>{di.icon && <SafetySignIcon icon={di.icon} />}<span>{di.text}</span></> : null; })()}
         </div>
       )}
 

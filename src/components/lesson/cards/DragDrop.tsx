@@ -140,7 +140,7 @@ export default function DragDrop({ items, targets, correct_pairs, xp_value, onCo
             MATCH
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {items.map((item) => {
+            {shuffledItems.map((item) => {
               const isMatched = matchedItemIds.has(item.id);
               const isWrong = wrong === item.id;
               return (

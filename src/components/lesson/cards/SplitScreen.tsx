@@ -5,6 +5,8 @@ interface SplitScreenProps {
   right_label?: string;
   left_text: string;
   right_text: string;
+  left_image?: string;
+  right_image?: string;
   title?: string;
   takeaway?: string;
   onComplete?: () => void;
@@ -15,6 +17,8 @@ export default function SplitScreen({
   right_label = "✓ Right",
   left_text,
   right_text,
+  left_image,
+  right_image,
   title,
   takeaway,
   onComplete,
@@ -101,6 +105,20 @@ export default function SplitScreen({
             transform: tapped === "left" ? "scale(0.97)" : "scale(1)",
           }}
         >
+          {left_image && (
+            <img
+              src={left_image}
+              alt="Option A"
+              loading="eager"
+              style={{
+                width: "100%",
+                height: 100,
+                objectFit: "cover",
+                borderRadius: 10,
+                marginBottom: 8,
+              }}
+            />
+          )}
           <p
             style={{
               color: revealed || tapped === "left" ? "#ef4444" : "rgba(255,255,255,0.4)",
@@ -143,6 +161,20 @@ export default function SplitScreen({
             transform: tapped === "right" ? "scale(0.97)" : "scale(1)",
           }}
         >
+          {right_image && (
+            <img
+              src={right_image}
+              alt="Option B"
+              loading="eager"
+              style={{
+                width: "100%",
+                height: 100,
+                objectFit: "cover",
+                borderRadius: 10,
+                marginBottom: 8,
+              }}
+            />
+          )}
           <p
             style={{
               color: revealed || tapped === "right" ? "#10b981" : "rgba(255,255,255,0.4)",

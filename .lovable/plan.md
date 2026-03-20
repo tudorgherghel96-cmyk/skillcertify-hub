@@ -1,27 +1,27 @@
 
 
-# Fix DragDrop — Add Mouse Event Support
+# Shuffle DragDrop Items So Pairs Aren't Obvious
 
 ## Problem
-The DragDrop component only uses `onTouchStart/Move/End` events. In the Lovable preview (and desktop browsers), the user interacts with mouse events, not touch events — so dragging does nothing.
+Items and targets render in the same positional order, so each item sits directly next to its correct match. The game has no challenge.
 
-## Plan
+## Fix
+In `DragDrop.tsx`, shuffle the `items` array on initial render using a `useMemo` with a Fisher-Yates shuffle. This randomizes the left column while keeping the right column (targets) in place, so users actually have to think about which item matches which target.
 
-### Update `DragDrop.tsx` to support both mouse and touch
+### Change in `DragDrop.tsx`
+- Add a `useMemo` at the top of the component that creates a shuffled copy of `items`:
+```typescript
+const shuffledItems = useMemo(() => {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}, [items]);
+```
+- Replace all references to `items.map(...)` in the render with `shuffledItems.map(...)`
+- Keep the `items.find(...)` call for the dragging ghost element as-is (it just looks up text by id)
 
-Add mouse event handlers (`onMouseDown`, `onMouseMove`, `onMouseUp`) mirroring the existing touch handlers:
-
-- **`onMouseDown`** on each item: sets `dragging` and `dragPos` using `e.clientX/Y`
-- **`onMouseMove`** on the container: updates `dragPos`
-- **`onMouseUp`** on the container: hit-tests against target refs and performs match/wrong logic (same as `handleTouchEnd`)
-
-Extract the shared "drop" logic (hit-test targets, check correct pairs, update matched state) into a reusable function called from both `handleTouchEnd` and `handleMouseUp`.
-
-Add `onMouseDown` to each item div alongside the existing `onTouchStart`. Add `onMouseMove` and `onMouseUp` to the container div alongside `onTouchMove` and `onTouchEnd`.
-
-### Fix `touchAction` conflict in `InteractiveSlide.tsx`
-
-Change `touchAction: "manipulation"` to `touchAction: "none"` so it doesn't override the DragDrop's `touchAction: "none"` setting, which is needed to prevent the browser from intercepting touch drags as scrolls.
-
-No other files need changes.
+One file changed, no other modifications needed.
 

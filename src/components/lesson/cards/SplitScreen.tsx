@@ -198,23 +198,37 @@ export default function SplitScreen({
       <div
         style={{
           marginTop: 14,
-          padding: "12px 16px",
+          borderRadius: 14,
           background: revealed ? "rgba(16,185,129,0.08)" : "transparent",
-          borderRadius: 12,
           border: revealed ? "1px solid rgba(16,185,129,0.2)" : "1px solid transparent",
           opacity: revealed ? 1 : 0,
           transform: revealed ? "translateY(0)" : "translateY(8px)",
           transition: "all 0.4s ease",
+          overflow: "hidden",
           minHeight: revealed ? "auto" : 0,
         }}
       >
         {revealed && (
-          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, lineHeight: 1.5, margin: 0 }}>
-            <span style={{ color: "#10b981", fontWeight: 700 }}>
-              {tapped === "right" ? "Correct! " : "Not quite — "}
-            </span>
-            {takeaway || "The right side shows the safe, compliant approach. Always follow correct procedure on site."}
-          </p>
+          <>
+            <div style={{ height: 3, background: tapped === "right" ? "#10b981" : "#ef4444", width: "100%" }} />
+            <div style={{ padding: "14px 16px", display: "flex", alignItems: "stretch", gap: 0 }}>
+              <div
+                style={{
+                  width: 3,
+                  borderRadius: 2,
+                  background: tapped === "right" ? "#10b981" : "#ef4444",
+                  flexShrink: 0,
+                  marginRight: 12,
+                }}
+              />
+              <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 15, fontWeight: 600, lineHeight: 1.6, margin: 0 }}>
+                <span style={{ color: tapped === "right" ? "#10b981" : "#ef4444", fontWeight: 700 }}>
+                  {tapped === "right" ? "✓ Correct! " : "✗ Not quite — "}
+                </span>
+                {takeaway || "The right side shows the safe, compliant approach. Always follow correct procedure on site."}
+              </p>
+            </div>
+          </>
         )}
       </div>
     </div>

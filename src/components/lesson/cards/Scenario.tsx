@@ -112,10 +112,33 @@ export default function Scenario({
       </div>
 
       {answered && (
-        <div style={{ marginTop: 20, padding: "12px 16px", borderRadius: 12, background: isCorrect ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)" }}>
-          <p style={{ color: isCorrect ? "#10b981" : "#ef4444", fontSize: 14, fontWeight: 600, margin: 0 }}>
-            {isCorrect ? `✓ ${feedback_correct}` : `✗ ${feedback_wrong[selected!] || "Not quite right."}`}
-          </p>
+        <div
+          style={{
+            marginTop: 20,
+            borderRadius: 14,
+            background: isCorrect ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.08)",
+            border: `1px solid ${isCorrect ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)"}`,
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ height: 3, background: isCorrect ? "#10b981" : "#ef4444", width: "100%" }} />
+          <div style={{ padding: "14px 16px", display: "flex", alignItems: "stretch", gap: 0 }}>
+            <div
+              style={{
+                width: 3,
+                borderRadius: 2,
+                background: isCorrect ? "#10b981" : "#ef4444",
+                flexShrink: 0,
+                marginRight: 12,
+              }}
+            />
+            <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 15, fontWeight: 600, lineHeight: 1.6, margin: 0 }}>
+              <span style={{ color: isCorrect ? "#10b981" : "#ef4444", fontWeight: 700 }}>
+                {isCorrect ? "✓ " : "✗ "}
+              </span>
+              {isCorrect ? feedback_correct : (feedback_wrong[selected!] || "Not quite right.")}
+            </p>
+          </div>
         </div>
       )}
     </div>

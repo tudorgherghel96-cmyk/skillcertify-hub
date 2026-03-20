@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { getLessonVideoUrl } from "@/lib/media";
 import { triggerHaptic } from "@/lib/haptics";
+import { formatRememberText } from "@/lib/formatRememberText";
 import { speakWord } from "@/lib/pronunciation";
 import VideoPlayer, { VideoPlaceholder } from "./VideoPlayer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";

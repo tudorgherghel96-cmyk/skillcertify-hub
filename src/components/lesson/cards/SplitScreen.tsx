@@ -5,6 +5,8 @@ interface SplitScreenProps {
   right_label?: string;
   left_text: string;
   right_text: string;
+  left_image?: string;
+  right_image?: string;
   title?: string;
   takeaway?: string;
   onComplete?: () => void;

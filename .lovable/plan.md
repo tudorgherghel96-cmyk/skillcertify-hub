@@ -1,27 +1,32 @@
 
 
-# Improve RememberThis Card Readability Across All Cards
+# Improve RememberThis Content Readability
 
 ## Problem
-The current RememberThis card uses tight spacing, small text, and a subtle gradient background that makes content hard to read against the dark lesson player. The layout needs to be clearer, more digestible, and easier to follow.
+Many "Remember This" cards fall through to the plain-text fallback because their content doesn't match the numbered list or key=value patterns. This results in dense, hard-to-read paragraphs. Examples:
+- "HYGIENE: Wash hands before eating. Weil's disease from rat urine. Cement causes dermatitis/burns."
+- "SCAFFOLD: Guardrails (top), Mid-rails (middle), Toe boards (bottom)."
+- "NOISE: 80 dB = available. 85 dB = MANDATORY. Permanent."
 
-## Changes
+These all render as a single block of text with no visual structure.
+
+## Solution
+Enhance the parser to detect **sentence-based lists** (period-separated facts) as a new structured type, and improve the component to render them as distinct visual items.
+
+### `src/lib/formatRememberText.ts`
+Add a new detection step between key=value and fallback:
+
+1. **New item type**: Add `"bullet"` to `ParsedItem.type`
+2. **Sentence splitter** (step 3.5): After key=value fails, split the body on `.` boundaries. If there are 2+ meaningful sentences (each >8 chars), return them as `bullet` items
+3. This catches all the cards that currently fall through to a dense paragraph
 
 ### `src/components/lesson/cards/RememberThis.tsx`
-Redesign the card layout for maximum readability:
-
-1. **Stronger background contrast** — switch from translucent gradient to a more solid dark background with a subtle blue tint border
-2. **Larger, bolder text** — increase body text from 15px to 16px, bump line-height to 1.8
-3. **Better item spacing** — increase gap between items from 12px (gap-3) to 16px (gap-4), add a subtle separator line or background card per item
-4. **Item cards** — wrap each numbered/key-value item in its own rounded panel (rgba background) so items are visually distinct
-5. **Larger number badges** — increase from h-6/w-6 to h-7/w-7 with slightly larger font
-6. **Fallback text** — increase to 18px with more generous line-height (1.8)
-7. **Better title styling** — add bottom margin, slightly larger size
-
-### `src/components/lesson/RememberThis.tsx`
-Delete this file — it's unused (not imported anywhere).
+1. **Render bullet items** with a small blue dot/dash indicator (instead of numbered badge) — each sentence gets its own panel row, same styling as numbered items
+2. **Increase gap** from `gap-3` to `gap-4` for more breathing room between items
+3. **Add subtle intro text** — when a title exists but items are sentence-based, render a thin separator after the title
+4. **Bold key terms** — auto-bold text before colons or in ALL CAPS within each item for emphasis
 
 ### Files changed
-- `src/components/lesson/cards/RememberThis.tsx` — redesign for readability
-- `src/components/lesson/RememberThis.tsx` — delete (unused)
+- `src/lib/formatRememberText.ts` — add sentence-based list detection + bullet type
+- `src/components/lesson/cards/RememberThis.tsx` — render bullet items, increase spacing, bold key terms
 

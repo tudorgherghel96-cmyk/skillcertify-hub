@@ -196,6 +196,7 @@ function CardRenderer({
             title={content.title as string | undefined}
             panels={(content.panels as { front: string; back: string; icon?: string }[]) || []}
             xp_value={card.xp_value}
+            layout={content.layout as string | undefined}
           />
         </InteractiveSlide>
       );

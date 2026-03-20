@@ -20,7 +20,7 @@ export default function SpeedDrill({ questions, xp_value, timerSeconds = 3, onCo
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
-  const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
+  const [timeLeft, setTimeLeft] = useState(timerSeconds);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const advance = useCallback(

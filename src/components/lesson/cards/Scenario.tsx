@@ -97,8 +97,7 @@ export default function Scenario({
             style={{
               width: "100%",
               height: "auto",
-              maxHeight: 220,
-              objectFit: "cover",
+              objectFit: "contain",
               display: "block",
             }}
           />

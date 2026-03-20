@@ -223,15 +223,34 @@ function CardRenderer({
         </InteractiveSlide>
       );
 
-    case "speed_drill":
+    case "speed_drill": {
+      // Normalize DB format: questions may be {answer,image} (sign drill) or {question,options,correct_index}
+      const rawDrillQs = (content.questions as Record<string, unknown>[]) || [];
+      const normalizedDrillQs = rawDrillQs.map((q) => {
+        if (q.options && Array.isArray(q.options)) {
+          return q as unknown as { question: string; options: string[]; correct_index: number };
+        }
+        // Sign-matching format: {answer, image} → generate question with shuffled options
+        const correctAnswer = (q.answer as string) || "";
+        const allAnswers = [...new Set(rawDrillQs.map((r) => (r.answer as string) || ""))];
+        const distractors = allAnswers.filter((a) => a !== correctAnswer);
+        const shuffledDistractors = distractors.sort(() => Math.random() - 0.5).slice(0, 3);
+        const options = [correctAnswer, ...shuffledDistractors].sort(() => Math.random() - 0.5);
+        return {
+          question: `What type of sign is this? (${(q.image as string) || ""})`,
+          options,
+          correct_index: options.indexOf(correctAnswer),
+        };
+      });
       return (
         <InteractiveSlide>
           <SpeedDrill
-            questions={(content.questions as { question: string; options: string[]; correct_index: number }[]) || []}
+            questions={normalizedDrillQs}
             xp_value={card.xp_value}
           />
         </InteractiveSlide>
       );
+    }
 
     case "pattern_card": {
       // Normalize: DB stores pairs: [{ hazard, disease }], component expects separate arrays

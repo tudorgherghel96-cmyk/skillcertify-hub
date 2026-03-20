@@ -14,7 +14,7 @@ export interface ParsedRememberText {
 }
 
 export interface ParsedItem {
-  type: "numbered" | "keyvalue" | "plain";
+  type: "numbered" | "keyvalue" | "bullet" | "plain";
   number?: number;
   key?: string;
   text: string;

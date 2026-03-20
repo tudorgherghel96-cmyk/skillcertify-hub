@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/lessons/1.6_safety_signs_site.webp', media_bucket = NULL WHERE id = 'b96e1488-4ea0-4eda-9fa9-906ee2be6d8b';

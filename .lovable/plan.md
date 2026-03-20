@@ -1,39 +1,27 @@
 
 
-# Add Photos to Split Screen Card 18 (Lesson 1.7)
+# Improve RememberThis Card Readability Across All Cards
 
-## What changes
+## Problem
+The current RememberThis card uses tight spacing, small text, and a subtle gradient background that makes content hard to read against the dark lesson player. The layout needs to be clearer, more digestible, and easier to follow.
 
-### 1. Copy and optimize images
-Save the uploaded photos as optimized WebP files:
-- `public/images/lessons/no-ppe.webp` (Option A — wrong)
-- `public/images/lessons/full-ppe.webp` (Option B — correct)
+## Changes
 
-### 2. Update database content
-Update card `75d1e411-9e5d-4d13-b71d-fe68da1562d6` to add `left_image` and `right_image` fields:
-```json
-{
-  "left": "No goggles, no ear protection, no gloves — exposed to flying debris, loud noise, and chemical burns.",
-  "right": "Full PPE: goggles, ear defenders, gloves, dust mask — every hazard covered and protected.",
-  "left_image": "/images/lessons/no-ppe.webp",
-  "right_image": "/images/lessons/full-ppe.webp",
-  "title": "Which worker is protected?",
-  "takeaway": "Full PPE isn't optional — each item protects against a specific hazard. Missing even one piece leaves you exposed."
-}
-```
+### `src/components/lesson/cards/RememberThis.tsx`
+Redesign the card layout for maximum readability:
 
-### 3. Update SplitScreen component
-- Add optional `left_image` and `right_image` props
-- Render images above the text in each panel — clickable photos with rounded corners, `loading="eager"`, constrained height
-- Images act as the tap target (clicking the image = clicking that side)
+1. **Stronger background contrast** — switch from translucent gradient to a more solid dark background with a subtle blue tint border
+2. **Larger, bolder text** — increase body text from 15px to 16px, bump line-height to 1.8
+3. **Better item spacing** — increase gap between items from 12px (gap-3) to 16px (gap-4), add a subtle separator line or background card per item
+4. **Item cards** — wrap each numbered/key-value item in its own rounded panel (rgba background) so items are visually distinct
+5. **Larger number badges** — increase from h-6/w-6 to h-7/w-7 with slightly larger font
+6. **Fallback text** — increase to 18px with more generous line-height (1.8)
+7. **Better title styling** — add bottom margin, slightly larger size
 
-### 4. Update SwipeContainer
-- Pass `left_image` and `right_image` from content_json to SplitScreen
+### `src/components/lesson/RememberThis.tsx`
+Delete this file — it's unused (not imported anywhere).
 
 ### Files changed
-- `public/images/lessons/no-ppe.webp` — optimized image (Option A)
-- `public/images/lessons/full-ppe.webp` — optimized image (Option B)
-- `src/components/lesson/cards/SplitScreen.tsx` — add image support
-- `src/components/lesson/SwipeContainer.tsx` — pass image props
-- New migration — update card content with image paths
+- `src/components/lesson/cards/RememberThis.tsx` — redesign for readability
+- `src/components/lesson/RememberThis.tsx` — delete (unused)
 

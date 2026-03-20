@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/risk-assessment-form.png' WHERE id = 'e69a098a-e51c-449c-a712-64ae3667e61a';

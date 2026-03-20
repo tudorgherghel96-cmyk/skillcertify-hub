@@ -13,6 +13,7 @@ export function getLessonMediaUrl(
   bucket: string | null,
 ): string {
   if (!file || !bucket) return "";
+  if (file.startsWith("/")) return file; // local public asset
 
   // Detect video by file extension
   if (file.toLowerCase().endsWith(".mp4")) {

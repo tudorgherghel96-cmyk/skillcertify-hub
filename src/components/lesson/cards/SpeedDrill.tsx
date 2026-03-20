@@ -45,7 +45,7 @@ export default function SpeedDrill({ questions, xp_value, timerSeconds = 3, onCo
 
   useEffect(() => {
     if (done || feedback) return;
-    setTimeLeft(TIMER_SECONDS);
+    setTimeLeft(timerSeconds);
     timerRef.current = setInterval(() => {
       setTimeLeft((t) => {
         if (t <= 1) {

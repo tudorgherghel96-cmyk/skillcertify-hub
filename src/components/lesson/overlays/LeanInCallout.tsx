@@ -29,27 +29,55 @@ export default function LeanInCallout({ text, videoRef }: LeanInCalloutProps) {
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
         borderRadius: 16,
-        padding: "18px 24px",
+        padding: "16px 20px",
         border: "1px solid rgba(255,255,255,0.1)",
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(20px)",
         transition: "opacity 600ms ease, transform 600ms ease",
         pointerEvents: "none",
         zIndex: 10,
+        display: "flex",
+        alignItems: "stretch",
+        gap: 0,
       }}
     >
-      <p
+      {/* Blue accent bar */}
+      <div
         style={{
-          color: "white",
-          fontSize: 16,
-          fontWeight: 600,
-          textAlign: "center",
-          margin: 0,
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          width: 3,
+          borderRadius: 2,
+          background: "hsl(205, 91%, 55%)",
+          flexShrink: 0,
+          marginRight: 14,
         }}
-      >
-        {text}
-      </p>
+      />
+      <div style={{ flex: 1 }}>
+        <p
+          style={{
+            color: "hsl(205, 91%, 65%)",
+            fontSize: 11,
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "1.5px",
+            margin: "0 0 6px 0",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          }}
+        >
+          👀 Lean in
+        </p>
+        <p
+          style={{
+            color: "white",
+            fontSize: 17,
+            fontWeight: 600,
+            lineHeight: 1.5,
+            margin: 0,
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          }}
+        >
+          {text}
+        </p>
+      </div>
     </div>
   );
 }

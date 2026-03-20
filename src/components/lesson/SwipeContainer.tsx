@@ -193,7 +193,8 @@ function CardRenderer({
       return (
         <InteractiveSlide>
           <TapToReveal
-            panels={(content.panels as { front: string; back: string }[]) || []}
+            title={content.title as string | undefined}
+            panels={(content.panels as { front: string; back: string; icon?: string }[]) || []}
             xp_value={card.xp_value}
           />
         </InteractiveSlide>

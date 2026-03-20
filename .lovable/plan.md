@@ -1,26 +1,50 @@
 
 
-# Add Fire Triangle Teaching Card Before Tap-to-Reveal
+# Fire Triangle Visual Layout for Tap-to-Reveal
 
-## Problem
-The Tap-to-Reveal card (position 6) tests learners on the Fire Triangle, but they haven't been taught the concept first. The video at position 5 may cover it, but there's no explicit knowledge card explaining what the Fire Triangle is before the interactive quiz.
+## What changes
+The `TapToReveal` component will detect when the title contains "Fire Triangle" (or when a `layout: "triangle"` field is set in content_json) and render a triangle-shaped layout instead of the default 2×2 grid.
 
-## Solution
-Insert a new `remember_this` card at position 6 that teaches the Fire Triangle, and shift the existing cards (positions 6+) up by one.
-
-### New card content
-A "Remember This" card with structured text that the existing formatter will auto-detect and render as a clean numbered/titled layout:
-
+### Triangle layout design
+```text
+        ┌─────────┐
+        │  HEAT   │  ← top center (panel 0)
+        └────┬────┘
+       ╱      ╲
+  ┌────┴──┐  ┌──┴────┐
+  │ FUEL  │  │OXYGEN │  ← bottom left & right (panels 1, 2)
+  └───────┘  └───────┘
+        ┌─────────┐
+        │ 🧯 Stop │  ← center below triangle (panel 3)
+        └─────────┘
 ```
-THE FIRE TRIANGLE: Fire needs THREE things to burn — remove any one to stop the fire. 1) HEAT — sparks, hot works, electrical faults, friction 2) FUEL — wood, paper, flammable liquids, gas, dust 3) OXYGEN — always present in the air (about 21%). A fire extinguisher works by removing one side of the triangle.
-```
 
-This will be parsed by `formatRememberText` into a title ("THE FIRE TRIANGLE") plus 3 numbered items with a closing plain-text line.
+- 3 panels arranged as an inverted triangle: 1 on top, 2 on bottom row
+- 4th panel (extinguisher) centered below
+- SVG triangle outline drawn connecting the 3 corners, glowing when all 3 sides are revealed
+- Each panel is a tappable card (same flip animation as before)
+- Front shows emoji + label ("🔥 Heat", "⛽ Fuel", "💨 Oxygen")
+- Back reveals the detail text
 
-### Database operations (using insert/update tool, not migrations)
-1. **Shift positions**: `UPDATE lesson_cards SET card_position = card_position + 1 WHERE lesson_id = '1.7' AND card_position >= 6 ORDER BY card_position DESC`
-2. **Insert new card**: Insert a `remember_this` card at position 6 with `lesson_id = '1.7'`, `module_id = 1`, `xp_value = 5`
+### Implementation
+
+**`src/components/lesson/cards/TapToReveal.tsx`**
+- Add a `layout?: string` prop
+- When `layout === "triangle"` (or auto-detect from title containing "Triangle"):
+  - Render custom triangle layout instead of grid
+  - Draw faint SVG lines between the 3 panel positions to form a triangle shape
+  - Lines glow green when the connected panels are revealed
+  - 4th panel rendered centered below the triangle
+- Default 2×2 grid remains for all other tap_to_reveal cards
+
+**`src/components/lesson/SwipeContainer.tsx`**
+- Pass `layout` field from `content_json` to `TapToReveal`
+
+**Database migration**
+- Update card `171d2556-9935-4b3b-b0cd-3fc6dba7000b` to add `"layout": "triangle"` to `content_json`
 
 ### Files changed
-None — this is a data-only change. The existing `RememberThis` component and `formatRememberText` utility will handle rendering automatically.
+- `src/components/lesson/cards/TapToReveal.tsx` — add triangle layout mode
+- `src/components/lesson/SwipeContainer.tsx` — pass `layout` prop
+- New migration — add layout field to the card's content_json
 

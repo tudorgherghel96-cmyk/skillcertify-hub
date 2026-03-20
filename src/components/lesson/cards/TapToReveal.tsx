@@ -35,6 +35,11 @@ export default function TapToReveal({ title, panels, xp_value, onComplete }: Tap
 
   return (
     <div>
+      {title && (
+        <p style={{ color: "white", fontSize: 20, fontWeight: 800, textAlign: "center", margin: "0 0 4px 0", lineHeight: 1.3 }}>
+          {title}
+        </p>
+      )}
       <p style={{ color: "#f59e0b", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 20px 0" }}>
         Tap to reveal
       </p>

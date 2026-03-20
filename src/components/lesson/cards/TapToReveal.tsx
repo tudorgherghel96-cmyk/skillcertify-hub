@@ -10,12 +10,13 @@ interface Panel {
 }
 
 interface TapToRevealProps {
+  title?: string;
   panels: Panel[];
   xp_value: number;
   onComplete?: () => void;
 }
 
-export default function TapToReveal({ panels, xp_value, onComplete }: TapToRevealProps) {
+export default function TapToReveal({ title, panels, xp_value, onComplete }: TapToRevealProps) {
   const [flipped, setFlipped] = useState<Set<number>>(new Set());
 
   const flip = (i: number) => {

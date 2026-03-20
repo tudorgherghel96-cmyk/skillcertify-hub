@@ -305,13 +305,16 @@ export default function LessonQuiz({
                 {q.explanation}
               </p>
               {q.test_tip && (
-                <div className="flex items-start gap-2 bg-amber-500/10 rounded-lg p-2.5 border border-amber-500/20">
-                  <span className="text-amber-400 text-xs font-bold shrink-0">
-                    📝 TEST TIP
-                  </span>
-                  <span className="text-xs text-amber-200/80 leading-relaxed">
-                    {q.test_tip}
-                  </span>
+                <div className="flex items-stretch gap-0 bg-amber-500/10 rounded-xl p-3 border border-amber-500/20">
+                  <div className="w-[3px] rounded-full bg-amber-500 shrink-0 mr-3" />
+                  <div className="flex-1">
+                    <p className="text-amber-400 text-[10px] font-bold uppercase tracking-[1.5px] mb-1">
+                      📝 Test Tip
+                    </p>
+                    <p className="text-[13px] text-amber-200/90 leading-relaxed font-medium">
+                      {q.test_tip}
+                    </p>
+                  </div>
                 </div>
               )}
             </motion.div>

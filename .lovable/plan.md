@@ -1,19 +1,19 @@
 
 
-# Fix Text Overflow on Triangle FlipCard
+# Add Missing Video for Card 12 (Lesson 1.7)
 
-## Problem
-The "🔥 Side 1" text on the front of the triangle layout cards overflows outside the 90×90px card boundary.
+## Context
+Card 12 (id: `07b8200d-3d44-4ffc-b7d1-cbdb0118decf`) is a "lean_in" video card about CO2 fire extinguishers. It references `M1-L7-C05-lean-in-co2.mp4` in the `final-correct-media` bucket, but the file is missing. The user has uploaded the actual video.
 
-## Fix
-In `src/components/lesson/cards/TapToReveal.tsx`, update the `FlipCard` component's front face:
+## Plan
 
-1. Add `overflow: hidden` to the front face container
-2. Reduce font size from 12px to 11px for the icon variant label
-3. Add `overflow: hidden` to the back face as well for safety
+1. **Copy the video** to `public/videos/lessons/m1-l7-c05-lean-in-co2.mp4`
 
-These are small style tweaks in the `FlipCard` function (lines ~47-70).
+2. **Update the database** to point to the local path:
+   - Set `media_file = '/videos/lessons/m1-l7-c05-lean-in-co2.mp4'`
+   - Set `media_bucket = NULL` (local asset, no bucket needed)
 
 ### Files changed
-- `src/components/lesson/cards/TapToReveal.tsx` — add overflow hidden + reduce font size on FlipCard faces
+- `public/videos/lessons/m1-l7-c05-lean-in-co2.mp4` — new video asset
+- Database migration — update card 12 media reference
 

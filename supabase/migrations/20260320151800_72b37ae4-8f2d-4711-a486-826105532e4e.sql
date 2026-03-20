@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/lessons/hazard-site-trailing-cables.webp', media_bucket = NULL WHERE id = '2fc42d71-88ac-4cff-a7b2-061a24277e51';

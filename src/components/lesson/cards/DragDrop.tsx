@@ -25,6 +25,15 @@ export default function DragDrop({ items, targets, correct_pairs, xp_value, onCo
   const containerRef = useRef<HTMLDivElement>(null);
   const targetRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  const shuffledItems = useMemo(() => {
+    const arr = [...items];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }, [items]);
+
   const allMatched = Object.keys(correct_pairs).every((itemId) =>
     Object.values(matched).includes(itemId)
   );

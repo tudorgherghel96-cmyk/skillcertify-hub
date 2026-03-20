@@ -1,10 +1,12 @@
 import { useState } from "react";
+import SafetySignIcon from "./SafetySignIcon";
 
 interface Panel {
   front?: string;
   back?: string;
   label?: string;
   content?: string;
+  icon?: string;
 }
 
 interface TapToRevealProps {

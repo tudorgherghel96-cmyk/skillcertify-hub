@@ -88,6 +88,20 @@ export function formatRememberText(raw: string): ParsedRememberText {
     return { title, items };
   }
 
-  // ── 4. Fallback — return as plain text
+  // ── 4. Try sentence-based list (period-separated facts)
+  const sentences = body
+    .split(/\.\s+/)
+    .map((s) => s.trim().replace(/\.$/, ""))
+    .filter((s) => s.length > 8);
+
+  if (sentences.length >= 2) {
+    const items: ParsedItem[] = sentences.map((s) => ({
+      type: "bullet" as const,
+      text: s,
+    }));
+    return { title, items };
+  }
+
+  // ── 5. Fallback — return as plain text
   return { items: [], fallback: trimmed, title };
 }

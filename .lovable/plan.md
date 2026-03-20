@@ -1,17 +1,27 @@
 
 
-# Fix Misplaced Accident Book Image
+# Split Lesson 1.1 Card 17 and Add New Image
 
-## Problem
-The previous migration updated card 7 in lesson **1.4** (Dynamic Risk Assessment, "Changing conditions require reassessment") instead of card 7 in lesson **1.5** (Reporting Accidents). Two cards need fixing.
+## Current State
+Card 17 (lesson 1.1) is an `image` card showing `1.1_photo_6.webp` with caption: *"Waste and buried services are hidden hazards. TEST TIP: The exam tests whether you can identify BOTH visible and hidden hazards."*
 
-## Steps
+Cards 18 (quiz) and 19 (lesson_complete) follow.
 
-### 1. Revert lesson 1.4 card 7 back to original image
-Update card `39df5470-890b-4961-8461-d2a7def4b8ad` to restore `1.4_photo_1.webp` (its original media file).
+## Plan
 
-### 2. Move accident book image to lesson 1.5 card 7
-Update card `b68092fa-ed99-4d08-9b7f-b0201f4507e1` to use `/images/accident-book-reporting.webp`.
+### 1. Optimize uploaded image
+Convert `buried_waste.jpeg` to WebP at 800px width, save as `public/images/buried-waste-hazard.webp`.
 
-Both changes via a single SQL data update — no code changes needed.
+### 2. Update card 17 — image only, no caption
+Remove the caption text and test tip from card 17's `content_json`, keeping it as a clean image-only card.
+
+### 3. Insert new card at position 18
+New `image` card with:
+- Caption: *"Waste and buried services are hidden hazards. TEST TIP: The exam tests whether you can identify BOTH visible and hidden hazards."*
+- Media: `/images/buried-waste-hazard.webp` (local optimized asset)
+
+### 4. Bump existing cards 18→19 and 19→20
+Shift the quiz card and lesson_complete card positions up by 1.
+
+All data changes via SQL using the insert/update tool (not migrations).
 

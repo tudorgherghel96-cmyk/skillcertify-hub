@@ -4,6 +4,37 @@ interface RememberThisProps {
   content: string;
 }
 
+/** Auto-bold text before a colon or ALL-CAPS words */
+function highlightKeyTerms(text: string) {
+  // Bold text before first colon if present
+  const colonIdx = text.indexOf(":");
+  if (colonIdx > 0 && colonIdx < 40) {
+    const before = text.slice(0, colonIdx);
+    const after = text.slice(colonIdx + 1).trim();
+    return (
+      <>
+        <span className="font-semibold text-white">{before}:</span> {after}
+      </>
+    );
+  }
+  // Bold ALL CAPS words (3+ chars)
+  const parts = text.split(/(\b[A-Z]{3,}\b)/g);
+  if (parts.length > 1) {
+    return (
+      <>
+        {parts.map((part, i) =>
+          /^[A-Z]{3,}$/.test(part) ? (
+            <span key={i} className="font-semibold text-white">{part}</span>
+          ) : (
+            <span key={i}>{part}</span>
+          )
+        )}
+      </>
+    );
+  }
+  return text;
+}
+
 export default function RememberThis({ content }: RememberThisProps) {
   const parsed = formatRememberText(content);
 
@@ -21,13 +52,18 @@ export default function RememberThis({ content }: RememberThisProps) {
       <div className="w-10 h-[3px] bg-blue-400 rounded-sm mx-auto mb-6" />
 
       {parsed.title && (
-        <p className="text-white text-base font-bold uppercase tracking-wide mb-5">
-          {parsed.title}
-        </p>
+        <>
+          <p className="text-white text-lg font-bold uppercase tracking-wide mb-3">
+            {parsed.title}
+          </p>
+          {parsed.items.length > 0 && (
+            <div className="w-16 h-px bg-white/10 mx-auto mb-5" />
+          )}
+        </>
       )}
 
       {parsed.items.length > 0 ? (
-        <div className="flex flex-col gap-3 text-left max-w-sm mx-auto">
+        <div className="flex flex-col gap-4 text-left max-w-sm mx-auto">
           {parsed.items.map((item, i) => (
             <div
               key={i}
@@ -43,6 +79,9 @@ export default function RememberThis({ content }: RememberThisProps) {
                   {item.key}
                 </span>
               )}
+              {item.type === "bullet" && (
+                <span className="shrink-0 h-2 w-2 rounded-full bg-blue-400 mt-2.5" />
+              )}
               <p className="text-gray-200 text-[16px] leading-[1.8]">
                 {item.type === "keyvalue" && (
                   <span className="font-semibold text-white">{item.text.split(/\s*[-–—]\s*/)[0]}</span>
@@ -50,7 +89,8 @@ export default function RememberThis({ content }: RememberThisProps) {
                 {item.type === "keyvalue" && item.text.includes("—") && (
                   <span> — {item.text.split(/\s*[-–—]\s+/).slice(1).join(" — ")}</span>
                 )}
-                {item.type !== "keyvalue" && item.text}
+                {item.type === "bullet" && highlightKeyTerms(item.text)}
+                {item.type === "numbered" && item.text}
               </p>
             </div>
           ))}

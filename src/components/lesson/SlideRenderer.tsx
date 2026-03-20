@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { getLessonVideoUrl } from "@/lib/media";
 import { triggerHaptic } from "@/lib/haptics";
+import { formatRememberText } from "@/lib/formatRememberText";
 import { speakWord } from "@/lib/pronunciation";
 import VideoPlayer, { VideoPlaceholder } from "./VideoPlayer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -194,18 +195,58 @@ function KeyTermSlide({ slide }: { slide: Extract<Slide, { type: "keyterm" }> })
 /* ─── Remember This Slide ─── */
 function RememberSlide({ slide }: { slide: Extract<Slide, { type: "remember" }> }) {
   const reducedMotion = useReducedMotion();
+  const parsed = formatRememberText(slide.text);
+
   return (
     <SlideShell>
-      <motion.div variants={pop} initial="hidden" animate="show" className="max-w-md text-center space-y-5">
-        <motion.div
-          animate={reducedMotion ? undefined : { scale: [1, 1.08, 1] }}
-          transition={reducedMotion ? undefined : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto ring-2 ring-destructive/20"
-        >
-          <Brain className="h-8 w-8 text-destructive" />
-        </motion.div>
-        <p className="text-xs font-bold uppercase tracking-widest text-destructive">Remember This</p>
-        <p className="text-lg font-semibold leading-relaxed text-foreground">{slide.text}</p>
+      <motion.div variants={pop} initial="hidden" animate="show" className="max-w-md w-full space-y-5">
+        <div className="text-center space-y-2">
+          <motion.div
+            animate={reducedMotion ? undefined : { scale: [1, 1.08, 1] }}
+            transition={reducedMotion ? undefined : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto ring-2 ring-destructive/20"
+          >
+            <Brain className="h-8 w-8 text-destructive" />
+          </motion.div>
+          <p className="text-xs font-bold uppercase tracking-widest text-destructive">Remember This</p>
+          {parsed.title && (
+            <p className="text-sm font-bold uppercase tracking-wide text-foreground">{parsed.title}</p>
+          )}
+        </div>
+
+        {parsed.items.length > 0 ? (
+          <div className="flex flex-col gap-3 text-left">
+            {parsed.items.map((item, i) => (
+              <div key={i} className="flex items-start gap-3">
+                {item.type === "numbered" && (
+                  <span className="shrink-0 h-6 w-6 rounded-full bg-destructive/10 text-destructive text-xs font-bold flex items-center justify-center mt-0.5">
+                    {item.number}
+                  </span>
+                )}
+                {item.type === "keyvalue" && (
+                  <span className="shrink-0 h-6 w-6 rounded-full bg-destructive/10 text-destructive text-xs font-bold flex items-center justify-center mt-0.5">
+                    {item.key}
+                  </span>
+                )}
+                <p className="text-[15px] leading-relaxed text-foreground">
+                  {item.type === "keyvalue" ? (
+                    <>
+                      <span className="font-semibold">{item.text.split(/\s*[-–—]\s*/)[0]}</span>
+                      {item.text.includes("—") && (
+                        <span> — {item.text.split(/\s*[-–—]\s+/).slice(1).join(" — ")}</span>
+                      )}
+                    </>
+                  ) : (
+                    item.text
+                  )}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-lg font-semibold leading-relaxed text-foreground text-center">{parsed.fallback}</p>
+        )}
+
         <EnglishOverlay text={slide.textEn} />
       </motion.div>
     </SlideShell>

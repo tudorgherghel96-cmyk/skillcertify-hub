@@ -8,6 +8,7 @@ interface ScenarioProps {
   feedback_correct: string;
   feedback_wrong: string[];
   xp_value: number;
+  image?: string;
   onAnswer?: (correct: boolean, selectedIndex: number) => void;
 }
 
@@ -19,6 +20,7 @@ export default function Scenario({
   feedback_correct,
   feedback_wrong,
   xp_value,
+  image,
   onAnswer,
 }: ScenarioProps) {
   const [selected, setSelected] = useState<number | null>(null);
@@ -54,8 +56,8 @@ export default function Scenario({
         style={{
           background: "rgba(245,158,11,0.08)",
           borderRadius: 14,
-          padding: "16px 18px",
-          marginBottom: 24,
+          padding: "14px 16px",
+          marginBottom: 16,
           display: "flex",
           alignItems: "stretch",
           gap: 0,
@@ -67,32 +69,57 @@ export default function Scenario({
             borderRadius: 2,
             background: "#f59e0b",
             flexShrink: 0,
-            marginRight: 14,
+            marginRight: 12,
           }}
         />
         <div style={{ flex: 1 }}>
-          <p style={{ color: "#f59e0b", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.5px", margin: "0 0 6px 0" }}>
+          <p style={{ color: "#f59e0b", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.5px", margin: "0 0 4px 0" }}>
             📋 Scenario
           </p>
-          <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 16, lineHeight: 1.6, margin: 0, fontWeight: 500 }}>{scenario}</p>
+          <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 15, lineHeight: 1.5, margin: 0, fontWeight: 500 }}>{scenario}</p>
         </div>
       </div>
 
-      <p style={{ color: "white", fontSize: 20, fontWeight: 700, lineHeight: 1.4, margin: "0 0 20px 0" }}>
+      {/* Image if provided */}
+      {image && (
+        <div
+          style={{
+            borderRadius: 12,
+            overflow: "hidden",
+            marginBottom: 16,
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <img
+            src={image}
+            alt="Scenario context"
+            loading="eager"
+            style={{
+              width: "100%",
+              height: "auto",
+              maxHeight: 220,
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
+        </div>
+      )}
+
+      <p style={{ color: "white", fontSize: 18, fontWeight: 700, lineHeight: 1.4, margin: "0 0 14px 0" }}>
         {question}
       </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {options.map((opt, i) => (
           <button
             key={i}
             onClick={(e) => { e.stopPropagation(); handleSelect(i); }}
             style={{
               width: "100%",
-              minHeight: 60,
-              padding: "18px 20px",
-              borderRadius: 16,
-              fontSize: 16,
+              minHeight: 48,
+              padding: "14px 16px",
+              borderRadius: 14,
+              fontSize: 15,
               fontWeight: 600,
               textAlign: "left",
               display: "flex",
@@ -114,7 +141,7 @@ export default function Scenario({
       {answered && (
         <div
           style={{
-            marginTop: 20,
+            marginTop: 16,
             borderRadius: 14,
             background: isCorrect ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.08)",
             border: `1px solid ${isCorrect ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)"}`,

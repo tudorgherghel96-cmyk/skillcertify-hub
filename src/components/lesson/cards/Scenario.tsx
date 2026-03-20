@@ -53,16 +53,29 @@ export default function Scenario({
       <div
         style={{
           background: "rgba(245,158,11,0.08)",
-          borderLeft: "4px solid #f59e0b",
-          borderRadius: 12,
-          padding: 20,
+          borderRadius: 14,
+          padding: "16px 18px",
           marginBottom: 24,
+          display: "flex",
+          alignItems: "stretch",
+          gap: 0,
         }}
       >
-        <p style={{ color: "#f59e0b", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, margin: "0 0 8px 0" }}>
-          Scenario
-        </p>
-        <p style={{ color: "white", fontSize: 16, lineHeight: 1.5, margin: 0 }}>{scenario}</p>
+        <div
+          style={{
+            width: 3,
+            borderRadius: 2,
+            background: "#f59e0b",
+            flexShrink: 0,
+            marginRight: 14,
+          }}
+        />
+        <div style={{ flex: 1 }}>
+          <p style={{ color: "#f59e0b", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.5px", margin: "0 0 6px 0" }}>
+            📋 Scenario
+          </p>
+          <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 16, lineHeight: 1.6, margin: 0, fontWeight: 500 }}>{scenario}</p>
+        </div>
       </div>
 
       <p style={{ color: "white", fontSize: 20, fontWeight: 700, lineHeight: 1.4, margin: "0 0 20px 0" }}>

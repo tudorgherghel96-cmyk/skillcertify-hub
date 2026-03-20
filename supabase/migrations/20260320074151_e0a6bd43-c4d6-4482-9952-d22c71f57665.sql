@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '1.3_photo_3.webp' WHERE id = '7d1f5b0a-7ba7-4c1f-8c56-d80293a63925';

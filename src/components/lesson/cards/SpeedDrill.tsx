@@ -116,6 +116,11 @@ export default function SpeedDrill({ questions, xp_value, timerSeconds = 3, onCo
       <p style={{ color: "#f59e0b", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 4px 0", textAlign: "center" }}>
         Speed Drill ⚡ {qIndex + 1}/{questions.length}
       </p>
+      {q.icon && (
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          <SafetySignIcon icon={q.icon} size={48} />
+        </div>
+      )}
       <p style={{ color: "white", fontSize: 20, fontWeight: 700, lineHeight: 1.4, margin: "0 0 24px 0", textAlign: "center" }}>
         {q.question}
       </p>

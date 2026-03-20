@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/five-steps-risk-assessment.webp', content_json = jsonb_set(content_json::jsonb, '{caption}', '"TEST TIP: You MUST know all 5 steps for the exam."') WHERE id = '9aa06162-f77d-4525-b356-ec0fcb12b0bd';

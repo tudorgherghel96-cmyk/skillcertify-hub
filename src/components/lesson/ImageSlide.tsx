@@ -122,18 +122,35 @@ export default function ImageSlide({ src, alt = "", caption, isActive }: ImageSl
             {tipText && (
               <div
                 style={{
-                  marginTop: 10,
-                  padding: "10px 12px",
-                  background: "rgba(245,158,11,0.15)",
-                  border: "1px solid rgba(245,158,11,0.3)",
-                  borderRadius: 10,
+                  marginTop: 12,
+                  background: "rgba(245,158,11,0.1)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  border: "1px solid rgba(245,158,11,0.25)",
+                  borderRadius: 12,
+                  padding: "12px 14px",
                   display: "flex",
-                  alignItems: "flex-start",
-                  gap: 8,
+                  alignItems: "stretch",
+                  gap: 0,
                 }}
               >
-                <span style={{ color: "#fbbf24", fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}>📝 TEST TIP</span>
-                <span style={{ color: "rgba(253,230,138,0.9)", fontSize: 13, lineHeight: 1.4 }}>{tipText}</span>
+                <div
+                  style={{
+                    width: 3,
+                    borderRadius: 2,
+                    background: "#f59e0b",
+                    flexShrink: 0,
+                    marginRight: 12,
+                  }}
+                />
+                <div style={{ flex: 1 }}>
+                  <p style={{ color: "#fbbf24", fontSize: 10, fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", margin: "0 0 4px 0" }}>
+                    📝 Test Tip
+                  </p>
+                  <p style={{ color: "rgba(253,230,138,0.95)", fontSize: 14, lineHeight: 1.6, margin: 0, fontWeight: 500 }}>
+                    {tipText}
+                  </p>
+                </div>
               </div>
             )}
           </div>

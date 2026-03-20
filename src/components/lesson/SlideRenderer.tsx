@@ -266,8 +266,9 @@ function TipSlide({ slide }: { slide: Extract<Slide, { type: "tip" }> }) {
         >
           <Lightbulb className="h-8 w-8 text-amber-500" />
         </motion.div>
-        <p className="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">Test Tip</p>
-        <p className="text-lg leading-relaxed text-foreground">{slide.text}</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-1">Test Tip</p>
+        <div className="w-10 h-[3px] bg-gradient-to-r from-amber-500 to-orange-500 rounded-sm mx-auto" />
+        <p className="text-lg leading-[1.8] text-foreground font-medium max-w-sm mx-auto">{slide.text}</p>
         <EnglishOverlay text={slide.textEn} />
       </motion.div>
     </SlideShell>

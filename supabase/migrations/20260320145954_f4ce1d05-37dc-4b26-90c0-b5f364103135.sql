@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/lessons/handwash-sign.webp', media_bucket = NULL WHERE id = 'ec6148b4-4f21-4877-bae2-ba3682570747';

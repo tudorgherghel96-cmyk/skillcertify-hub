@@ -1,26 +1,20 @@
 
 
-# Fix: Card 18 Image Not Loading
+# Update Lesson 1.4 Card 13 — Image Only with New Photo
 
-## Problem
-The `getLessonMediaUrl` function returns `""` when `media_bucket` is `null`, even for local assets (paths starting with `/`). The new card 18 was inserted with `media_file = '/images/buried-waste-hazard.webp'` but no `media_bucket`, so the early guard `if (!file || !bucket) return ""` prevents the local path from being returned.
+## Current State
+Card 13 (ID: `6f1d96a6-a20a-4013-98a6-436d8969e80c`) is an `image` card showing `1.4_photo_3.webp` with caption text about dynamic RA steps.
 
-## Fix
+## Plan
 
-### Option A (code fix — recommended)
-In `src/lib/media.ts`, move the local path check before the null-bucket guard:
+### 1. Optimize uploaded image
+Copy `Worker_stops_activity_202603201553.jpeg` to `public/images/worker-stops-dra.webp`, converting to WebP at 800px width for fast mobile loading.
 
-```ts
-export function getLessonMediaUrl(file: string | null, bucket: string | null): string {
-  if (!file) return "";
-  if (file.startsWith("/")) return file; // local public asset
-  if (!bucket) return "";
-  // ... rest unchanged
-}
-```
+### 2. Update card 13 — image only, no caption
+Update card `6f1d96a6-a20a-4013-98a6-436d8969e80c`:
+- Set `media_file` to `/images/worker-stops-dra.webp` (local path, no bucket needed)
+- Set `media_bucket` to `NULL`
+- Set `content_json` to `{"alt": "Worker stopped — Dynamic Risk Assessment procedure"}` (no caption)
 
-This fixes this card and all future local assets. No database change needed.
-
-### Technical Detail
-One line reorder in `src/lib/media.ts` — move the `/` prefix check above the `!bucket` guard.
+Single migration, one SQL statement.
 

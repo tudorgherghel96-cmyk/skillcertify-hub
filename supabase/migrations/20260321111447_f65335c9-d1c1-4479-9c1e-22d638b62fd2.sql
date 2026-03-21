@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/lessons/2.1_card9.webp', media_bucket = NULL WHERE lesson_id = '2.1' AND card_position = 9;

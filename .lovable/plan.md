@@ -1,35 +1,31 @@
 
 
-# Enhance Bottom Caption Text Across All Card Types
+# Radically Improve KeyTerm Cards
 
 ## Problem
-Image card captions are plain white text (15px, weight 500) on a basic gradient — visually flat, easy to ignore, and not engaging for students. The same applies to video overlay text (LeanInCallout, HoldUpCard) which could be more visually striking.
+Current KeyTerm cards are visually flat — small emoji icon, tiny label, and a basic green-tinted box with plain text. They don't command attention or help students absorb terminology effectively. The definition text blends together and lacks visual structure.
 
-## What changes
+## Design
 
-### 1. `src/components/lesson/ImageSlide.tsx` — Redesign caption area
-The biggest impact. Currently a simple gradient with plain text. Enhance to:
+Redesign to match the app's established "Top Bar + Side Accent" engagement pattern, but with a distinct green identity for terminology:
 
-- **Stronger gradient** — taller (40% of card height), darker base for better contrast
-- **Glassmorphism caption panel** — wrap text in a frosted glass card (`rgba(255,255,255,0.08)`, `backdrop-filter: blur(16px)`, rounded corners, subtle border)
-- **Better typography** — 16px size, weight 600, line-height 1.5, letter-spacing 0.2px
-- **Auto-highlight key terms** — reuse the `highlightKeyTerms` logic from RememberThis to bold ALL-CAPS words and text before colons
-- **Left accent bar** — 3px blue/amber vertical bar on the left edge of the caption panel for visual anchoring
-- **Subtle entrance animation** — fade-in when `isActive` becomes true (opacity transition)
-- Keep TEST TIP callout styling as-is (already good)
+### New layout for `src/components/lesson/cards/KeyTerm.tsx`
 
-### 2. `src/components/lesson/overlays/LeanInCallout.tsx` — More eye-catching
-- Add a **blue left accent bar** (3px) inside the callout
-- Add a small **"👀 Lean in"** label above the text in blue-400
-- Increase font size from 16px to 17px
+1. **Bold header section** — Large green top accent bar (3px, full width), "📖 KEY TERM" label in green with stronger sizing (13px, weight 800)
+2. **Term as hero text** — The term itself displayed at 26px, weight 900, white, with a subtle green underline/glow to make it the focal point
+3. **Definition in a glassmorphism panel** — Frosted glass card (`rgba(255,255,255,0.06)`, `backdrop-blur(12px)`, rounded, border) with:
+   - Green left accent bar (3px)
+   - Definition text at 16px, line-height 1.8, weight 500
+   - Auto-bold key terms (ALL CAPS, text before colons) — already implemented
+4. **Sentence splitting** — If definition contains multiple sentences (period-separated), render each as a separate bullet point with a green dot, making long definitions scannable
+5. **Dual-term layout** — When `term2`/`definition2` exist, render both with a subtle divider between them, each with its own hero term + definition panel
+6. **Spacing** — More breathing room: 20px gaps between sections, 24px padding inside panels
 
-### 3. `src/components/lesson/overlays/HoldUpCard.tsx` — More attention-grabbing
-- Add a **red/amber top accent bar** (full width, 3px)
-- Add **"✋ Hold up"** label in bold above the text
-- Add subtle amber border glow
+### What stays the same
+- Props interface unchanged (`term`, `definition`, `term2?`, `definition2?`)
+- `highlightDef` function stays (already good)
+- No changes to SwipeContainer — same props passed through
 
 ### Files changed
-- `src/components/lesson/ImageSlide.tsx` — glassmorphism caption panel with key term highlighting
-- `src/components/lesson/overlays/LeanInCallout.tsx` — add accent bar + label
-- `src/components/lesson/overlays/HoldUpCard.tsx` — add accent bar + label
+- `src/components/lesson/cards/KeyTerm.tsx` — full redesign
 

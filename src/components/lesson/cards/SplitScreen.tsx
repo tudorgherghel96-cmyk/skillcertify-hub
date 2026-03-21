@@ -112,10 +112,11 @@ export default function SplitScreen({
               loading="eager"
               style={{
                 width: "100%",
-                height: 100,
-                objectFit: "cover",
+                maxHeight: 180,
+                objectFit: "contain",
                 borderRadius: 10,
                 marginBottom: 8,
+                background: "rgba(255,255,255,0.03)",
               }}
             />
           )}

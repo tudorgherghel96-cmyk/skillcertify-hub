@@ -24,6 +24,7 @@ export default function Scenario({
   onAnswer,
 }: ScenarioProps) {
   const [selected, setSelected] = useState<number | null>(null);
+  const hasImage = Boolean(image);
 
   const handleSelect = (i: number) => {
     if (selected !== null) return;
@@ -50,14 +51,20 @@ export default function Scenario({
   };
 
   return (
-    <div>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: hasImage ? 10 : 12,
+        height: "100%",
+      }}
+    >
       {/* Scenario box */}
       <div
         style={{
           background: "rgba(245,158,11,0.08)",
           borderRadius: 14,
-          padding: "14px 16px",
-          marginBottom: 16,
+          padding: hasImage ? "12px 14px" : "14px 16px",
           display: "flex",
           alignItems: "stretch",
           gap: 0,
@@ -76,7 +83,7 @@ export default function Scenario({
           <p style={{ color: "#f59e0b", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.5px", margin: "0 0 4px 0" }}>
             📋 Scenario
           </p>
-          <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 15, lineHeight: 1.5, margin: 0, fontWeight: 500 }}>{scenario}</p>
+          <p style={{ color: "rgba(255,255,255,0.9)", fontSize: hasImage ? 14 : 15, lineHeight: hasImage ? 1.45 : 1.5, margin: 0, fontWeight: 500 }}>{scenario}</p>
         </div>
       </div>
 
@@ -86,8 +93,9 @@ export default function Scenario({
           style={{
             borderRadius: 12,
             overflow: "hidden",
-            marginBottom: 16,
             border: "1px solid rgba(255,255,255,0.1)",
+            background: "rgba(255,255,255,0.03)",
+            flexShrink: 1,
           }}
         >
           <img
@@ -96,6 +104,7 @@ export default function Scenario({
             loading="eager"
             style={{
               width: "100%",
+              maxHeight: "34vh",
               height: "auto",
               objectFit: "contain",
               display: "block",
@@ -104,21 +113,21 @@ export default function Scenario({
         </div>
       )}
 
-      <p style={{ color: "white", fontSize: 18, fontWeight: 700, lineHeight: 1.4, margin: "0 0 14px 0" }}>
+      <p style={{ color: "white", fontSize: hasImage ? 16 : 18, fontWeight: 700, lineHeight: hasImage ? 1.35 : 1.4, margin: 0 }}>
         {question}
       </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: hasImage ? 8 : 10 }}>
         {options.map((opt, i) => (
           <button
             key={i}
             onClick={(e) => { e.stopPropagation(); handleSelect(i); }}
             style={{
               width: "100%",
-              minHeight: 48,
-              padding: "14px 16px",
+              minHeight: hasImage ? 42 : 48,
+              padding: hasImage ? "12px 14px" : "14px 16px",
               borderRadius: 14,
-              fontSize: 15,
+              fontSize: hasImage ? 14 : 15,
               fontWeight: 600,
               textAlign: "left",
               display: "flex",
@@ -140,7 +149,7 @@ export default function Scenario({
       {answered && (
         <div
           style={{
-            marginTop: 16,
+            marginTop: hasImage ? 10 : 16,
             borderRadius: 14,
             background: isCorrect ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.08)",
             border: `1px solid ${isCorrect ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)"}`,

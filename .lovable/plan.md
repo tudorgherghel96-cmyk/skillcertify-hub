@@ -1,18 +1,35 @@
 
 
-# Show Step Illustrations on Tap-to-Reveal Card 7
+# Add Illustrations to Card 13 (Lesson 2.2) Split Screen
 
 ## Problem
-Card 7's `tap_to_reveal` panels have `icon` set to image paths (e.g. `/images/lessons/2.2_step_1.webp`), but the component passes these to `SafetySignIcon` which only handles SVG icon names like "prohibition" or "warning". The illustrations are silently ignored.
+Card 13 in lesson 2.2 is a `split_screen` comparing bad vs good lifting technique but has no images — just text. Card 11 in lesson 2.1 (Manual Handling) has a similar layout but includes custom illustrations for each option.
 
-## Fix
-Update `TapToReveal.tsx` to detect when `panel.icon` is an image path (starts with `/` or contains `.webp`/`.png`/`.jpg`) and render an `<img>` tag instead of `SafetySignIcon`. This applies to both the `FlipCard` component (used in triangle layout) and the inline grid layout.
+## What to do
 
-### Changes in `src/components/lesson/cards/TapToReveal.tsx`
-- Add a small helper: `const isImagePath = (s: string) => s.startsWith('/') || /\.(webp|png|jpg|jpeg|svg)$/i.test(s)`
-- In `FlipCard` front face: if `panel.icon` is an image path, render `<img src={panel.icon} />` (rounded, 36px) instead of `<SafetySignIcon>`
-- In the grid layout front face: same logic — render `<img>` for image paths, `<SafetySignIcon>` for named icons
+### 1. Generate 2 illustrations
+Using the AI image generation tool, create two images in a similar style to the lesson 2.1 card 11 illustrations:
+
+- **Option A (Bad)**: Worker with rounded back, jerky twisting motion, spine under stress — red/warning tones
+- **Option B (Good)**: Worker with straight back, smooth leg-driven lift, load held close, feet repositioning — green/positive tones
+
+Save as optimized WebP files:
+- `public/images/lessons/2.2_bad_technique.webp`
+- `public/images/lessons/2.2_good_technique.webp`
+
+### 2. Update database
+Add `left_image` and `right_image` paths to the card's `content_json`:
+```sql
+UPDATE lesson_cards SET content_json = jsonb_build_object(
+  'left', 'Rounded back, jerky, twisting spine.',
+  'left_image', '/images/lessons/2.2_bad_technique.webp',
+  'right', 'Straight back, smooth legs, load close, feet move.',
+  'right_image', '/images/lessons/2.2_good_technique.webp'
+) WHERE lesson_id = '2.2' AND card_position = 13;
+```
 
 ### Files changed
-- `src/components/lesson/cards/TapToReveal.tsx` — add image path detection + `<img>` rendering
+- `public/images/lessons/2.2_bad_technique.webp` — new illustration (bad technique)
+- `public/images/lessons/2.2_good_technique.webp` — new illustration (good technique)
+- 1 SQL migration — add image paths to content_json
 

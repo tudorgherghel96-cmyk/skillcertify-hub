@@ -42,6 +42,8 @@ export default function RememberThis({ content, illustrations, heroImage }: Reme
   const isCompact = parsed.items.length >= 6 && hasIllustrations;
   const itemCount = parsed.items.length;
 
+  const showHeader = !!parsed.title;
+
   return (
     <div
       className={`text-center rounded-[20px] border border-blue-400/20 ${isCompact ? "py-4 px-3" : "py-6 px-4"}`}
@@ -49,13 +51,15 @@ export default function RememberThis({ content, illustrations, heroImage }: Reme
         background: "linear-gradient(180deg, rgba(30,40,70,0.95) 0%, rgba(15,15,25,0.98) 40%)",
       }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-center gap-2 mb-1">
-        <span className={isCompact ? "text-[24px]" : "text-[32px]"}>🧠</span>
-        <p className={`text-blue-400 font-extrabold tracking-[3px] uppercase ${isCompact ? "text-[10px]" : "text-xs"}`}>
-          Remember This
-        </p>
-      </div>
+      {/* Header - only show when there's a title */}
+      {showHeader && (
+        <div className="flex items-center justify-center gap-2 mb-1">
+          <span className={isCompact ? "text-[24px]" : "text-[32px]"}>🧠</span>
+          <p className={`text-blue-400 font-extrabold tracking-[3px] uppercase ${isCompact ? "text-[10px]" : "text-xs"}`}>
+            Remember This
+          </p>
+        </div>
+      )}
       <div className={`bg-gradient-to-r from-transparent via-blue-400 to-transparent mx-auto ${isCompact ? "w-24 h-[2px] mb-3" : "w-32 h-[2px] mb-4"}`} />
 
       {/* Hero image */}

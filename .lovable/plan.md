@@ -1,22 +1,35 @@
 
 
-# Make Card 6 (RememberThis with 8 Steps) Compact — Fit on One Screen
+# Add Images to Card 4 (Lesson 2.3) TILE Tap-to-Reveal
 
-## Problem
-Card 6 in lesson 2.2 has 8 numbered steps, each with a 56×56px illustration, generous padding/gaps, and a large header section. With 8 items this overflows the viewport (844px minus ~55px nav = ~789px usable).
+## What
+Card 4 is a `tap_to_reveal` with 4 panels for T-I-L-E. Add the uploaded images as icons on each panel's front face.
 
-## Changes in `src/components/lesson/cards/RememberThis.tsx`
+## Image mapping
+- **T (Task)** — Worker with bricks on pallet (Screenshot_2026-03-23_at_11.25.04.png)
+- **I (Individual)** — Two workers communicating/signaling (Screenshot_2026-03-23_at_11.24.57.png)
+- **L (Load)** — Worker lifting concrete blocks (Screenshot_2026-03-23_at_11.24.49.png)
+- **E (Environment)** — Worker with wheelbarrow indoors (Screenshot_2026-03-23_at_11.25.10.png)
 
-Detect when there are many items (≥6) with illustrations and switch to a **compact layout**:
+## Steps
 
-1. **Reduce header** — Smaller emoji (28px), tighter margins, combine "Remember This" label + title into less vertical space, reduce divider margins
-2. **Compact item grid** — Switch from single-column `gap-4` to a **2-column grid** (`grid-cols-2 gap-2`) when item count ≥ 6 and illustrations exist
-3. **Smaller illustration tiles** — Each tile: 40×40px image (down from 56×56), step number overlay, text at 12px (down from 16px), padding `px-2 py-2` (down from `px-4 py-3`)
-4. **Reduce line-height** — From 1.8 to 1.4 in compact mode
-5. **Outer padding** — `py-4 px-3` instead of `py-10 px-5` in compact mode
+1. **Copy and optimize** the 4 uploaded images to `public/images/lessons/2.3_tile_{t,i,l,e}.webp` (800px, WebP)
+2. **Update database** — add `icon` field to each panel in `content_json`:
+```sql
+UPDATE lesson_cards SET content_json = '{"panels":[
+  {"label":"T","content":"Task — what does the job involve?","icon":"/images/lessons/2.3_tile_t.webp"},
+  {"label":"I","content":"Individual — are YOU fit?","icon":"/images/lessons/2.3_tile_i.webp"},
+  {"label":"L","content":"Load — heavy, awkward, grip?","icon":"/images/lessons/2.3_tile_l.webp"},
+  {"label":"E","content":"Environment — wet, narrow, steps?","icon":"/images/lessons/2.3_tile_e.webp"}
+]}'::jsonb WHERE lesson_id = '2.3' AND card_position = 4;
+```
 
-This keeps all 8 steps + illustrations visible in a ~700px content area. Photos remain clearly visible at 40×40px rounded thumbnails.
+No component changes needed — `TapToReveal` already detects image paths in the `icon` field and renders `<img>` tags.
 
 ### Files changed
-- `src/components/lesson/cards/RememberThis.tsx`
+- `public/images/lessons/2.3_tile_t.webp` — new optimized image
+- `public/images/lessons/2.3_tile_i.webp` — new optimized image
+- `public/images/lessons/2.3_tile_l.webp` — new optimized image
+- `public/images/lessons/2.3_tile_e.webp` — new optimized image
+- SQL data update for card 4 content_json
 

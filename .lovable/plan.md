@@ -1,39 +1,26 @@
 
-The image is still not showing because Card 5 is not actually pointing at the local replacement image.
 
-## What I found
-- Lesson `3.4`, card `5` currently has:
-  - `media_bucket = 'final-correct-media'`
-  - `media_file = '3.4_photo_1.webp'`
-- That means the app is still trying to load the old Supabase bucket asset.
-- The lesson player code is working as intended:
-  - if `media_file` starts with `/`, it uses the local public asset
-  - otherwise it builds a Supabase Storage URL
-- The session replay confirms the image request fails and the card falls back to **“Image unavailable”**.
-- So this is a **data/config issue**, not an `ImageSlide` rendering bug.
+# Add "Example of Internal Void" Card
+
+## Current state
+- Lesson 3.1 card 5 mentions "INCLUDING STANDING NEAR VOIDS"
+- Lesson 3.1 card 11 has a remember_this about "unguarded openings, trenches, and floor voids" with the voids image
+- Lesson 3.4 card 9 uses image `3.4_photo_2.webp` from `final-correct-media` bucket — this is the image the user identifies as showing an internal void
+
+## Where to place it
+The most appropriate location is in **Lesson 3.1 (What is Working at Height)** right after card 5 (which mentions "INCLUDING STANDING NEAR VOIDS"). Placing a visual example of an internal void immediately after that reference reinforces the concept. This means inserting at **position 6**, shifting all existing cards 6-14 forward by 1.
 
 ## Plan
-1. Update the `lesson_cards` row for lesson `3.4`, card `5` so it uses the local asset path instead of the storage bucket.
-   - Set `media_file` to the local path for the replacement image
-   - Set `media_bucket` to `NULL`
-
-2. Keep the card as an `image` card with the existing caption unless you want that text changed too.
-
-3. Verify the card now resolves through the local-path branch of `getLessonMediaUrl`, which should stop the broken bucket lookup and display the image properly.
+1. Shift all cards in lesson 3.1 at positions 6-14 forward by 1 (to 7-15)
+2. Insert a new `image` card at position 6 with:
+   - `media_file = '3.4_photo_2.webp'`
+   - `media_bucket = 'final-correct-media'`
+   - `content_json = {"caption": "Example of internal void", "alt": "Example of an internal void on a construction site"}`
+   - `card_type = 'image'`
+   - `lesson_id = '3.1'`, `module_id = 3`, `xp_value = 0`
 
 ## Technical details
-```text
-Current broken state:
-media_bucket = final-correct-media
-media_file   = 3.4_photo_1.webp
+- 9 UPDATE statements to shift positions (14→15, 13→14, ... 6→7) — must be done in reverse order
+- 1 INSERT for the new card at position 6
+- All done via the insert tool (data operations, not schema changes)
 
-Expected fixed state:
-media_bucket = NULL
-media_file   = /images/lessons/3.4_rooflights_fragile.webp
-```
-
-## Why this happened
-A previous image conversion may have succeeded, but the database row for card 5 still points to the old storage object. Since the code prefers the DB record, the new local file is never used.
-
-## Expected result
-Card 5 in “Fragile Surfaces” will load the replacement rooflights image instead of showing “Image unavailable”.

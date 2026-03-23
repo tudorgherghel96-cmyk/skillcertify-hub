@@ -1,58 +1,25 @@
 
-Restore that content as a single `remember_this` card in Lesson 3.1 instead of splitting it across separate cards.
 
-## What I found
-- The current DB state for lesson `3.1` is:
-  - card 11 = `image`
-  - card 12 = `remember_this` with `media_file: /images/lessons/3.1_voids_openings.webp`
-  - card 13 = quiz
-- The renderer for `remember_this` currently only passes:
-  - `content.text` / `content.content`
-  - `content.illustrations`
-- It does not currently pass the card’s `mediaUrl`, and `RememberThis.tsx` does not support a single hero image block above the text.
-- Earlier migrations changed this content from one image-caption style card into split cards, which is why the original “image + remember this message together” behavior was lost.
+# Split Card 9 in Lesson 3.3: Image Only + New Text Card
+
+## Current state
+Card 9 (lesson 3.3) is an `image` card with:
+- Image: `3.3_photo_2.webp`
+- Caption: "Fall PREVENTION (guardrails) always comes before fall ARREST (harnesses). TEST TIP: The hierarchy is AVOID > PREVENT > ARREST > MINIMISE."
 
 ## Plan
-1. Update the Lesson 3.1 data so the “Working at height includes working near unguarded openings, trenches, and floor voids” content lives on one `remember_this` card again.
-   - Keep it at card 12, since that card already points to the uploaded image path.
-   - Store the remember-this text in the field shape the component actually reads (`text` or `content`), not only `title/items`.
+1. **Update card 9** — remove the caption text, keep it as image-only
+   - Set `content_json` to `{"alt": "Guardrails and edge protection", "caption": ""}` (empty caption)
 
-2. Extend the `remember_this` rendering flow to support a single top image.
-   - Pass `card.mediaUrl` from `SwipeContainer` into `RememberThis`.
-   - Add an optional `heroImage` prop in `RememberThis.tsx`.
-   - Render the image near the top of the card, under the brain icon / “Remember This” label, so it still clearly reads as a remember-this card.
+2. **Insert new card at position 10** — a `remember_this` card with the text content
+   - Text: "Fall PREVENTION (guardrails) always comes before fall ARREST (harnesses)."
+   - Include the test tip about the hierarchy (AVOID > PREVENT > ARREST > MINIMISE)
+   - Shift existing cards 10+ forward by 1 position
 
-3. Keep the remember-this visual treatment intact.
-   - Preserve the icon/header at the top.
-   - Show the uploaded image as the main visual.
-   - Render the text below in a clear stacked layout so the key warning remains prominent and easy to scan on mobile.
+3. **No code changes needed** — the existing `remember_this` and `image` renderers handle these card types already
 
-4. Clean up the lesson flow.
-   - Ensure card 12 is the combined remember-this card.
-   - Ensure card 11 remains whatever precedes it and card 13 remains the quiz, with no duplicate or empty replacement card left behind.
+### Database operations (via insert tool)
+- UPDATE card 9 to clear caption
+- UPDATE cards 10, 11 → positions 11, 12
+- INSERT new `remember_this` card at position 10
 
-## Technical details
-```text
-Current issue:
-remember_this card has image in media_file
-but component ignores mediaUrl
-and content_json shape is partly incompatible with current renderer
-
-Required implementation:
-LessonPlayer -> mediaUrl already exists
-SwipeContainer remember_this case -> pass heroImage={card.mediaUrl}
-RememberThis -> accept optional heroImage and render it
-DB data -> set card 12 content_json to include a text string the component reads
-```
-
-## Files likely involved
-- `src/components/lesson/SwipeContainer.tsx`
-- `src/components/lesson/cards/RememberThis.tsx`
-- data update for `lesson_cards` where `lesson_id = '3.1'` and `card_position = 12`
-
-## Expected result
-Card 12 in “What is Working at Height” will again be a proper `Remember This` card with:
-- the brain icon and “Remember This” heading
-- the uploaded image on the same card
-- the full warning text: “Working at height includes working near unguarded openings, trenches, and floor voids.”
-- the rest of the reminder content underneath in a readable format

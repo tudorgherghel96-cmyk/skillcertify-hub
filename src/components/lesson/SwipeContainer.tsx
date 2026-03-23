@@ -297,7 +297,10 @@ function CardRenderer({
     case "remember_this":
       return (
         <InteractiveSlide>
-          <RememberThis content={(content.text as string) || (content.content as string) || ""} />
+          <RememberThis
+            content={(content.text as string) || (content.content as string) || ""}
+            illustrations={content.illustrations as string[] | undefined}
+          />
         </InteractiveSlide>
       );
 

@@ -65,36 +65,57 @@ export default function RememberThis({ content, illustrations }: RememberThisPro
 
       {parsed.items.length > 0 ? (
         <div className="flex flex-col gap-4 text-left max-w-sm mx-auto">
-          {parsed.items.map((item, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-3 bg-white/[0.06] border border-white/[0.08] rounded-xl px-4 py-3"
-            >
-              {item.type === "numbered" && (
-                <span className="shrink-0 h-7 w-7 rounded-full bg-blue-500/25 text-blue-300 text-xs font-bold flex items-center justify-center mt-0.5">
-                  {item.number}
-                </span>
-              )}
-              {item.type === "keyvalue" && (
-                <span className="shrink-0 h-7 w-7 rounded-full bg-blue-500/25 text-blue-300 text-xs font-bold flex items-center justify-center mt-0.5">
-                  {item.key}
-                </span>
-              )}
-              {item.type === "bullet" && (
-                <span className="shrink-0 h-2 w-2 rounded-full bg-blue-400 mt-2.5" />
-              )}
-              <p className="text-gray-200 text-[16px] leading-[1.8]">
-                {item.type === "keyvalue" && (
-                  <span className="font-semibold text-white">{item.text.split(/\s*[-–—]\s*/)[0]}</span>
+          {parsed.items.map((item, i) => {
+            const illustrationSrc = item.type === "numbered" && illustrations && item.number
+              ? illustrations[item.number - 1]
+              : undefined;
+            return (
+              <div
+                key={i}
+                className="flex items-start gap-3 bg-white/[0.06] border border-white/[0.08] rounded-xl px-4 py-3"
+              >
+                {illustrationSrc ? (
+                  <img
+                    src={illustrationSrc}
+                    alt={`Step ${item.number}`}
+                    className="shrink-0 h-14 w-14 rounded-lg object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <>
+                    {item.type === "numbered" && (
+                      <span className="shrink-0 h-7 w-7 rounded-full bg-blue-500/25 text-blue-300 text-xs font-bold flex items-center justify-center mt-0.5">
+                        {item.number}
+                      </span>
+                    )}
+                    {item.type === "keyvalue" && (
+                      <span className="shrink-0 h-7 w-7 rounded-full bg-blue-500/25 text-blue-300 text-xs font-bold flex items-center justify-center mt-0.5">
+                        {item.key}
+                      </span>
+                    )}
+                    {item.type === "bullet" && (
+                      <span className="shrink-0 h-2 w-2 rounded-full bg-blue-400 mt-2.5" />
+                    )}
+                  </>
                 )}
-                {item.type === "keyvalue" && item.text.includes("—") && (
-                  <span> — {item.text.split(/\s*[-–—]\s+/).slice(1).join(" — ")}</span>
-                )}
-                {item.type === "bullet" && highlightKeyTerms(item.text)}
-                {item.type === "numbered" && item.text}
-              </p>
-            </div>
-          ))}
+                <div className="flex flex-col gap-1">
+                  {illustrationSrc && item.type === "numbered" && (
+                    <span className="text-blue-300 text-xs font-bold">Step {item.number}</span>
+                  )}
+                  <p className="text-gray-200 text-[16px] leading-[1.8]">
+                    {item.type === "keyvalue" && (
+                      <span className="font-semibold text-white">{item.text.split(/\s*[-–—]\s*/)[0]}</span>
+                    )}
+                    {item.type === "keyvalue" && item.text.includes("—") && (
+                      <span> — {item.text.split(/\s*[-–—]\s+/).slice(1).join(" — ")}</span>
+                    )}
+                    {item.type === "bullet" && highlightKeyTerms(item.text)}
+                    {item.type === "numbered" && item.text}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       ) : (
         <p className="text-gray-100 text-[18px] font-medium leading-[1.8] max-w-sm mx-auto">

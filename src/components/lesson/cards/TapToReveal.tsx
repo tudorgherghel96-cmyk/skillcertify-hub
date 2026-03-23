@@ -230,7 +230,7 @@ export default function TapToReveal({ title, panels, xp_value, layout, onComplet
         <TriangleLayout panels={panels} flipped={flipped} onFlip={flip} />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, perspective: 1000 }}>
-          {panels.slice(0, 4).map((panel, i) => {
+          {panels.map((panel, i) => {
             const isFlipped = flipped.has(i);
             return (
               <div

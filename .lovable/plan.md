@@ -1,49 +1,41 @@
 
 
-# Split Card 4 in Lesson 3.4 into 3 Illustrated Cards
+# Create Illustrations for Card 6 (Lesson 3.5) — Spot the Difference
 
 ## Current state
-Card 4 is a `remember_this` card with text:
-> "FRAGILE: Rooflights, fibre cement, glass panels, deteriorated felt. NEVER walk on them. Use crawl boards, guardrails, barriers."
+Card 6 is a `split_screen` card with:
+- **Left (wrong):** "Harness only — catches AFTER you fall."
+- **Right (correct):** "Guardrails + harness — PREVENTS the fall first."
+- No images currently attached.
 
-Lesson 3.4 currently has 12 cards (positions 1-12).
+## Existing split-screen illustration style
+The project has three sets of split-screen illustrations that follow a consistent style:
+- `1.7`: no-ppe.webp / full-ppe.webp (PPE comparison)
+- `2.1`: option_a.webp / option_b.webp (lifting technique)
+- `2.2`: bad_technique.webp / good_technique.webp (manual handling)
+
+All are AI-generated, placed in `public/images/lessons/`, optimized WebP, referenced via local paths.
 
 ## Plan
 
-Split card 4 into 3 separate `remember_this` cards, each with a generated illustration, and shift cards 5-12 forward by 2 positions (to 7-14).
+1. **Generate two images** using AI image generation, matching the illustrative style of existing split-screen cards:
+   - **Left image** (`3.5_harness_only.webp`): Worker on elevated platform with only a harness, no guardrails — depicting the "arrest only" approach
+   - **Right image** (`3.5_guardrails_harness.webp`): Worker on elevated platform with guardrails AND a harness — depicting "prevention first" approach
 
-### New card 4 — What is fragile
-- Type: `remember_this` (headerless, image-focused)
-- Text: "FRAGILE SURFACES: Rooflights, fibre cement sheets, glass panels, and deteriorated felt."
-- Image: AI-generated illustration showing examples of fragile surfaces (rooflights, cement sheets)
-- Saved to `public/images/lessons/3.4_fragile_types.webp`
-- DB: `media_file = '/images/lessons/3.4_fragile_types.webp'`, `media_bucket = NULL`
+2. **Optimize** both images to WebP format, <150KB, max 800px
 
-### New card 5 — Never walk on them
-- Type: `remember_this` (headerless, image-focused)
-- Text: "NEVER walk on fragile surfaces — they will NOT hold your weight."
-- Image: AI-generated illustration showing the danger of walking on fragile surfaces
-- Saved to `public/images/lessons/3.4_never_walk.webp`
-- DB: `media_file = '/images/lessons/3.4_never_walk.webp'`, `media_bucket = NULL`
+3. **Update database** — add `left_image` and `right_image` to the card's `content_json`:
+   ```sql
+   UPDATE lesson_cards
+   SET content_json = jsonb_set(
+     jsonb_set(content_json, '{left_image}', '"/images/lessons/3.5_harness_only.webp"'),
+     '{right_image}', '"/images/lessons/3.5_guardrails_harness.webp"'
+   )
+   WHERE lesson_id = '3.5' AND card_position = 6;
+   ```
 
-### New card 6 — Protection measures
-- Type: `remember_this`
-- Text: "Use crawl boards, guardrails, and barriers to protect against falls through fragile surfaces."
-- Image: AI-generated illustration showing crawl boards and guardrails
-- Saved to `public/images/lessons/3.4_crawl_boards.webp`
-- DB: `media_file = '/images/lessons/3.4_crawl_boards.webp'`, `media_bucket = NULL`
-
-### Database operations
-1. Shift cards 5-12 forward by 2 (to 7-14) — reverse order to avoid conflicts
-2. Update card 4 content to first bullet point only, add image reference
-3. Insert card 5 (never walk) and card 6 (protection measures)
-
-### Image generation
-Since I cannot generate AI images, I will use placeholder illustrations. The user can upload replacement images later, or I can prompt the user to provide 3 images for each point.
-
-**Alternative**: The user could upload 3 images and I apply them. Should I proceed with text-only cards and ask for images, or create the cards now with the existing rooflight image on card 4 and no images on cards 5-6?
-
-### Files involved
-- New migration SQL for card splitting and position shifts
-- 3 new image files in `public/images/lessons/` (if user provides them)
+### Files created
+- `public/images/lessons/3.5_harness_only.webp`
+- `public/images/lessons/3.5_guardrails_harness.webp`
+- New migration SQL
 

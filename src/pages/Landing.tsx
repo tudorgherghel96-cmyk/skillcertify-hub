@@ -216,6 +216,8 @@ const Landing = () => {
               alt="CSCS Green Card and SkillCertify app on a construction site"
               className="w-full rounded-2xl shadow-lg"
               loading="eager"
+              fetchPriority="high"
+              decoding="async"
             />
           </motion.div>
 

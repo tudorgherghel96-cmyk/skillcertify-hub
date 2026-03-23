@@ -94,6 +94,7 @@ export default function LearnHub() {
                         alt={mod.title}
                         className="w-full h-full object-cover"
                         loading="lazy"
+                        decoding="async"
                         onError={(e) => { (e.target as HTMLImageElement).src = '/fallback.webp'; }}
                       />
                     </div>

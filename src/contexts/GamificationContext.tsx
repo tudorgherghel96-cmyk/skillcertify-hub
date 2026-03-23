@@ -325,7 +325,7 @@ async function upsertStreak(userId: string, current: number, longest: number, la
 async function loadGamificationFromSupabase(userId: string) {
   const { data } = await supabase
     .from("user_gamification")
-    .select("*")
+    .select("total_xp, daily_xp, daily_goal, level, milestones_achieved, streak_freezes_available, daily_xp_date")
     .eq("user_id", userId)
     .maybeSingle();
   return data;

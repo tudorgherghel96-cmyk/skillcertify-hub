@@ -1,29 +1,29 @@
 
 
-# Fix Card 4 (Lesson 4.5) — Improve Text Layout
+# Fix Card 5 (Lesson 5.3 Traffic Management) — Improve Text Layout
 
 ## Problem
-The current text is a single dense block:
-> "Zero tolerance. Impairs judgment, slows reactions. Prescribed medication: if drowsy, MUST inform supervisor BEFORE starting work."
+The current text is a dense, comma-separated block:
+> "Primary purpose = SEGREGATION. Separate pedestrians from vehicles. Controls: one-way, pedestrian routes, speed limits, barriers."
 
-The `formatRememberText` parser splits on periods with `>8` char filter, but "Zero tolerance" (14 chars) gets parsed as a bullet alongside the other sentences. The result is three tightly packed bullet items with no clear hierarchy — making it hard to scan and digest.
+The `formatRememberText` parser splits this into bullet sentences, but the result lacks hierarchy and is hard to scan.
 
 ## Solution
-Restructure the text with a title and numbered points so the parser produces a clear, scannable layout:
+Restructure with a title and numbered points:
 
-**New content_json text:**
+**New text:**
 ```
-DRUGS, ALCOHOL & SUBSTANCE MISUSE: 1) Zero tolerance on site — never work under the influence 2) Impairs judgment and slows reaction times 3) Prescribed medication — if it causes drowsiness, MUST inform your supervisor BEFORE starting work
+TRAFFIC MANAGEMENT: 1) Primary purpose is SEGREGATION — keeping pedestrians and vehicles apart 2) Dedicated pedestrian walkways must be clearly marked 3) One-way systems and speed limits control vehicle movement 4) Physical barriers separate work zones from traffic routes
 ```
 
-This gives:
-- A bold title header: "DRUGS, ALCOHOL & SUBSTANCE MISUSE"
-- Three clearly separated numbered cards with distinct points
-- Each point is digestible on its own
+This produces:
+- Bold title: "TRAFFIC MANAGEMENT"
+- Four numbered cards, each with one clear point
+- Easy to scan and digest on mobile
 
 ## Implementation
-Single SQL migration updating `content_json` for lesson `4.5`, card position 4.
+Single SQL migration updating `content_json` for lesson `5.3`, card position 5.
 
 ### Files
-- New migration: `supabase/migrations/XXXX_update_lesson_4_5_card_4_text.sql`
+- New migration: `supabase/migrations/XXXX_update_lesson_5_3_card_5_text.sql`
 

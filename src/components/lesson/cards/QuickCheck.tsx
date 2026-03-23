@@ -100,6 +100,13 @@ export default function QuickCheck({
         ⚡ Quick Check
       </p>
 
+      {/* Image */}
+      {image && (
+        <div style={{ margin: "0 0 16px 0", borderRadius: 16, overflow: "hidden" }}>
+          <img src={image} alt="" style={{ width: "100%", maxHeight: 220, objectFit: "contain", borderRadius: 16 }} loading="lazy" />
+        </div>
+      )}
+
       {/* Question */}
       <p style={{ color: "white", fontSize: 22, fontWeight: 700, lineHeight: 1.4, margin: "0 0 32px 0" }}>
         {question}

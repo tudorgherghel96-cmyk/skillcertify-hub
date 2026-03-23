@@ -53,8 +53,8 @@ export const MODULES: Module[] = [
     lessons: [
       { id: 1, title: "What is Manual Handling and Why Does it Matter?" },
       { id: 2, title: "Safe Lifting Technique: Step by Step" },
-      { id: 3, title: "Lifting Aids and Mechanical Equipment" },
-      { id: 4, title: "Safe Storage of Materials" },
+      { id: 3, title: "TILE Assessment" },
+      { id: 4, title: "Team Lifting & Mechanical Aids" },
     ],
     topics: [
       "Lifting technique",

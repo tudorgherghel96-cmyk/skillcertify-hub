@@ -1,49 +1,47 @@
 
 
-# Add Illustrations to 8-Step Lifting Technique Card
+# Make the 8 Lifting Steps Interactive for Better Retention
 
-## What
-Generate 8 simple, clear illustrations — one for each safe lifting step on card 6 of lesson 2.2 (Safe Lifting Technique) — and display them inline with each numbered step.
+## Problem
+Card 6 currently shows all 8 safe lifting steps as a static "Remember This" list. Students passively read through it — no engagement, no active recall, poor retention.
 
-## The 8 Steps to Illustrate
-1. **Plan** — worker assessing the load/route before lifting
-2. **Feet shoulder-width** — feet positioned apart, stable base
-3. **Bend knees, straight back** — squatting with straight spine
-4. **Firm grip (palms)** — hands gripping box with full palms
-5. **Load close** — box held tight against torso
-6. **Lift with LEGS** — rising up using leg muscles, arrows on legs
-7. **Move feet to turn** — feet pivoting, no spine twist
-8. **Set down carefully** — lowering box with bent knees
+## Solution
+Replace the single static card with **3 new interactive cards** inserted after card 6 (which stays as the reference). This creates a "learn → practice → test" micro-loop:
+
+### Card 6 — Keep as-is
+The existing "Remember This" card with illustrations stays as the initial teaching moment.
+
+### New Card 6a — **Tap-to-Reveal: Steps in Order**
+A `tap_to_reveal` card where students see 8 numbered tiles (Step 1, Step 2...) and must tap each to reveal the action. Uses the existing illustrations as icons on the front face. Forces active recall — "what was step 3 again?"
+
+- Front: Step number + illustration thumbnail
+- Back: The action text (e.g. "Bend knees, straight back")
+- Layout: 2×4 grid to fit all 8
+
+### New Card 6b — **Drag-and-Drop: Match Step to Action**
+A `drag_drop` card where students drag the 8 action descriptions to match their correct step numbers. Tests whether they know the **sequence**, not just the individual steps.
+
+- Items: The 8 action texts (shuffled)
+- Targets: "Step 1" through "Step 8"
+- Correct pairs mapped positionally
+
+### New Card 6c — **Speed Drill: Quick-Fire Steps**
+A `speed_drill` card that shows a step number and asks "What do you do at Step X?" with 4 multiple-choice options. 8 questions, timed (8 seconds each). Tests rapid recall under pressure.
 
 ## Technical approach
 
-### 1. Generate illustrations
-Use the Nano banana image generation API to create 8 clear instructional illustrations. Style: simple, clean line-art/flat style on dark background, consistent visual language across all 8. Save as optimized WebP files in `public/images/lessons/2.2_step_{1-8}.webp`.
+### Database migration
+Insert 3 new cards after position 6 in lesson 2.2:
+1. Shift all existing cards at positions 7-18 up by 3 (to positions 10-21)
+2. Insert `tap_to_reveal` at position 7
+3. Insert `drag_drop` at position 8  
+4. Insert `speed_drill` at position 9
 
-### 2. Update DB content (`lesson_cards`)
-Add an `illustrations` array to the `content_json` for card 6 of lesson 2.2, mapping each step number to its image path:
-```json
-{
-  "text": "8 STEPS: 1) Plan ...",
-  "illustrations": [
-    "/images/lessons/2.2_step_1.webp",
-    "/images/lessons/2.2_step_2.webp",
-    ...
-  ]
-}
-```
+Each card's `content_json` will contain the appropriate structured data matching the existing component prop formats.
 
-### 3. Update `RememberThis.tsx`
-- Accept optional `illustrations` from content_json (passed through SwipeContainer)
-- When an illustration exists for a numbered item, render a small rounded image (64×64px) to the left of or above the text inside each item panel
-- Fallback gracefully — if no illustrations, render exactly as before
-
-### 4. Update `SwipeContainer.tsx`
-Pass the `illustrations` array from `content_json` through to RememberThis as a new optional prop.
+### No component changes needed
+All three card types (`tap_to_reveal`, `drag_drop`, `speed_drill`) already exist and are fully functional. The SwipeContainer already routes to them. This is purely a content/data change.
 
 ### Files changed
-- `public/images/lessons/2.2_step_{1-8}.webp` — 8 generated illustrations
-- `src/components/lesson/cards/RememberThis.tsx` — support optional illustrations per item
-- `src/components/lesson/SwipeContainer.tsx` — pass illustrations prop
-- SQL migration — update content_json for lesson 2.2 card 6
+- 1 SQL migration — shift positions + insert 3 new cards
 

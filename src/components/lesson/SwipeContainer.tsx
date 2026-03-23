@@ -289,7 +289,7 @@ function CardRenderer({
             targets={pcDiseases}
             correct_pairs={pcPairs}
             xp_value={card.xp_value}
-            onComplete={() => onComplete?.()}
+            onComplete={() => {}}
           />
         </InteractiveSlide>
       );

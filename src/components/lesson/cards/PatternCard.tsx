@@ -8,20 +8,30 @@ interface PatternItem {
 interface PatternCardProps {
   hazards: PatternItem[];
   diseases: PatternItem[];
-  correct_pairs: Record<string, string>; // hazard.id -> disease.id
+  correct_pairs: Record<string, string>;
   xp_value: number;
   onComplete?: () => void;
 }
 
+function guaranteedShuffle<T>(items: T[]): T[] {
+  if (items.length <= 1) return [...items];
+  const arr = [...items];
+  // Fisher-Yates
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  // If still same order, rotate by 1
+  const sameOrder = arr.every((item, i) => item === items[i]);
+  if (sameOrder) {
+    const first = arr.shift()!;
+    arr.push(first);
+  }
+  return arr;
+}
+
 export default function PatternCard({ hazards, diseases, correct_pairs, xp_value, onComplete }: PatternCardProps) {
-  const shuffledDiseases = useMemo(() => {
-    const items = [...diseases];
-    for (let i = items.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [items[i], items[j]] = [items[j], items[i]];
-    }
-    return items;
-  }, [diseases]);
+  const shuffledDiseases = useMemo(() => guaranteedShuffle(diseases), [diseases]);
 
   const [selectedHazard, setSelectedHazard] = useState<string | null>(null);
   const [matched, setMatched] = useState<Record<string, string>>({});
@@ -63,7 +73,14 @@ export default function PatternCard({ hazards, diseases, correct_pairs, xp_value
   }
 
   return (
-    <div>
+    <div
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchEnd={(e) => e.stopPropagation()}
+      style={{ touchAction: "none", userSelect: "none", WebkitUserSelect: "none" } as React.CSSProperties}
+    >
       <p style={{ color: "#f59e0b", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 20px 0" }}>
         Match Pairs
       </p>
@@ -82,7 +99,9 @@ export default function PatternCard({ hazards, diseases, correct_pairs, xp_value
               return (
                 <button
                   key={h.id}
-                  onClick={(e) => { e.stopPropagation(); handleHazard(h.id); }}
+                  onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleHazard(h.id); }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
                   style={{
                     padding: "12px 14px",
                     borderRadius: 12,
@@ -95,7 +114,9 @@ export default function PatternCard({ hazards, diseases, correct_pairs, xp_value
                     textAlign: "left",
                     animation: isWrong ? "shake 300ms ease" : undefined,
                     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                  }}
+                    touchAction: "none",
+                    WebkitTapHighlightColor: "transparent",
+                  } as React.CSSProperties}
                 >
                   {isMatched ? "✓ " : ""}{h.text}
                 </button>
@@ -115,7 +136,9 @@ export default function PatternCard({ hazards, diseases, correct_pairs, xp_value
               return (
                 <button
                   key={d.id}
-                  onClick={(e) => { e.stopPropagation(); handleDisease(d.id); }}
+                  onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleDisease(d.id); }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
                   style={{
                     padding: "12px 14px",
                     borderRadius: 12,
@@ -127,7 +150,9 @@ export default function PatternCard({ hazards, diseases, correct_pairs, xp_value
                     cursor: isMatched ? "default" : "pointer",
                     textAlign: "left",
                     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                  }}
+                    touchAction: "none",
+                    WebkitTapHighlightColor: "transparent",
+                  } as React.CSSProperties}
                 >
                   {isMatched ? "✓ " : ""}{d.text}
                 </button>

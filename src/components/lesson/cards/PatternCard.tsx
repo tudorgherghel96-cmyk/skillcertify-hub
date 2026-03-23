@@ -31,7 +31,9 @@ function guaranteedShuffle<T>(items: T[]): T[] {
 }
 
 export default function PatternCard({ hazards, diseases, correct_pairs, xp_value, onComplete }: PatternCardProps) {
-  const shuffledDiseases = useMemo(() => guaranteedShuffle(diseases), [diseases]);
+  // Stable key: only re-shuffle when the actual disease IDs change, not on every render
+  const diseaseKey = useMemo(() => diseases.map(d => d.id).join(","), [diseases]);
+  const shuffledDiseases = useMemo(() => guaranteedShuffle(diseases), [diseaseKey]);
 
   const [selectedHazard, setSelectedHazard] = useState<string | null>(null);
   const [matched, setMatched] = useState<Record<string, string>>({});

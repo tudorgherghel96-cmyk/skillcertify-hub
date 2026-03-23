@@ -145,10 +145,21 @@ export default function HeroSlide({ src, lessonTitle, moduleNumber, durationLabe
           transition: "opacity 600ms ease",
         }}
       >
-        <ChevronUp size={20} color="rgba(255,255,255,0.6)" style={{ animation: "bounce 1.5s infinite" }} />
-        <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-          Swipe up to start
-        </span>
+        {isDesktop ? (
+          <>
+            <MousePointer size={20} color="rgba(255,255,255,0.6)" />
+            <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+              Click to start
+            </span>
+          </>
+        ) : (
+          <>
+            <ChevronUp size={20} color="rgba(255,255,255,0.6)" style={{ animation: "bounce 1.5s infinite" }} />
+            <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+              Swipe up to start
+            </span>
+          </>
+        )}
       </div>
 
       <style>{`

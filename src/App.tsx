@@ -80,8 +80,7 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/module/:id" element={<ModuleOverview />} />
               </Route>
-              <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
-                <Route path="/lesson/:moduleId/:lessonId" element={<LessonPlayer />} />
+              <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                 <Route path="/practice/boost" element={<BoostDrill />} />
                 <Route path="/practice/:moduleId" element={<PracticeQuiz />} />
                 <Route path="/gqa-test/:moduleId" element={<GqaTest />} />
@@ -92,6 +91,9 @@ const App = () => (
                 <Route path="/journey" element={<Navigate to="/my-card" replace />} />
                 <Route path="/practice-hub" element={<Navigate to="/learn" replace />} />
                 <Route path="/cscs-route" element={<Navigate to="/my-card" replace />} />
+              </Route>
+              <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
+                <Route path="/lesson/:moduleId/:lessonId" element={<LessonPlayer />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

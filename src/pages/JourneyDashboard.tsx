@@ -37,9 +37,10 @@ export default function JourneyDashboard() {
   const showCscs = allGqaPassed(progress, isSuperUser);
 
   // Get first name from user metadata or email
-  const firstName = user?.user_metadata?.full_name?.split(" ")[0]
+  const rawName = user?.user_metadata?.full_name?.split(" ")[0]
     || user?.email?.split("@")[0]
     || "there";
+  const firstName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
 
   // Determine step number and label
   const getStepInfo = () => {

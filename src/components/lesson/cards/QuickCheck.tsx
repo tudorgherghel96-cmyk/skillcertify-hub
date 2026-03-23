@@ -11,6 +11,7 @@ interface QuickCheckProps {
   feedback_correct: string;
   feedback_wrong: string[];
   xp_value: number;
+  image?: string;
   onAnswer?: (correct: boolean, selectedIndex: number) => void;
 }
 
@@ -21,6 +22,7 @@ export default function QuickCheck({
   feedback_correct,
   feedback_wrong,
   xp_value,
+  image,
   onAnswer,
 }: QuickCheckProps) {
   const [selected, setSelected] = useState<number | null>(null);
@@ -97,6 +99,13 @@ export default function QuickCheck({
       <p style={{ color: "#f59e0b", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 16px 0" }}>
         ⚡ Quick Check
       </p>
+
+      {/* Image */}
+      {image && (
+        <div style={{ margin: "0 0 16px 0", borderRadius: 16, overflow: "hidden" }}>
+          <img src={image} alt="" style={{ width: "100%", maxHeight: 220, objectFit: "contain", borderRadius: 16 }} loading="lazy" />
+        </div>
+      )}
 
       {/* Question */}
       <p style={{ color: "white", fontSize: 22, fontWeight: 700, lineHeight: 1.4, margin: "0 0 32px 0" }}>

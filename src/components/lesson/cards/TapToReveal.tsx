@@ -1,6 +1,8 @@
 import { useState } from "react";
 import SafetySignIcon from "./SafetySignIcon";
 
+const isImagePath = (s: string) => s.startsWith('/') || /\.(webp|png|jpg|jpeg|svg)$/i.test(s);
+
 interface Panel {
   front?: string;
   back?: string;

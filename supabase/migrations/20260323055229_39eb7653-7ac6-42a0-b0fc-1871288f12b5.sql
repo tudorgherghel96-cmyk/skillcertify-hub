@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET content_json = jsonb_set(content_json, '{caption}', '"3 points of contact at all times"') WHERE lesson_id = '3.2' AND card_position = 10;

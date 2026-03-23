@@ -78,9 +78,9 @@ export default function RememberThis({ content, illustrations, heroImage, title:
         </div>
       )}
 
-      {parsed.title && (
+      {resolvedTitle && (
         <p className={`text-white font-extrabold uppercase tracking-wide mb-3 ${isCompact ? "text-sm" : "text-[17px]"}`}>
-          {parsed.title}
+          {resolvedTitle}
         </p>
       )}
 

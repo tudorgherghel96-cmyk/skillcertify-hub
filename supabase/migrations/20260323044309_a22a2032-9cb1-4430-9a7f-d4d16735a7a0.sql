@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET content_json = '{"alt":"Correct lifting technique demonstration","caption":""}'::jsonb WHERE lesson_id = '2.3' AND card_position = 14;

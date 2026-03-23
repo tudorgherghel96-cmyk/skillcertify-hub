@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET content_json = '{"caption": "Hand-Arm Vibration Syndrome (HAVS) — caused by prolonged use of vibrating tools like breakers and grinders. Symptoms include tingling, numbness, and white fingers. Limit exposure time and use anti-vibration gloves."}'::jsonb WHERE lesson_id = '4.3' AND card_position = 5;

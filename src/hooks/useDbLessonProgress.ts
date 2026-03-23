@@ -70,9 +70,13 @@ export function useDbLessonProgress() {
             existing.best_quiz_score = pct;
             existing.quiz_passed = row.passed;
           }
+          // If quiz passed, also mark lesson as completed (FIX 3)
+          if (row.passed && !existing.completed) {
+            existing.completed = true;
+          }
         } else {
           map[row.lesson_id] = {
-            completed: false,
+            completed: row.passed, // quiz pass counts as completion
             xp_earned: 0,
             cards_completed: 0,
             total_cards: 0,

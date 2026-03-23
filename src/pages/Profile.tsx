@@ -202,7 +202,7 @@ export default function Profile() {
                   );
                   return remaining.length > 0 ? (
                     <p className="text-[10px] text-muted-foreground mt-1">
-                      Remaining: {remaining.map((m) => `Topic ${m.id}`).join(", ")}
+                      Remaining: {remaining.map((m) => m.title).join(", ")}
                     </p>
                   ) : null;
                 })()}

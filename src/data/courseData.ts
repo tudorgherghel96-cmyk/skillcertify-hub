@@ -29,11 +29,12 @@ export const MODULES: Module[] = [
       { id: 1, title: "Hazards and Risks: What is the Difference?" },
       { id: 2, title: "Risk Assessments: Keeping Everyone Safe" },
       { id: 3, title: "Method Statements: The Safe Way to Work" },
-      { id: 4, title: "Accidents, Near Misses, and Incident Reporting" },
-      { id: 5, title: "Safety Signs: Know What They Mean" },
-      { id: 6, title: "Dynamic Risk Assessments" },
+      { id: 4, title: "Dynamic Risk Assessments" },
+      { id: 5, title: "Reporting Accidents and Near Misses" },
+      { id: 6, title: "Safety Signs and Symbols" },
       { id: 7, title: "Electrical Safety, Fire Safety, and PPE" },
       { id: 8, title: "Personal Hygiene on Site" },
+      { id: 9, title: "CDM 2015: Who Does What" },
     ],
     topics: [
       "Risk assessments",
@@ -52,8 +53,8 @@ export const MODULES: Module[] = [
     lessons: [
       { id: 1, title: "What is Manual Handling and Why Does it Matter?" },
       { id: 2, title: "Safe Lifting Technique: Step by Step" },
-      { id: 3, title: "Lifting Aids and Mechanical Equipment" },
-      { id: 4, title: "Safe Storage of Materials" },
+      { id: 3, title: "TILE Assessment" },
+      { id: 4, title: "Team Lifting & Mechanical Aids" },
     ],
     topics: [
       "Lifting technique",
@@ -92,7 +93,7 @@ export const MODULES: Module[] = [
     lessons: [
       { id: 1, title: "COSHH: Substances Hazardous to Health" },
       { id: 2, title: "Asbestos: The Silent Killer" },
-      { id: 3, title: "Drugs, Alcohol, Noise, and Vibration" },
+      { id: 3, title: "Noise and Vibration" },
       { id: 4, title: "Dust and Chemicals" },
       { id: 5, title: "Drugs, Alcohol & Substance Misuse" },
     ],
@@ -113,10 +114,11 @@ export const MODULES: Module[] = [
     title: "Plant, Equipment & Machinery",
     icon: Truck,
     lessons: [
-      { id: 1, title: "Hazards Around Moving Plant and Vehicles" },
-      { id: 2, title: "Exclusion Zones, Safeguards, and Emergency Stops" },
+      { id: 1, title: "Banksman and Exclusion Zones" },
+      { id: 2, title: "Machine Guarding & Isolation" },
       { id: 3, title: "Traffic Management" },
       { id: 4, title: "Overhead Services & Buried Utilities" },
+      { id: 5, title: "Confined Spaces" },
     ],
     topics: [
       "Exclusion zones",

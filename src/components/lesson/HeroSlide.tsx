@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronUp } from "lucide-react";
+import { ChevronUp, MousePointer } from "lucide-react";
 
 interface HeroSlideProps {
   src: string;
@@ -7,11 +7,21 @@ interface HeroSlideProps {
   moduleNumber: number;
   durationLabel?: string;
   isActive: boolean;
+  onAdvance?: () => void;
 }
 
-export default function HeroSlide({ src, lessonTitle, moduleNumber, durationLabel, isActive }: HeroSlideProps) {
+export default function HeroSlide({ src, lessonTitle, moduleNumber, durationLabel, isActive, onAdvance }: HeroSlideProps) {
   const [imgError, setImgError] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: fine)");
+    setIsDesktop(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => {
     if (!isActive) return;
@@ -20,7 +30,10 @@ export default function HeroSlide({ src, lessonTitle, moduleNumber, durationLabe
   }, [isActive]);
 
   return (
-    <div style={{ width: "100%", height: "100%", position: "relative", background: "#000", overflow: "hidden" }}>
+    <div
+      style={{ width: "100%", height: "100%", position: "relative", background: "#000", overflow: "hidden", cursor: isDesktop ? "pointer" : undefined }}
+      onClick={isDesktop && onAdvance ? onAdvance : undefined}
+    >
       {!imgError && src && (
         <img
           src={src}
@@ -132,10 +145,21 @@ export default function HeroSlide({ src, lessonTitle, moduleNumber, durationLabe
           transition: "opacity 600ms ease",
         }}
       >
-        <ChevronUp size={20} color="rgba(255,255,255,0.6)" style={{ animation: "bounce 1.5s infinite" }} />
-        <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-          Swipe up to start
-        </span>
+        {isDesktop ? (
+          <>
+            <MousePointer size={20} color="rgba(255,255,255,0.6)" />
+            <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+              Click to start
+            </span>
+          </>
+        ) : (
+          <>
+            <ChevronUp size={20} color="rgba(255,255,255,0.6)" style={{ animation: "bounce 1.5s infinite" }} />
+            <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+              Swipe up to start
+            </span>
+          </>
+        )}
       </div>
 
       <style>{`

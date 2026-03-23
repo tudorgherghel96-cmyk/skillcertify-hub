@@ -77,13 +77,14 @@ export function formatRememberText(raw: string): ParsedRememberText {
   }
 
   // ── 3. Try key=value pairs: "T=Task", "I=Individual"
-  const kvPattern = /([A-Z])=([^.]+?)(?:\.\s*|$)/g;
+  // Match KEY=Value where value extends until the next KEY= or end of string
+  const kvPattern = /([A-Z])=(.+?)(?=\s+[A-Z]=|$)/g;
   const kvMatches = [...body.matchAll(kvPattern)];
   if (kvMatches.length >= 2) {
     const items: ParsedItem[] = kvMatches.map((m) => ({
       type: "keyvalue" as const,
       key: m[1],
-      text: m[2].trim(),
+      text: m[2].trim().replace(/\.$/, ""),
     }));
     return { title, items };
   }

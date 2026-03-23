@@ -293,3 +293,8 @@ nav button, nav a {
   display: none;
 }
 
+/* Content visibility for off-screen list items */
+.content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}

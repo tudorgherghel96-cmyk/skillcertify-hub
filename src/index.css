@@ -5,6 +5,10 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    touch-action: manipulation;
+  }
+
   :root {
     --background: 30 33% 97%;
     --foreground: 209 33% 28%;

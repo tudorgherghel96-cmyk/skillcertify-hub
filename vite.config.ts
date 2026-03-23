@@ -3,14 +3,13 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import viteCompression from "vite-plugin-compression";
 
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    hmr: {
-      overlay: false,
-    },
+    hmr: { overlay: false },
   },
   plugins: [
     react(),
@@ -29,22 +28,9 @@ export default defineConfig(({ mode }) => ({
         scope: "/",
         start_url: "/",
         icons: [
-          {
-            src: "/pwa-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-          },
-          {
-            src: "/pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-          {
-            src: "/pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any maskable",
-          },
+          { src: "/pwa-192x192.png", sizes: "192x192", type: "image/png" },
+          { src: "/pwa-512x512.png", sizes: "512x512", type: "image/png" },
+          { src: "/pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
         ],
       },
       workbox: {
@@ -71,7 +57,6 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            // Supabase Storage images (all-media bucket)
             urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/public\/final-correct-media\/.*\.(webp|png|jpg|jpeg)$/i,
             handler: "CacheFirst",
             options: {
@@ -81,7 +66,6 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            // Supabase Storage videos (all-media bucket)
             urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/public\/final-correct-media\/.*\.(mp4|webm)$/i,
             handler: "CacheFirst",
             options: {
@@ -91,7 +75,6 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            // Supabase API requests — network first with offline fallback
             urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
             handler: "NetworkFirst",
             options: {
@@ -104,10 +87,35 @@ export default defineConfig(({ mode }) => ({
         ],
       },
     }),
+    mode === "production" && viteCompression({ algorithm: "gzip", threshold: 1024 }),
+    mode === "production" && viteCompression({ algorithm: "brotliCompress", threshold: 1024 }),
   ].filter(Boolean),
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+    alias: { "@": path.resolve(__dirname, "./src") },
+  },
+  build: {
+    target: "esnext",
+    sourcemap: false,
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("react") || id.includes("react-dom") || id.includes("react-router")) return "react-vendor";
+            if (id.includes("@supabase")) return "supabase-vendor";
+            if (id.includes("@radix-ui") || id.includes("class-variance-authority") || id.includes("tailwind-merge")) return "ui-vendor";
+            if (id.includes("lucide")) return "icons-vendor";
+          }
+        },
+        chunkFileNames: "js/[name]-[hash].js",
+        entryFileNames: "js/[name]-[hash].js",
+        assetFileNames: (assetInfo) => {
+          const name = assetInfo.name || "";
+          if (/\.(png|jpe?g|svg|gif|webp|avif)$/i.test(name)) return "images/[name]-[hash].[ext]";
+          if (/\.(woff2?|eot|ttf|otf)$/i.test(name)) return "fonts/[name]-[hash].[ext]";
+          return "assets/[name]-[hash].[ext]";
+        },
+      },
     },
   },
 }));

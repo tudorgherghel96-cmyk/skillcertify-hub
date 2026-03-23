@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,26 +14,41 @@ import AppLayout from "@/components/layout/AppLayout";
 import PWAInstallGate from "@/components/PWAInstallGate";
 import OfflineBanner from "@/components/layout/OfflineBanner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import Landing from "@/pages/Landing";
-import SelectLanguage from "@/pages/SelectLanguage";
-import Auth from "@/pages/Auth";
-import JourneyDashboard from "@/pages/JourneyDashboard";
-import LearnHub from "@/pages/LearnHub";
-import MyCard from "@/pages/MyCard";
-import Profile from "@/pages/Profile";
-import ModuleOverview from "@/pages/ModuleOverview";
-import LessonPlayer from "@/pages/LessonPlayer";
-import PracticeQuiz from "@/pages/PracticeQuiz";
-import GqaTest from "@/pages/GqaTest";
-import CscsPrep from "@/pages/CscsPrep";
-import CscsTest from "@/pages/CscsTest";
-import Results from "@/pages/Results";
-import NotFound from "@/pages/NotFound";
-import BoostDrill from "@/pages/BoostDrill";
-import Privacy from "@/pages/Privacy";
-import Terms from "@/pages/Terms";
 
-const queryClient = new QueryClient();
+// Route-level code splitting
+const Landing = React.lazy(() => import("@/pages/Landing"));
+const SelectLanguage = React.lazy(() => import("@/pages/SelectLanguage"));
+const Auth = React.lazy(() => import("@/pages/Auth"));
+const JourneyDashboard = React.lazy(() => import("@/pages/JourneyDashboard"));
+const LearnHub = React.lazy(() => import("@/pages/LearnHub"));
+const MyCard = React.lazy(() => import("@/pages/MyCard"));
+const Profile = React.lazy(() => import("@/pages/Profile"));
+const ModuleOverview = React.lazy(() => import("@/pages/ModuleOverview"));
+const LessonPlayer = React.lazy(() => import("@/pages/LessonPlayer"));
+const PracticeQuiz = React.lazy(() => import("@/pages/PracticeQuiz"));
+const GqaTest = React.lazy(() => import("@/pages/GqaTest"));
+const CscsPrep = React.lazy(() => import("@/pages/CscsPrep"));
+const CscsTest = React.lazy(() => import("@/pages/CscsTest"));
+const Results = React.lazy(() => import("@/pages/Results"));
+const NotFound = React.lazy(() => import("@/pages/NotFound"));
+const BoostDrill = React.lazy(() => import("@/pages/BoostDrill"));
+const Privacy = React.lazy(() => import("@/pages/Privacy"));
+const Terms = React.lazy(() => import("@/pages/Terms"));
+
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+  </div>
+);
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -48,6 +64,7 @@ const App = () => (
           <Sonner />
           <OfflineBanner />
           <BrowserRouter>
+            <Suspense fallback={<LoadingSpinner />}>
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
@@ -78,6 +95,7 @@ const App = () => (
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </Suspense>
           </BrowserRouter>
         </TooltipProvider>
         </AccessibilityProvider>

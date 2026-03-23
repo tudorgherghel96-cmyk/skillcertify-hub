@@ -213,7 +213,7 @@ export default function LessonPlayer() {
       // Always fetch cards — lesson 1/1 is public (no auth required)
       const cardsPromise = supabase
         .from("lesson_cards")
-        .select("*")
+        .select("id, card_position, card_type, content_json, fourth_wall_effect, effect_overlay_text, media_bucket, media_file, module_id, xp_value")
         .eq("lesson_id", lessonDbId)
         .order("card_position", { ascending: true });
 

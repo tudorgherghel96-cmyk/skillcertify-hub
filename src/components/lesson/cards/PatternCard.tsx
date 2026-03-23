@@ -14,8 +14,17 @@ interface PatternCardProps {
 }
 
 export default function PatternCard({ hazards, diseases, correct_pairs, xp_value, onComplete }: PatternCardProps) {
+  const shuffledDiseases = useMemo(() => {
+    const items = [...diseases];
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    return items;
+  }, [diseases]);
+
   const [selectedHazard, setSelectedHazard] = useState<string | null>(null);
-  const [matched, setMatched] = useState<Record<string, string>>({}); // hazardId -> diseaseId
+  const [matched, setMatched] = useState<Record<string, string>>({});
   const [wrong, setWrong] = useState<string | null>(null);
 
   const matchedHazards = new Set(Object.keys(matched));

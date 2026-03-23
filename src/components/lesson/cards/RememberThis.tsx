@@ -36,7 +36,7 @@ function highlightKeyTerms(text: string) {
   return text;
 }
 
-export default function RememberThis({ content }: RememberThisProps) {
+export default function RememberThis({ content, illustrations }: RememberThisProps) {
   const parsed = formatRememberText(content);
 
   return (

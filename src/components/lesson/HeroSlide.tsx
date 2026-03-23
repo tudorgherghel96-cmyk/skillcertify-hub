@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronUp } from "lucide-react";
+import { ChevronUp, MousePointer } from "lucide-react";
 
 interface HeroSlideProps {
   src: string;
@@ -7,6 +7,7 @@ interface HeroSlideProps {
   moduleNumber: number;
   durationLabel?: string;
   isActive: boolean;
+  onAdvance?: () => void;
 }
 
 export default function HeroSlide({ src, lessonTitle, moduleNumber, durationLabel, isActive }: HeroSlideProps) {

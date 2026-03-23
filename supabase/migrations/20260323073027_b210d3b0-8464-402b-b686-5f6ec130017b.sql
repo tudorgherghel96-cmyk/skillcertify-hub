@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/lessons/4.2_asbestos_danger_sign.webp', media_bucket = NULL WHERE lesson_id = '4.2' AND card_position = 4;

@@ -3,6 +3,7 @@ import { formatRememberText } from "@/lib/formatRememberText";
 interface RememberThisProps {
   content: string;
   illustrations?: string[];
+  heroImage?: string;
 }
 
 /** Auto-bold text before a colon or ALL-CAPS words */
@@ -35,7 +36,7 @@ function highlightKeyTerms(text: string) {
   return text;
 }
 
-export default function RememberThis({ content, illustrations }: RememberThisProps) {
+export default function RememberThis({ content, illustrations, heroImage }: RememberThisProps) {
   const parsed = formatRememberText(content);
   const hasIllustrations = illustrations && illustrations.length > 0;
   const isCompact = parsed.items.length >= 6 && hasIllustrations;
@@ -56,6 +57,18 @@ export default function RememberThis({ content, illustrations }: RememberThisPro
         </p>
       </div>
       <div className={`bg-gradient-to-r from-transparent via-blue-400 to-transparent mx-auto ${isCompact ? "w-24 h-[2px] mb-3" : "w-32 h-[2px] mb-4"}`} />
+
+      {/* Hero image */}
+      {heroImage && (
+        <div className="mb-4 mx-auto max-w-sm overflow-hidden rounded-xl">
+          <img
+            src={heroImage}
+            alt="Remember this"
+            className="w-full h-auto max-h-[240px] object-contain rounded-xl"
+            loading="lazy"
+          />
+        </div>
+      )}
 
       {parsed.title && (
         <p className={`text-white font-extrabold uppercase tracking-wide mb-3 ${isCompact ? "text-sm" : "text-[17px]"}`}>

@@ -300,6 +300,7 @@ function CardRenderer({
           <RememberThis
             content={(content.text as string) || (content.content as string) || ""}
             illustrations={content.illustrations as string[] | undefined}
+            heroImage={card.mediaUrl || undefined}
           />
         </InteractiveSlide>
       );

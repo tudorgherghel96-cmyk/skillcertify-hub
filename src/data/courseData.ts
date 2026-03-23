@@ -114,10 +114,11 @@ export const MODULES: Module[] = [
     title: "Plant, Equipment & Machinery",
     icon: Truck,
     lessons: [
-      { id: 1, title: "Hazards Around Moving Plant and Vehicles" },
-      { id: 2, title: "Exclusion Zones, Safeguards, and Emergency Stops" },
+      { id: 1, title: "Banksman and Exclusion Zones" },
+      { id: 2, title: "Machine Guarding & Isolation" },
       { id: 3, title: "Traffic Management" },
       { id: 4, title: "Overhead Services & Buried Utilities" },
+      { id: 5, title: "Confined Spaces" },
     ],
     topics: [
       "Exclusion zones",

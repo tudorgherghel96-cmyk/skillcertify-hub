@@ -60,15 +60,17 @@ export default function RememberThis({ content, illustrations, heroImage }: Reme
           </p>
         </div>
       )}
-      <div className={`bg-gradient-to-r from-transparent via-blue-400 to-transparent mx-auto ${isCompact ? "w-24 h-[2px] mb-3" : "w-32 h-[2px] mb-4"}`} />
+      {showHeader && (
+        <div className={`bg-gradient-to-r from-transparent via-blue-400 to-transparent mx-auto ${isCompact ? "w-24 h-[2px] mb-3" : "w-32 h-[2px] mb-4"}`} />
+      )}
 
       {/* Hero image */}
       {heroImage && (
-        <div className="mb-4 mx-auto max-w-sm overflow-hidden rounded-xl">
+        <div className={`mx-auto overflow-hidden rounded-xl ${showHeader ? "mb-4 max-w-sm" : "mb-3"}`}>
           <img
             src={heroImage}
             alt="Remember this"
-            className="w-full h-auto max-h-[240px] object-contain rounded-xl"
+            className={`w-full h-auto object-contain rounded-xl ${showHeader ? "max-h-[240px]" : "max-h-[360px]"}`}
             loading="lazy"
           />
         </div>

@@ -158,10 +158,118 @@ export default function JourneyDashboard() {
         </motion.div>
       )}
 
+      {/* Streak card */}
+      {gamification.streak > 0 && (
+        <motion.div variants={fadeUp}>
+          <Card className="border-primary/10">
+            <CardContent className="py-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-lg">🔥</div>
+              <div>
+                <p className="text-sm font-bold text-foreground">
+                  {gamification.streak} day streak!
+                </p>
+                <p className="text-xs text-muted-foreground">Keep it going — study today to stay on track</p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Today's goal */}
+      <motion.div variants={fadeUp}>
+        <Card className="border-primary/10">
+          <CardContent className="py-4 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Target className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">Today's goal</p>
+              <p className="text-xs text-muted-foreground">
+                {overall.percentage === 0
+                  ? "Complete your first lesson"
+                  : overall.percentage < 50
+                  ? "Finish 1 lesson today"
+                  : "Do a 5-min practice session"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Weak areas */}
+      <WeakAreasSection />
+
       {/* Due for review */}
       <motion.div variants={fadeUp}>
         <DueToday />
       </motion.div>
+    </motion.div>
+  );
+}
+
+function WeakAreasSection() {
+  const { user } = useAuth();
+  const [weakModules, setWeakModules] = useState<Array<{ moduleId: number; score: number }>>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchWeak = async () => {
+      const { data } = await supabase
+        .from("practice_attempts")
+        .select("module_id, percentage")
+        .eq("user_id", user.id);
+      if (!data || data.length === 0) return;
+
+      // Get best score per module
+      const best: Record<number, number> = {};
+      for (const row of data) {
+        const pct = row.percentage ?? 0;
+        if (!best[row.module_id] || pct > best[row.module_id]) {
+          best[row.module_id] = pct;
+        }
+      }
+      // Find modules with score < 70
+      const weak = Object.entries(best)
+        .filter(([, score]) => score < 70)
+        .map(([id, score]) => ({ moduleId: Number(id), score }))
+        .sort((a, b) => a.score - b.score)
+        .slice(0, 3);
+      setWeakModules(weak);
+    };
+    fetchWeak();
+  }, [user]);
+
+  if (weakModules.length === 0) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay: 0.2 }}
+    >
+      <Card className="border-destructive/10">
+        <CardContent className="py-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+            <p className="text-sm font-bold text-foreground">Weak areas</p>
+          </div>
+          <div className="space-y-2">
+            {weakModules.map(({ moduleId, score }) => {
+              const mod = MODULES.find((m) => m.id === moduleId);
+              return (
+                <Link
+                  key={moduleId}
+                  to={`/practice/${moduleId}`}
+                  className="flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                >
+                  <span className="text-xs font-medium text-foreground">{mod?.title ?? `Topic ${moduleId}`}</span>
+                  <span className="text-xs font-semibold text-destructive">{score}%</span>
+                </Link>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
     </motion.div>
   );
 }

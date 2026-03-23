@@ -11,7 +11,7 @@ const navItems = [
 
 const BottomNav = () => {
   const { pathname } = useLocation();
-  if (pathname.startsWith("/lesson/")) return null;
+  if (pathname.startsWith("/lesson/") || pathname.startsWith("/cscs-test") || pathname.startsWith("/gqa-test")) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur-md sm:hidden safe-area-bottom" aria-label="Main navigation">

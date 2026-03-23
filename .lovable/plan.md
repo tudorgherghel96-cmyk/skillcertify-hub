@@ -1,25 +1,39 @@
 
+The image is still not showing because Card 5 is not actually pointing at the local replacement image.
 
-# Split Card 9 in Lesson 3.3: Image Only + New Text Card
-
-## Current state
-Card 9 (lesson 3.3) is an `image` card with:
-- Image: `3.3_photo_2.webp`
-- Caption: "Fall PREVENTION (guardrails) always comes before fall ARREST (harnesses). TEST TIP: The hierarchy is AVOID > PREVENT > ARREST > MINIMISE."
+## What I found
+- Lesson `3.4`, card `5` currently has:
+  - `media_bucket = 'final-correct-media'`
+  - `media_file = '3.4_photo_1.webp'`
+- That means the app is still trying to load the old Supabase bucket asset.
+- The lesson player code is working as intended:
+  - if `media_file` starts with `/`, it uses the local public asset
+  - otherwise it builds a Supabase Storage URL
+- The session replay confirms the image request fails and the card falls back to **“Image unavailable”**.
+- So this is a **data/config issue**, not an `ImageSlide` rendering bug.
 
 ## Plan
-1. **Update card 9** — remove the caption text, keep it as image-only
-   - Set `content_json` to `{"alt": "Guardrails and edge protection", "caption": ""}` (empty caption)
+1. Update the `lesson_cards` row for lesson `3.4`, card `5` so it uses the local asset path instead of the storage bucket.
+   - Set `media_file` to the local path for the replacement image
+   - Set `media_bucket` to `NULL`
 
-2. **Insert new card at position 10** — a `remember_this` card with the text content
-   - Text: "Fall PREVENTION (guardrails) always comes before fall ARREST (harnesses)."
-   - Include the test tip about the hierarchy (AVOID > PREVENT > ARREST > MINIMISE)
-   - Shift existing cards 10+ forward by 1 position
+2. Keep the card as an `image` card with the existing caption unless you want that text changed too.
 
-3. **No code changes needed** — the existing `remember_this` and `image` renderers handle these card types already
+3. Verify the card now resolves through the local-path branch of `getLessonMediaUrl`, which should stop the broken bucket lookup and display the image properly.
 
-### Database operations (via insert tool)
-- UPDATE card 9 to clear caption
-- UPDATE cards 10, 11 → positions 11, 12
-- INSERT new `remember_this` card at position 10
+## Technical details
+```text
+Current broken state:
+media_bucket = final-correct-media
+media_file   = 3.4_photo_1.webp
 
+Expected fixed state:
+media_bucket = NULL
+media_file   = /images/lessons/3.4_rooflights_fragile.webp
+```
+
+## Why this happened
+A previous image conversion may have succeeded, but the database row for card 5 still points to the old storage object. Since the code prefers the DB record, the new local file is never used.
+
+## Expected result
+Card 5 in “Fragile Surfaces” will load the replacement rooflights image instead of showing “Image unavailable”.

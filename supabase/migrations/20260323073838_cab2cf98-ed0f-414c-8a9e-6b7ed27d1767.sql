@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/lessons/4.3_hearing_vibration.webp', media_bucket = NULL WHERE lesson_id = '4.3' AND card_position = 10;

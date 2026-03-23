@@ -1,52 +1,45 @@
 
+The reason it is still not working is that the shuffle is currently unstable, not missing.
 
-# Fix Card 6 Match Pairs Properly
+What I found:
+- The database for lesson `4.4`, card `6` is correct: it is a `pattern_card` with 6 hazard/disease pairs.
+- `PatternCard.tsx` does already contain a shuffle now.
+- But `SwipeContainer.tsx` rebuilds the `hazards` and `diseases` arrays with `.map()` on every render.
+- Because of that, `PatternCard` receives a fresh `diseases` array every render, so this line keeps reshuffling:
+  ```ts
+  const shuffledDiseases = useMemo(() => guaranteedShuffle(diseases), [diseases]);
+  ```
+- In practice, every tap can trigger a re-render and the right column can reshuffle again, which makes the interaction feel broken and inconsistent.
+- So the real issue is: the shuffle is tied to a prop that changes identity every render.
 
-## What I found
-- The database for lesson `4.4`, card `6` is correct: it contains 6 hazard/disease pairs in `content_json.pairs`.
-- `PatternCard.tsx` already contains a shuffle, but the user is still seeing the pairs as effectively unchanged and the interaction still feels broken.
-- Unlike other interactive cards (`DragDrop`, etc.), `PatternCard` is missing the stronger mobile interaction protections already used elsewhere:
-  - no `touchAction: "none"` wrapper
-  - no pointer/touch event handling to stop the swipe container from interfering
-- The current shuffle is also not robust enough for this use case because it can still return the original order.
+Why that matches what you’re seeing:
+- Sometimes it can still appear effectively unshuffled.
+- Sometimes the disease list can move around after you tap, which makes matching feel like it is not working.
+- This is a rendering/state bug, not a lesson data bug.
 
-## Likely root cause
-This is now a UI interaction issue, not a data issue:
-1. The parent swipe/scroll container is still interfering with taps on mobile.
-2. The shuffle needs to guarantee the right column is not shown in the original order.
+Plan:
+1. Fix `PatternCard.tsx` so the shuffled disease order is created once per card load, not on every re-render.
+2. Reset that shuffled order only when the actual card data changes, not when local state changes.
+3. Keep the current touch protections, and strengthen button event handling only if needed after stabilising the shuffle.
+4. Re-test lesson `4.4`, card `6` on mobile width and confirm:
+   - the right column starts in a different order,
+   - the order stays stable while tapping,
+   - matches register reliably.
 
-## Implementation plan
-1. Update `src/components/lesson/cards/PatternCard.tsx` to follow the same interaction pattern as the working interactive cards:
-   - add a top-level wrapper with `touchAction: "none"` / `userSelect: "none"`
-   - stop pointer/touch propagation on the interactive area
-   - make hazard/disease buttons explicitly mobile-safe
-
-2. Replace the current shuffle with a “shuffle until different” approach:
-   - shuffle the diseases list on mount
-   - if the shuffled order matches the original order and there is more than 1 item, reshuffle (or rotate) so the list is visibly randomized
-   - keep `correct_pairs` unchanged
-
-3. Keep the existing pair mapping from `SwipeContainer.tsx`, but make the card logic independent from display order:
-   - hazards stay in learning order on the left
-   - diseases render in guaranteed-random order on the right
-   - match checking still uses IDs only
-
-4. Add a small completion hook path while in the file:
-   - call `onComplete?.()` reliably when all pairs are matched
-   - keep success feedback and XP display stable after completion
-
-5. QA target after implementation:
-   - open `/lesson/4/4`
-   - go to card 6 on mobile width
-   - confirm the right column is not pre-aligned
-   - confirm tapping a hazard then a disease works consistently without the swipe container hijacking the gesture
-
-## Files to update
+Files to update:
 - `src/components/lesson/cards/PatternCard.tsx`
 
-## Expected result
-Card 6 in Dust & Chemicals will:
-- show the disease side in a truly randomized order
-- allow matching reliably on mobile
-- no longer feel pre-solved or unresponsive
+Technical detail:
+```text
+Current problem:
+SwipeContainer creates new diseases[] each render
+→ PatternCard useMemo([diseases]) reruns
+→ shuffledDiseases changes during interaction
 
+Correct behavior:
+shuffle once when the card mounts or when the source pair set changes
+→ keep that shuffled order stable during selection/matching
+```
+
+Unrelated note:
+- The `Function components cannot be given refs` warning in the console is a separate issue around `LessonComplete`/confetti and is not what is breaking this match-pairs card.

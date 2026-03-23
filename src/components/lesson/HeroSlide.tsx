@@ -10,9 +10,18 @@ interface HeroSlideProps {
   onAdvance?: () => void;
 }
 
-export default function HeroSlide({ src, lessonTitle, moduleNumber, durationLabel, isActive }: HeroSlideProps) {
+export default function HeroSlide({ src, lessonTitle, moduleNumber, durationLabel, isActive, onAdvance }: HeroSlideProps) {
   const [imgError, setImgError] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: fine)");
+    setIsDesktop(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => {
     if (!isActive) return;

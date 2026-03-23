@@ -1,75 +1,63 @@
 
 
-# PWA Install Gate — Full Implementation Plan
+# Performance Optimization Pass
 
 ## Overview
-Create a full-screen install gate component that blocks mobile browser users from accessing the app until they install it as a PWA. Desktop users and already-installed PWA users pass through normally.
+A comprehensive performance optimization across build config, routing, data fetching, media loading, CSS, and database indexes.
 
 ## Changes
 
-### 1. Update `index.html` meta tags (lines 10-16)
-Replace existing PWA meta block with the specified meta tags. Update `theme-color` to `#1e3a5f`, `apple-mobile-web-app-status-bar-style` to `default`, keep `apple-touch-icon` pointing to existing `pwa-192x192.png`, add `mobile-web-app-capable` meta. Keep the existing manifest link (Vite PWA plugin generates it).
+### 1. Vite Config (`vite.config.ts`)
+Replace with optimized version: manual chunks (react-vendor, supabase-vendor, ui-vendor, icons-vendor), gzip+brotli compression via `vite-plugin-compression`, `target: esnext`, no sourcemaps in prod. Keep the existing VitePWA plugin with all its workbox config — the user's proposed config drops PWA support which would break the app. Merge both configs.
 
-### 2. Update `vite.config.ts` manifest section
-Update the PWA manifest values: `theme_color` → `#1e3a5f`, `background_color` → `#ffffff`, `start_url` → `/`, add `orientation: "portrait-primary"`. Keep existing icons pointing to `pwa-192x192.png` and `pwa-512x512.png`.
+### 2. Route-level Code Splitting (`src/App.tsx`)
+- Convert all 16 page imports to `React.lazy()` 
+- Add `<Suspense>` with a loading spinner around `<Routes>`
+- Create a small `LoadingSpinner` inline component
 
-### 3. Create `src/components/PWAInstallGate.tsx`
-Single self-contained component (~350 lines). All logic in one file.
+### 3. Fix Supabase `select('*')` queries
+Two files have `select('*')`:
+- `src/pages/LessonPlayer.tsx` → select only columns used by SwipeContainer
+- `src/contexts/GamificationContext.tsx` → select only columns used by gamification state
 
-**Detection logic:**
-- `isStandalone`: checks `display-mode: standalone` media query + `navigator.standalone` for iOS
-- `isIOS`: UA check for iPhone/iPad + Mac with touch (iPad)
-- `isAndroid`: UA check
-- `isInAppBrowser`: UA check for FBAN, FBAV, Instagram, LinkedIn
-- `isIOSNotSafari`: iOS but Chrome/Firefox/in-app browser
-- `isDesktop`: not iOS and not Android
-- Re-check on `visibilitychange` to catch post-install returns
+### 4. RLS Policy Optimization
+Create a migration wrapping `auth.uid()` in subselects for all RLS policies. This prevents Postgres from re-evaluating auth.uid() per row.
 
-**State management:**
-- `showGate`: derived from platform + standalone + dismissed timestamp
-- `deferredPrompt`: stored from `beforeinstallprompt` event
-- 24-hour dismiss logic via `localStorage` key `pwa-install-dismissed`
+### 5. Database Indexes
+Create indexes on frequently queried columns: `user_id` on all user-scoped tables, `lesson_id` on lesson_cards, `module_id` on progress/practice_attempts, `concept_id` on concept_attempts.
 
-**Rendering (platform-specific):**
-- Full-screen fixed overlay, white background, z-99999, fade-in 300ms
-- Top: "SkillCertify" bold title + "Install the app for the best experience" + "It only takes 10 seconds"
-- **Android**: Big navy "Install SkillCertify" button triggering stored prompt. Fallback to manual 3-dot menu instructions if no prompt available. Auto-dismiss on `appinstalled`.
-- **iOS Safari**: 3-step vertical stepper with inline SVG icons (share icon, add-to-home-screen icon), pulsing animation on current step, large numbered circles (48px, navy bg)
-- **iOS non-Safari**: "Open this page in Safari" message + "Copy Link" button
-- **In-app browser**: "Tap ⋯ then Open in Browser" message
-- Bottom: "Continue in browser" muted link
+### 6. React Query Integration
+Already installed (`@tanstack/react-query` in package.json) and `QueryClientProvider` already wraps the app. No Supabase fetches currently use `useQuery` though. Will NOT refactor every fetch in this pass — that's a larger effort. Will configure the existing `QueryClient` with sensible defaults.
 
-**Design tokens:**
-- Primary: `#1e3a5f`
-- All inline styles (no Tailwind dependency for the gate itself, though can use Tailwind classes)
-- Step circles: 48px, navy bg, white text
-- Step text: 18px, font-weight 500
-- Install button: full-width, 56px tall, rounded-xl, download icon SVG
+### 7. Image & Video Lazy Loading
+- Add `loading="lazy"`, `decoding="async"` to `<img>` tags across components (SlideRenderer, Landing, LearnHub, etc.)
+- Hero image on Landing gets `loading="eager"` + `fetchPriority="high"`
+- Videos already have controlled loading; add `preload="none"` where missing
 
-### 4. Update `src/App.tsx`
-Wrap the entire app content (everything inside QueryClientProvider) with `<PWAInstallGate>...</PWAInstallGate>`. Import the new component.
+### 8. Resource Hints (`index.html`)
+Add `<link rel="preconnect" href="https://huhpvawveowlezmbfoww.supabase.co" />`
+
+### 9. CSS Optimizations (`src/index.css`)
+- Add `touch-action: manipulation` on `html`
+- Add `.content-auto` utility class with `content-visibility: auto`
+
+### 10. QueryClient Default Config (`src/App.tsx`)
+Set default `staleTime: 5 * 60 * 1000` and `gcTime: 10 * 60 * 1000` on the QueryClient.
 
 ## Files to create/modify
-- `index.html` — update meta tags
-- `vite.config.ts` — update manifest values
-- `src/components/PWAInstallGate.tsx` — new file (single component, all logic)
-- `src/App.tsx` — wrap with PWAInstallGate
+- `vite.config.ts` — merge compression + chunks with existing PWA config
+- `src/App.tsx` — lazy imports, Suspense, QueryClient defaults
+- `src/pages/LessonPlayer.tsx` — narrow select columns
+- `src/contexts/GamificationContext.tsx` — narrow select columns
+- `index.html` — add preconnect hint
+- `src/index.css` — touch-action, content-visibility utility
+- `src/components/lesson/SlideRenderer.tsx` — img lazy loading
+- `src/pages/Landing.tsx` — img lazy/eager loading
+- `src/pages/LearnHub.tsx` — img lazy loading
+- New migration: RLS policy subselect optimization + database indexes
 
-## Technical details
-
-```text
-Render flow:
-  App.tsx
-    └─ PWAInstallGate
-         ├─ isDesktop OR isStandalone → render {children}
-         ├─ dismissed < 24h ago → render {children}
-         └─ mobile browser → render overlay + {children hidden behind it}
-
-Platform detection:
-  iOS Safari     → 3-step visual guide
-  iOS non-Safari → "Open in Safari" + copy link
-  In-app browser → "Open in Browser" instructions
-  Android        → beforeinstallprompt button / manual fallback
-  Desktop        → no gate, pass through
-```
+## What is NOT included (too risky or too large for one pass)
+- Full useQuery migration of every Supabase fetch (would touch 15+ files)
+- useTransition for filtering (no filtering/search UI currently exists)
+- Intersection Observer for videos (already handled by isActive prop pattern)
 

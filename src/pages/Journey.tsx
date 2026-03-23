@@ -273,7 +273,7 @@ export default function Journey() {
         <CscsSmartCheck
           cardRequestStatus={cardRequestStatus}
           cscsRegNumber={cscsPassed ? "1234567890" : undefined}
-          expiryDate={cscsPassed ? "31/12/2031" : undefined}
+          expiryDate={cscsPassed ? `31/12/${new Date().getFullYear() + 5}` : undefined}
           cardType="Green Labourer"
         />
       </motion.div>

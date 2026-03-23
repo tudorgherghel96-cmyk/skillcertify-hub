@@ -1,26 +1,49 @@
 
 
-# Add "Example of Internal Void" Card
+# Split Card 4 in Lesson 3.4 into 3 Illustrated Cards
 
 ## Current state
-- Lesson 3.1 card 5 mentions "INCLUDING STANDING NEAR VOIDS"
-- Lesson 3.1 card 11 has a remember_this about "unguarded openings, trenches, and floor voids" with the voids image
-- Lesson 3.4 card 9 uses image `3.4_photo_2.webp` from `final-correct-media` bucket — this is the image the user identifies as showing an internal void
+Card 4 is a `remember_this` card with text:
+> "FRAGILE: Rooflights, fibre cement, glass panels, deteriorated felt. NEVER walk on them. Use crawl boards, guardrails, barriers."
 
-## Where to place it
-The most appropriate location is in **Lesson 3.1 (What is Working at Height)** right after card 5 (which mentions "INCLUDING STANDING NEAR VOIDS"). Placing a visual example of an internal void immediately after that reference reinforces the concept. This means inserting at **position 6**, shifting all existing cards 6-14 forward by 1.
+Lesson 3.4 currently has 12 cards (positions 1-12).
 
 ## Plan
-1. Shift all cards in lesson 3.1 at positions 6-14 forward by 1 (to 7-15)
-2. Insert a new `image` card at position 6 with:
-   - `media_file = '3.4_photo_2.webp'`
-   - `media_bucket = 'final-correct-media'`
-   - `content_json = {"caption": "Example of internal void", "alt": "Example of an internal void on a construction site"}`
-   - `card_type = 'image'`
-   - `lesson_id = '3.1'`, `module_id = 3`, `xp_value = 0`
 
-## Technical details
-- 9 UPDATE statements to shift positions (14→15, 13→14, ... 6→7) — must be done in reverse order
-- 1 INSERT for the new card at position 6
-- All done via the insert tool (data operations, not schema changes)
+Split card 4 into 3 separate `remember_this` cards, each with a generated illustration, and shift cards 5-12 forward by 2 positions (to 7-14).
+
+### New card 4 — What is fragile
+- Type: `remember_this` (headerless, image-focused)
+- Text: "FRAGILE SURFACES: Rooflights, fibre cement sheets, glass panels, and deteriorated felt."
+- Image: AI-generated illustration showing examples of fragile surfaces (rooflights, cement sheets)
+- Saved to `public/images/lessons/3.4_fragile_types.webp`
+- DB: `media_file = '/images/lessons/3.4_fragile_types.webp'`, `media_bucket = NULL`
+
+### New card 5 — Never walk on them
+- Type: `remember_this` (headerless, image-focused)
+- Text: "NEVER walk on fragile surfaces — they will NOT hold your weight."
+- Image: AI-generated illustration showing the danger of walking on fragile surfaces
+- Saved to `public/images/lessons/3.4_never_walk.webp`
+- DB: `media_file = '/images/lessons/3.4_never_walk.webp'`, `media_bucket = NULL`
+
+### New card 6 — Protection measures
+- Type: `remember_this`
+- Text: "Use crawl boards, guardrails, and barriers to protect against falls through fragile surfaces."
+- Image: AI-generated illustration showing crawl boards and guardrails
+- Saved to `public/images/lessons/3.4_crawl_boards.webp`
+- DB: `media_file = '/images/lessons/3.4_crawl_boards.webp'`, `media_bucket = NULL`
+
+### Database operations
+1. Shift cards 5-12 forward by 2 (to 7-14) — reverse order to avoid conflicts
+2. Update card 4 content to first bullet point only, add image reference
+3. Insert card 5 (never walk) and card 6 (protection measures)
+
+### Image generation
+Since I cannot generate AI images, I will use placeholder illustrations. The user can upload replacement images later, or I can prompt the user to provide 3 images for each point.
+
+**Alternative**: The user could upload 3 images and I apply them. Should I proceed with text-only cards and ask for images, or create the cards now with the existing rooflight image on card 4 and no images on cards 5-6?
+
+### Files involved
+- New migration SQL for card splitting and position shifts
+- 3 new image files in `public/images/lessons/` (if user provides them)
 

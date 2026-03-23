@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Flame, Zap, Timer, ArrowRight } from "lucide-react";
+import { Flame, Zap, Timer, ArrowRight, Target, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,10 +11,13 @@ import {
   getOverallProgress,
   getNextAction,
   allGqaPassed,
+  getModuleProgress,
 } from "@/contexts/ProgressContext";
 import { useSuperUser } from "@/contexts/SuperUserContext";
+import { MODULES } from "@/data/courseData";
 import DueToday from "@/components/dashboard/DueToday";
 import QuickSession from "@/components/practice/QuickSession";
+import { supabase } from "@/integrations/supabase/client";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },

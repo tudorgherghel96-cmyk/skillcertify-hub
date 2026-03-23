@@ -93,7 +93,7 @@ export const MODULES: Module[] = [
     lessons: [
       { id: 1, title: "COSHH: Substances Hazardous to Health" },
       { id: 2, title: "Asbestos: The Silent Killer" },
-      { id: 3, title: "Drugs, Alcohol, Noise, and Vibration" },
+      { id: 3, title: "Noise and Vibration" },
       { id: 4, title: "Dust and Chemicals" },
       { id: 5, title: "Drugs, Alcohol & Substance Misuse" },
     ],

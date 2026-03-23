@@ -30,7 +30,10 @@ export default function HeroSlide({ src, lessonTitle, moduleNumber, durationLabe
   }, [isActive]);
 
   return (
-    <div style={{ width: "100%", height: "100%", position: "relative", background: "#000", overflow: "hidden" }}>
+    <div
+      style={{ width: "100%", height: "100%", position: "relative", background: "#000", overflow: "hidden", cursor: isDesktop ? "pointer" : undefined }}
+      onClick={isDesktop && onAdvance ? onAdvance : undefined}
+    >
       {!imgError && src && (
         <img
           src={src}

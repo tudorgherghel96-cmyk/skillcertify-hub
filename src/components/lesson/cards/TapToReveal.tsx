@@ -268,14 +268,19 @@ export default function TapToReveal({ title, panels, xp_value, layout, onComplet
                   }}
                 >
                   {panel.icon ? (
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                      {isImagePath(panel.icon) ? (
-                        <img src={panel.icon} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />
-                      ) : (
+                    isImagePath(panel.icon) ? (
+                      <>
+                        <img src={panel.icon} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", borderRadius: 14, objectFit: "cover" }} />
+                        <span style={{ position: "relative", zIndex: 1, color: "white", fontSize: 15, fontWeight: 800, textAlign: "center", textShadow: "0 2px 8px rgba(0,0,0,0.8)", background: "rgba(0,0,0,0.45)", borderRadius: 8, padding: "4px 10px", lineHeight: 1.2 }}>
+                          {panel.front || panel.label}
+                        </span>
+                      </>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
                         <SafetySignIcon icon={panel.icon} size={36} />
-                      )}
-                      <span style={{ color: "white", fontSize: 13, fontWeight: 700, textAlign: "center" }}>{panel.front || panel.label}</span>
-                    </div>
+                        <span style={{ color: "white", fontSize: 13, fontWeight: 700, textAlign: "center" }}>{panel.front || panel.label}</span>
+                      </div>
+                    )
                   ) : (
                     <span style={{ color: "white", fontSize: 15, fontWeight: 700, textAlign: "center" }}>{panel.front || panel.label}</span>
                   )}

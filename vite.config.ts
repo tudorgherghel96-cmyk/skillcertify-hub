@@ -22,12 +22,12 @@ export default defineConfig(({ mode }) => ({
         name: "SkillCertify — Construction Training",
         short_name: "SkillCertify",
         description: "Level 1 Award in Health & Safety. Get your CSCS Green Card.",
-        theme_color: "#0777D2",
-        background_color: "#304A5F",
+        theme_color: "#1e3a5f",
+        background_color: "#ffffff",
         display: "standalone",
-        orientation: "portrait",
+        orientation: "portrait-primary",
         scope: "/",
-        start_url: "/dashboard",
+        start_url: "/",
         icons: [
           {
             src: "/pwa-192x192.png",

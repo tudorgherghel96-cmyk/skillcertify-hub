@@ -10,6 +10,7 @@ import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import { SuperUserProvider } from "@/contexts/SuperUserContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
+import PWAInstallGate from "@/components/PWAInstallGate";
 import OfflineBanner from "@/components/layout/OfflineBanner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Landing from "@/pages/Landing";

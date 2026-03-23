@@ -4,6 +4,7 @@ interface RememberThisProps {
   content: string;
   illustrations?: string[];
   heroImage?: string;
+  title?: string;
 }
 
 /** Auto-bold text before a colon or ALL-CAPS words */

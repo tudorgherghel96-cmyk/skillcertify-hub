@@ -1,31 +1,49 @@
 
 
-# Radically Improve KeyTerm Cards
+# Add Illustrations to 8-Step Lifting Technique Card
 
-## Problem
-Current KeyTerm cards are visually flat — small emoji icon, tiny label, and a basic green-tinted box with plain text. They don't command attention or help students absorb terminology effectively. The definition text blends together and lacks visual structure.
+## What
+Generate 8 simple, clear illustrations — one for each safe lifting step on card 6 of lesson 2.2 (Safe Lifting Technique) — and display them inline with each numbered step.
 
-## Design
+## The 8 Steps to Illustrate
+1. **Plan** — worker assessing the load/route before lifting
+2. **Feet shoulder-width** — feet positioned apart, stable base
+3. **Bend knees, straight back** — squatting with straight spine
+4. **Firm grip (palms)** — hands gripping box with full palms
+5. **Load close** — box held tight against torso
+6. **Lift with LEGS** — rising up using leg muscles, arrows on legs
+7. **Move feet to turn** — feet pivoting, no spine twist
+8. **Set down carefully** — lowering box with bent knees
 
-Redesign to match the app's established "Top Bar + Side Accent" engagement pattern, but with a distinct green identity for terminology:
+## Technical approach
 
-### New layout for `src/components/lesson/cards/KeyTerm.tsx`
+### 1. Generate illustrations
+Use the Nano banana image generation API to create 8 clear instructional illustrations. Style: simple, clean line-art/flat style on dark background, consistent visual language across all 8. Save as optimized WebP files in `public/images/lessons/2.2_step_{1-8}.webp`.
 
-1. **Bold header section** — Large green top accent bar (3px, full width), "📖 KEY TERM" label in green with stronger sizing (13px, weight 800)
-2. **Term as hero text** — The term itself displayed at 26px, weight 900, white, with a subtle green underline/glow to make it the focal point
-3. **Definition in a glassmorphism panel** — Frosted glass card (`rgba(255,255,255,0.06)`, `backdrop-blur(12px)`, rounded, border) with:
-   - Green left accent bar (3px)
-   - Definition text at 16px, line-height 1.8, weight 500
-   - Auto-bold key terms (ALL CAPS, text before colons) — already implemented
-4. **Sentence splitting** — If definition contains multiple sentences (period-separated), render each as a separate bullet point with a green dot, making long definitions scannable
-5. **Dual-term layout** — When `term2`/`definition2` exist, render both with a subtle divider between them, each with its own hero term + definition panel
-6. **Spacing** — More breathing room: 20px gaps between sections, 24px padding inside panels
+### 2. Update DB content (`lesson_cards`)
+Add an `illustrations` array to the `content_json` for card 6 of lesson 2.2, mapping each step number to its image path:
+```json
+{
+  "text": "8 STEPS: 1) Plan ...",
+  "illustrations": [
+    "/images/lessons/2.2_step_1.webp",
+    "/images/lessons/2.2_step_2.webp",
+    ...
+  ]
+}
+```
 
-### What stays the same
-- Props interface unchanged (`term`, `definition`, `term2?`, `definition2?`)
-- `highlightDef` function stays (already good)
-- No changes to SwipeContainer — same props passed through
+### 3. Update `RememberThis.tsx`
+- Accept optional `illustrations` from content_json (passed through SwipeContainer)
+- When an illustration exists for a numbered item, render a small rounded image (64×64px) to the left of or above the text inside each item panel
+- Fallback gracefully — if no illustrations, render exactly as before
+
+### 4. Update `SwipeContainer.tsx`
+Pass the `illustrations` array from `content_json` through to RememberThis as a new optional prop.
 
 ### Files changed
-- `src/components/lesson/cards/KeyTerm.tsx` — full redesign
+- `public/images/lessons/2.2_step_{1-8}.webp` — 8 generated illustrations
+- `src/components/lesson/cards/RememberThis.tsx` — support optional illustrations per item
+- `src/components/lesson/SwipeContainer.tsx` — pass illustrations prop
+- SQL migration — update content_json for lesson 2.2 card 6
 

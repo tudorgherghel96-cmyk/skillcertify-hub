@@ -1,6 +1,8 @@
 import { useState } from "react";
 import SafetySignIcon from "./SafetySignIcon";
 
+const isImagePath = (s: string) => s.startsWith('/') || /\.(webp|png|jpg|jpeg|svg)$/i.test(s);
+
 interface Panel {
   front?: string;
   back?: string;
@@ -64,7 +66,11 @@ function FlipCard({
       >
         {panel.icon ? (
           <>
-            <SafetySignIcon icon={panel.icon} size={28} />
+            {isImagePath(panel.icon) ? (
+              <img src={panel.icon} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
+            ) : (
+              <SafetySignIcon icon={panel.icon} size={28} />
+            )}
             <span style={{ color: "white", fontSize: 10, fontWeight: 700, textAlign: "center", lineHeight: 1.1, wordBreak: "break-word" }}>
               {panel.front || panel.label}
             </span>
@@ -224,7 +230,7 @@ export default function TapToReveal({ title, panels, xp_value, layout, onComplet
         <TriangleLayout panels={panels} flipped={flipped} onFlip={flip} />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, perspective: 1000 }}>
-          {panels.slice(0, 4).map((panel, i) => {
+          {panels.map((panel, i) => {
             const isFlipped = flipped.has(i);
             return (
               <div
@@ -258,7 +264,11 @@ export default function TapToReveal({ title, panels, xp_value, layout, onComplet
                 >
                   {panel.icon ? (
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                      <SafetySignIcon icon={panel.icon} size={36} />
+                      {isImagePath(panel.icon) ? (
+                        <img src={panel.icon} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />
+                      ) : (
+                        <SafetySignIcon icon={panel.icon} size={36} />
+                      )}
                       <span style={{ color: "white", fontSize: 13, fontWeight: 700, textAlign: "center" }}>{panel.front || panel.label}</span>
                     </div>
                   ) : (

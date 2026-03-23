@@ -36,6 +36,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <PWAInstallGate>
     <AuthProvider>
     <LanguageProvider>
       <ProgressProvider>
@@ -85,6 +86,7 @@ const App = () => (
       </ProgressProvider>
     </LanguageProvider>
     </AuthProvider>
+    </PWAInstallGate>
   </QueryClientProvider>
 );
 

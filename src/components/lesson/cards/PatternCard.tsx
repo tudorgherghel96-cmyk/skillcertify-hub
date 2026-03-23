@@ -110,7 +110,7 @@ export default function PatternCard({ hazards, diseases, correct_pairs, xp_value
             Disease
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {diseases.map((d) => {
+            {shuffledDiseases.map((d) => {
               const isMatched = matchedDiseases.has(d.id);
               return (
                 <button

@@ -11,6 +11,7 @@ interface QuickCheckProps {
   feedback_correct: string;
   feedback_wrong: string[];
   xp_value: number;
+  image?: string;
   onAnswer?: (correct: boolean, selectedIndex: number) => void;
 }
 

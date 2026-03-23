@@ -131,6 +131,7 @@ function CardRenderer({
             feedback_correct={(content.feedback_correct as string) || "Correct!"}
             feedback_wrong={normFbWrong}
             xp_value={card.xp_value}
+            image={card.mediaUrl || undefined}
             onAnswer={(correct, sel) => onAnswer(correct, sel)}
           />
         </InteractiveSlide>

@@ -1,49 +1,49 @@
 
 
-# Create Illustrations for Card 5 (Lesson 4.1) — Tap to Reveal: Routes of Entry
+# Redesign Card 9 (Lesson 4.2 Asbestos) — Three Types of Asbestos
 
 ## Current state
-Card 5 in lesson 4.1 is a `tap_to_reveal` with 4 panels about how hazardous substances enter the body:
-- **Lungs** → Inhalation — breathe in
-- **Mouth** → Ingestion — swallow
-- **Skin** → Absorption — through skin
-- **Wound** → Injection — through cuts
+Card 9 is an `image` card with a long caption cramming all three asbestos types into one block:
+> "Three types of asbestos: Blue (Crocidolite) — most dangerous, Brown (Amosite) — commonly found in insulation, White (Chrysotile) — most common, found in cement sheets and brake linings."
 
-Currently no `icon` field is set on any panel — they display as text-only tiles.
+This is hard to scan and digest on mobile — all three types blur together in a single caption paragraph.
 
-## Existing illustrated tap-to-reveal style
-Lessons 2.2 and 2.3 use local WebP images as `icon` values in tap_to_reveal panels (e.g., `/images/lessons/2.3_tile_t.webp`). These render as full-square background fills with overlaid labels on semi-transparent badges.
+## Redesign approach
+Convert card 9 into a `remember_this` card with `heroImage` showing the asbestos types image, and structured numbered items for each type. This uses the existing RememberThis component's hero image + numbered list layout, which provides clear visual separation per item.
 
 ## Plan
 
-1. **Generate 4 images** using AI image generation, matching the flat illustrative style used across the project:
-   - `4.1_route_lungs.webp` — Worker breathing in dust/fumes on site (inhalation)
-   - `4.1_route_mouth.webp` — Contaminated hands near mouth / eating on site (ingestion)
-   - `4.1_route_skin.webp` — Chemical splash on exposed skin (absorption)
-   - `4.1_route_wound.webp` — Sharp object / cut with substance entry (injection)
+1. **Update card 9** from `image` to `remember_this` with structured content:
+   - `card_type`: `remember_this`
+   - `heroImage`: keep the existing image (`4.2_photo_2.webp` from storage, referenced via Supabase URL or local path)
+   - `text`: Reformatted as a numbered list with title
 
-2. **Optimize** all to WebP, <150KB, max 800px
-
-3. **Save** to `public/images/lessons/`
-
-4. **Update database** — add `icon` fields to each panel in content_json:
-   ```sql
-   UPDATE lesson_cards
-   SET content_json = '{
-     "panels": [
-       {"label": "Lungs", "content": "Inhalation — breathe in", "icon": "/images/lessons/4.1_route_lungs.webp"},
-       {"label": "Mouth", "content": "Ingestion — swallow", "icon": "/images/lessons/4.1_route_mouth.webp"},
-       {"label": "Skin", "content": "Absorption — through skin", "icon": "/images/lessons/4.1_route_skin.webp"},
-       {"label": "Wound", "content": "Injection — through cuts", "icon": "/images/lessons/4.1_route_wound.webp"}
-     ]
-   }'::jsonb
-   WHERE lesson_id = '4.1' AND card_position = 5;
+   New `content_json`:
+   ```json
+   {
+     "text": "THREE TYPES OF ASBESTOS: 1) Blue (Crocidolite) — most dangerous 2) Brown (Amosite) — commonly found in insulation 3) White (Chrysotile) — most common, found in cement sheets and brake linings",
+     "heroImage": "4.2_photo_2.webp"
+   }
    ```
 
-### Files created
-- `public/images/lessons/4.1_route_lungs.webp`
-- `public/images/lessons/4.1_route_mouth.webp`
-- `public/images/lessons/4.1_route_skin.webp`
-- `public/images/lessons/4.1_route_wound.webp`
-- New migration SQL
+   The `formatRememberText` parser will automatically detect:
+   - Title: "THREE TYPES OF ASBESTOS"
+   - Three numbered items with clear separation
+   - Each type gets its own visual card with a numbered badge
+
+2. **Keep media fields** pointing to the same image so `heroImage` resolves via the existing media URL logic. Set `media_bucket = 'final-correct-media'` and `media_file = '4.2_photo_2.webp'` as before.
+
+3. **Check heroImage resolution** — the RememberThis component accepts `heroImage` as a direct prop. Need to verify the SwipeContainer passes the `heroImage` from `content_json` to the component.
+
+### Database operation
+Single UPDATE to card 9 changing `card_type` and `content_json`. No position shifts needed.
+
+### Result
+Students see:
+- The asbestos types image at the top (hero)
+- Title: "THREE TYPES OF ASBESTOS"
+- Three clearly separated numbered cards:
+  1. Blue (Crocidolite) — most dangerous
+  2. Brown (Amosite) — commonly found in insulation
+  3. White (Chrysotile) — most common, found in cement sheets and brake linings
 

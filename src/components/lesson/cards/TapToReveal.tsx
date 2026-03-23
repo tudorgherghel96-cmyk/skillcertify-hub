@@ -264,7 +264,11 @@ export default function TapToReveal({ title, panels, xp_value, layout, onComplet
                 >
                   {panel.icon ? (
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                      <SafetySignIcon icon={panel.icon} size={36} />
+                      {isImagePath(panel.icon) ? (
+                        <img src={panel.icon} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />
+                      ) : (
+                        <SafetySignIcon icon={panel.icon} size={36} />
+                      )}
                       <span style={{ color: "white", fontSize: 13, fontWeight: 700, textAlign: "center" }}>{panel.front || panel.label}</span>
                     </div>
                   ) : (

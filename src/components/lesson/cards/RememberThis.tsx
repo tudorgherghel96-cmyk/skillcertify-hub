@@ -2,6 +2,7 @@ import { formatRememberText } from "@/lib/formatRememberText";
 
 interface RememberThisProps {
   content: string;
+  illustrations?: string[];
 }
 
 /** Auto-bold text before a colon or ALL-CAPS words */

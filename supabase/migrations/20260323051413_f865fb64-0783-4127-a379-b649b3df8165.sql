@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET content_json = '{"caption":"Examples of working at height, INCLUDING STANDING NEAR VOIDS"}'::jsonb WHERE lesson_id = '3.1' AND card_position = 5;

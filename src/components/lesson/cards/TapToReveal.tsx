@@ -66,7 +66,11 @@ function FlipCard({
       >
         {panel.icon ? (
           <>
-            <SafetySignIcon icon={panel.icon} size={28} />
+            {isImagePath(panel.icon) ? (
+              <img src={panel.icon} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
+            ) : (
+              <SafetySignIcon icon={panel.icon} size={28} />
+            )}
             <span style={{ color: "white", fontSize: 10, fontWeight: 700, textAlign: "center", lineHeight: 1.1, wordBreak: "break-word" }}>
               {panel.front || panel.label}
             </span>

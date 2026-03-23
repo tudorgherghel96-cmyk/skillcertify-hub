@@ -4,6 +4,7 @@ interface RememberThisProps {
   content: string;
   illustrations?: string[];
   heroImage?: string;
+  title?: string;
 }
 
 /** Auto-bold text before a colon or ALL-CAPS words */
@@ -36,13 +37,14 @@ function highlightKeyTerms(text: string) {
   return text;
 }
 
-export default function RememberThis({ content, illustrations, heroImage }: RememberThisProps) {
+export default function RememberThis({ content, illustrations, heroImage, title: explicitTitle }: RememberThisProps) {
   const parsed = formatRememberText(content);
   const hasIllustrations = illustrations && illustrations.length > 0;
   const isCompact = parsed.items.length >= 6 && hasIllustrations;
   const itemCount = parsed.items.length;
 
-  const showHeader = !!parsed.title;
+  const resolvedTitle = explicitTitle || parsed.title;
+  const showHeader = !!resolvedTitle;
 
   return (
     <div
@@ -76,9 +78,9 @@ export default function RememberThis({ content, illustrations, heroImage }: Reme
         </div>
       )}
 
-      {parsed.title && (
+      {resolvedTitle && (
         <p className={`text-white font-extrabold uppercase tracking-wide mb-3 ${isCompact ? "text-sm" : "text-[17px]"}`}>
-          {parsed.title}
+          {resolvedTitle}
         </p>
       )}
 

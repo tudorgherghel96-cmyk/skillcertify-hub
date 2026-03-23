@@ -301,6 +301,7 @@ function CardRenderer({
             content={(content.text as string) || (content.content as string) || ""}
             illustrations={content.illustrations as string[] | undefined}
             heroImage={card.mediaUrl || undefined}
+            title={content.title as string | undefined}
           />
         </InteractiveSlide>
       );

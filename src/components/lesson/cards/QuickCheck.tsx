@@ -22,6 +22,7 @@ export default function QuickCheck({
   feedback_correct,
   feedback_wrong,
   xp_value,
+  image,
   onAnswer,
 }: QuickCheckProps) {
   const [selected, setSelected] = useState<number | null>(null);

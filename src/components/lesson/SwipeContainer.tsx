@@ -284,11 +284,12 @@ function CardRenderer({
         : ((content.correct_pairs as Record<string, string>) || {});
       return (
         <InteractiveSlide>
-          <PatternCard
-            hazards={pcHazards}
-            diseases={pcDiseases}
+          <DragDrop
+            items={pcHazards}
+            targets={pcDiseases}
             correct_pairs={pcPairs}
             xp_value={card.xp_value}
+            onComplete={() => onComplete?.()}
           />
         </InteractiveSlide>
       );

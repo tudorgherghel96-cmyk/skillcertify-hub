@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/lessons/3.2_ladder_angle.webp', media_bucket = NULL WHERE lesson_id = '3.2' AND card_position = 6;

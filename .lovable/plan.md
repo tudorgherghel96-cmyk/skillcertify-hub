@@ -1,30 +1,29 @@
 
 
-# Fix Card 6 (Lesson 4.4) — Switch to DragDrop Component
+# Fix Card 4 (Lesson 4.5) — Improve Text Layout
 
 ## Problem
-`PatternCard` is a tap-to-match component with no drag support. The user wants drag-and-drop. The project already has a fully working `DragDrop` component with mouse and touch drag handlers, hit-testing, and a floating drag ghost.
+The current text is a single dense block:
+> "Zero tolerance. Impairs judgment, slows reactions. Prescribed medication: if drowsy, MUST inform supervisor BEFORE starting work."
+
+The `formatRememberText` parser splits on periods with `>8` char filter, but "Zero tolerance" (14 chars) gets parsed as a bullet alongside the other sentences. The result is three tightly packed bullet items with no clear hierarchy — making it hard to scan and digest.
 
 ## Solution
-Change the `pattern_card` case in `SwipeContainer.tsx` to render `DragDrop` instead of `PatternCard`. The normalization already produces `hazards` and `diseases` arrays with IDs — just map them to `items` and `targets` for DragDrop.
+Restructure the text with a title and numbered points so the parser produces a clear, scannable layout:
 
-## Changes
+**New content_json text:**
+```
+DRUGS, ALCOHOL & SUBSTANCE MISUSE: 1) Zero tolerance on site — never work under the influence 2) Impairs judgment and slows reaction times 3) Prescribed medication — if it causes drowsiness, MUST inform your supervisor BEFORE starting work
+```
 
-**`src/components/lesson/SwipeContainer.tsx`** — lines 273-294
+This gives:
+- A bold title header: "DRUGS, ALCOHOL & SUBSTANCE MISUSE"
+- Three clearly separated numbered cards with distinct points
+- Each point is digestible on its own
 
-Replace the `pattern_card` case to use `DragDrop`:
-- Map `pcHazards` → `items` (left column, draggable)
-- Map `pcDiseases` → `targets` (right column, drop zones)
-- Pass `pcPairs` as `correct_pairs`
-- Keep `xp_value`
+## Implementation
+Single SQL migration updating `content_json` for lesson `4.5`, card position 4.
 
-The existing `DragDrop` component already handles:
-- Fisher-Yates shuffle of items
-- Touch drag with floating ghost element
-- Mouse drag support
-- Hit-test drop detection
-- Correct/wrong feedback with haptics
-- Completion callback
-
-No changes needed to `DragDrop.tsx` — it already works correctly for other cards.
+### Files
+- New migration: `supabase/migrations/XXXX_update_lesson_4_5_card_4_text.sql`
 

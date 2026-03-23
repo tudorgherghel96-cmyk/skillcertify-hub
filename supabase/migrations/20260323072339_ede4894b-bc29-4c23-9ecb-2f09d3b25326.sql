@@ -1,0 +1,1 @@
+UPDATE lesson_cards SET media_file = '/images/lessons/4.1_coshh_hazard_symbols.webp', media_bucket = NULL WHERE lesson_id = '4.1' AND card_position = 6;

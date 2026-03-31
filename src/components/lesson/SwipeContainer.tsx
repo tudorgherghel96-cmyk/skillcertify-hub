@@ -500,10 +500,17 @@ export default function SwipeContainer({
                   zIndex: 25,
                   animation: "bob 1.4s ease-in-out infinite",
                   pointerEvents: "none",
-                  opacity: 0.7,
+                  opacity: 0.9,
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  background: "rgba(0,0,0,0.5)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                <ChevronDown size={28} color="white" strokeWidth={2.5} />
+                <ChevronDown size={24} color="#2196F3" strokeWidth={2.5} />
               </div>
             )}
         </div>

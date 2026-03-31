@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
+import { ChevronDown } from "lucide-react";
 import type { LessonCard } from "@/pages/LessonPlayer";
 import VideoSlide from "./VideoSlide";
 import HeroSlide from "./HeroSlide";

@@ -200,6 +200,7 @@ export default function VideoSlide({
           onCanPlay={() => setLoading(false)}
           onWaiting={() => { if (isActive) setLoading(true); }}
           onPlaying={handlePlaying}
+          onEnded={() => setEnded(true)}
           onError={handleError}
           onTimeUpdate={handleTimeUpdate}
           onClick={handleVideoTap}

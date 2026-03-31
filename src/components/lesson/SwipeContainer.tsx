@@ -483,8 +483,35 @@ export default function SwipeContainer({
             onBRollEnd={() => handleBRollEnd(i)}
             onQuizComplete={onQuizComplete}
           />
+          {/* Scroll indicator — bobbing arrow */}
+          {i === currentIndex &&
+            i < cards.length - 1 &&
+            card.card_type !== "lesson_complete" &&
+            card.card_type !== "quiz_card" && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 18,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  zIndex: 25,
+                  animation: "bob 1.4s ease-in-out infinite",
+                  pointerEvents: "none",
+                  opacity: 0.7,
+                }}
+              >
+                <ChevronDown size={28} color="white" strokeWidth={2.5} />
+              </div>
+            )}
         </div>
       ))}
+
+      <style>{`
+        @keyframes bob {
+          0%, 100% { transform: translateX(-50%) translateY(0); }
+          50% { transform: translateX(-50%) translateY(8px); }
+        }
+      `}</style>
     </div>
   );
 }

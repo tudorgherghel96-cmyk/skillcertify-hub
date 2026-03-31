@@ -445,10 +445,12 @@ export default function SwipeContainer({
         overflowY: "scroll",
         overflowX: "hidden",
         scrollSnapType: "y mandatory",
+        scrollBehavior: "smooth",
         WebkitOverflowScrolling: "touch",
         overscrollBehavior: "none",
         background: "#000",
         position: "relative",
+        touchAction: "pan-y",
       } as React.CSSProperties}
     >
       {cards.map((card, i) => (
@@ -460,11 +462,12 @@ export default function SwipeContainer({
             height: "100%",
             width: "100%",
             scrollSnapAlign: "start",
-            scrollSnapStop: "always",
+            scrollSnapStop: "normal",
             overflow: "hidden",
             position: "relative",
             background: "#000",
             flexShrink: 0,
+            touchAction: "pan-y",
           } as React.CSSProperties}
         >
           <CardRenderer

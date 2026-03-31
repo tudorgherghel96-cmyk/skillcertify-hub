@@ -243,33 +243,33 @@ export default function VideoSlide({
         </button>
       )}
 
-      {/* Mute toggle */}
+      {/* Mute toggle — top right */}
       {!error && !tapForSound && (
         <div
           style={{
             position: "absolute",
-            bottom: 16,
+            top: 16,
             right: 16,
             zIndex: 20,
-            opacity: showControls ? 1 : 0.6,
+            opacity: showControls ? 1 : 0.8,
             transition: "opacity 0.3s",
           }}
         >
           <button
             onClick={(e) => { e.stopPropagation(); onMuteToggle(); }}
             style={{
-              width: 40,
-              height: 40,
+              width: 44,
+              height: 44,
               borderRadius: "50%",
-              background: "rgba(0,0,0,0.5)",
+              background: "rgba(0,0,0,0.6)",
               backdropFilter: "blur(8px)",
-              border: "1px solid rgba(255,255,255,0.15)",
+              border: "1px solid rgba(255,255,255,0.2)",
               color: "white",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               cursor: "pointer",
-              fontSize: 18,
+              fontSize: 20,
             }}
             aria-label={muted ? "Unmute" : "Mute"}
           >

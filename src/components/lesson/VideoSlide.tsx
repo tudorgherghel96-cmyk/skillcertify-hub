@@ -341,6 +341,44 @@ export default function VideoSlide({
         </div>
       )}
 
+      {/* Video ended overlay */}
+      {ended && !error && (
+        <div
+          onClick={() => {
+            const vid = videoRef.current;
+            if (vid) {
+              vid.currentTime = 0;
+              vid.play().catch(() => {});
+            }
+            setEnded(false);
+          }}
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
+            background: "rgba(0,0,0,0.55)",
+            cursor: "pointer",
+            zIndex: 15,
+          }}
+        >
+          <div style={{
+            width: 64, height: 64, borderRadius: "50%",
+            background: "rgba(255,255,255,0.15)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 32,
+          }}>
+            ↻
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, margin: 0, fontWeight: 500 }}>
+            Video complete — tap to replay
+          </p>
+        </div>
+      )}
+
       {/* Fourth-wall overlays */}
       {fourthWallEffect === "lean_in" && overlayText && (
         <LeanInCallout text={overlayText} videoRef={videoRef} />

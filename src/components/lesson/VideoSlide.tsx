@@ -42,6 +42,7 @@ export default function VideoSlide({
     setRetryCount(0);
     setTapForSound(false);
     setShowControls(false);
+    setEnded(false);
   }, [initialUrl]);
 
   // Autoplay logic — start muted for browser policy, unmute on onPlaying

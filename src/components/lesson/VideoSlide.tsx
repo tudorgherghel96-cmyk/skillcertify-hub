@@ -30,6 +30,7 @@ export default function VideoSlide({
   const [retryCount, setRetryCount] = useState(0);
   const [tapForSound, setTapForSound] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const [ended, setEnded] = useState(false);
   const controlsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const MAX_RETRIES = 2;
 

@@ -250,7 +250,7 @@ export default function LessonPlayer() {
 
       const savedIdx = (progressData as { cards_completed?: number } | null)?.cards_completed ?? 0;
       if (savedIdx > 0 && savedIdx < (cardData?.length ?? 0)) {
-        setResumeCardIndex(savedIdx);
+        setResumeCardIndex(savedIdx - 1);
         setShowResume(true);
       }
 

@@ -30,6 +30,7 @@ export default function VideoSlide({
   const [retryCount, setRetryCount] = useState(0);
   const [tapForSound, setTapForSound] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const [ended, setEnded] = useState(false);
   const controlsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const MAX_RETRIES = 2;
 
@@ -41,6 +42,7 @@ export default function VideoSlide({
     setRetryCount(0);
     setTapForSound(false);
     setShowControls(false);
+    setEnded(false);
   }, [initialUrl]);
 
   // Autoplay logic — start muted for browser policy, unmute on onPlaying
@@ -198,6 +200,7 @@ export default function VideoSlide({
           onCanPlay={() => setLoading(false)}
           onWaiting={() => { if (isActive) setLoading(true); }}
           onPlaying={handlePlaying}
+          onEnded={() => setEnded(true)}
           onError={handleError}
           onTimeUpdate={handleTimeUpdate}
           onClick={handleVideoTap}
@@ -241,33 +244,33 @@ export default function VideoSlide({
         </button>
       )}
 
-      {/* Mute toggle */}
+      {/* Mute toggle — top right */}
       {!error && !tapForSound && (
         <div
           style={{
             position: "absolute",
-            bottom: 16,
+            top: 16,
             right: 16,
             zIndex: 20,
-            opacity: showControls ? 1 : 0.6,
+            opacity: showControls ? 1 : 0.8,
             transition: "opacity 0.3s",
           }}
         >
           <button
             onClick={(e) => { e.stopPropagation(); onMuteToggle(); }}
             style={{
-              width: 40,
-              height: 40,
+              width: 44,
+              height: 44,
               borderRadius: "50%",
-              background: "rgba(0,0,0,0.5)",
+              background: "rgba(0,0,0,0.6)",
               backdropFilter: "blur(8px)",
-              border: "1px solid rgba(255,255,255,0.15)",
+              border: "1px solid rgba(255,255,255,0.2)",
               color: "white",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               cursor: "pointer",
-              fontSize: 18,
+              fontSize: 20,
             }}
             aria-label={muted ? "Unmute" : "Mute"}
           >
@@ -336,6 +339,44 @@ export default function VideoSlide({
           >
             Tap to retry
           </button>
+        </div>
+      )}
+
+      {/* Video ended overlay */}
+      {ended && !error && (
+        <div
+          onClick={() => {
+            const vid = videoRef.current;
+            if (vid) {
+              vid.currentTime = 0;
+              vid.play().catch(() => {});
+            }
+            setEnded(false);
+          }}
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
+            background: "rgba(0,0,0,0.55)",
+            cursor: "pointer",
+            zIndex: 15,
+          }}
+        >
+          <div style={{
+            width: 64, height: 64, borderRadius: "50%",
+            background: "rgba(255,255,255,0.15)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 32,
+          }}>
+            ↻
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, margin: 0, fontWeight: 500 }}>
+            Video complete — tap to replay
+          </p>
         </div>
       )}
 
